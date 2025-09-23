@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Teacher Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <style>
+      .btn {
+        display: inline-block;
+        background-color: #3498db;
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        transition: background-color 0.3s;
+      }
+      .btn:hover {
+        background-color: #2980b9;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        padding: 12px 15px;
+        text-align: left;
+      }
+      th {
+        background-color: #2ecc71;
+        color: white;
+      }
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+      tr:hover {
+        background-color: #d6f5e0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <h2>Welcome, {{ session.username }}</h2>
+      <a class="btn logout-btn" href="/logout">Logout</a>
+      <a class="btn" href="/upload">Upload Student Images</a>
+
+      <h2>All Students Attendance</h2>
+      <table>
+        <tr>
+          <th>Name</th>
+          <th>Roll No</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+        {% for row in attendance %}
+        <tr>
+          <td>{{ row['name'] }}</td>
+          <td>{{ row['roll_no'] }}</td>
+          <td>{{ row['date'] }}</td>
+          <td>{{ row['status'] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </body>
+</html>
