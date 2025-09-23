@@ -25,7 +25,7 @@ def signup():
         username = request.form["username"]
         password = request.form["password"]
         role = request.form["role"]  # "student" or "teacher"
-        name = request.form.get("name")  # Only for student
+        name = request.form.get("name")
         roll_no = request.form.get("roll_no")  # Only for student
 
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
@@ -42,6 +42,11 @@ def signup():
             if role == "student" and name and roll_no:
                 db.execute("INSERT INTO students (name, roll_no, user_id) VALUES (?, ?, ?)",
                            (name, roll_no, user_id))
+                db.commit()
+            
+            elif role == "teacher" and name:
+                db.execute("INSERT INTO teachers (name, user_id) VALUES (?, ?)",
+                           (name, user_id))
                 db.commit()
 
             return redirect("/")  # After signup, go to login
@@ -88,8 +93,11 @@ def student_dashboard():
         return redirect("/")
     db = get_db()
     attendance = db.execute("""
-        SELECT date, status FROM attendance
-        WHERE student_id=(SELECT id FROM students WHERE user_id=?)
+        SELECT a.date, a.status, sub.name as subject, p.day as day FROM attendance a 
+        JOIN periods p ON a.period_id = p.id
+        JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id
+        JOIN subjects sub ON ts.subject_id = sub.id
+        WHERE a.student_id=(SELECT id FROM students WHERE user_id=?)
     """, (session["user_id"],)).fetchall()
     return render_template("student_dashboard.html", attendance=attendance)
 
@@ -100,10 +108,15 @@ def teacher_dashboard():
         return redirect("/")
     db = get_db()
     attendance = db.execute("""
-        SELECT s.name, s.roll_no, a.date, a.status
+        SELECT s.name as name, s.roll_no, a.date, sub.name as subject, p.day as day, a.status
         FROM attendance a
         JOIN students s ON a.student_id = s.id
-    """).fetchall()
+        JOIN periods p ON a.period_id = p.id
+        JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id
+        JOIN subjects sub ON ts.subject_id = sub.id
+        WHERE ts.teacher_id = (SELECT id FROM teachers WHERE user_id=?)
+        ORDER BY a.date DESC 
+        """, (session["user_id"],)).fetchall()
     return render_template("teacher_dashboard.html", attendance=attendance)
 
 # ---------------- Upload Images for Encoding ----------------

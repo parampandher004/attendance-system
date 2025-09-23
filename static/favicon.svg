@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   width="800"
+   height="800"
+   viewBox="0 0 24 24"
+   fill="none"
+   version="1.1"
+   id="svg7"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs7" />
+  <path
+     style="fill:#a6a8e5;stroke:none;stroke-width:0.03"
+     d="M 16.538798,5.6714903 C 14.475107,4.8591865 10.596617,4.8006432 8.3352936,5.4226901 6.0739703,6.044737 5.4300076,7.347298 4.9909156,8.810938 c -0.4390919,1.46364 -0.6732648,3.088214 -0.6147169,4.332292 0.058548,1.244077 0.4098001,2.107572 0.7318011,2.839392 0.3220009,0.731821 0.6147169,1.331889 1.3611701,1.888066 0.7464531,0.556177 1.9465898,1.06843 3.7175821,1.353835 1.770992,0.285405 4.112675,0.343947 5.803179,-0.2781 1.690503,-0.622047 2.729625,-1.924608 3.139445,-3.593157 0.409819,-1.66855 0.190282,-3.702927 -0.0439,-5.5031838 -0.23418,-1.8002567 -0.482988,-3.3662881 -2.546679,-4.1785919 z"
+     id="path8" />
+  <path
+     d="M 8.976,21 C 4.05476,21 3,19.9452 3,15.024"
+     stroke="#323232"
+     stroke-width="2"
+     stroke-linecap="round"
+     id="path1" />
+  <path
+     d="M 21,15.024 C 21,19.9452 19.9452,21 15.024,21"
+     stroke="#323232"
+     stroke-width="2"
+     stroke-linecap="round"
+     id="path2" />
+  <path
+     d="M 15.024,3 C 19.9452,3 21,4.05476 21,8.976"
+     stroke="#323232"
+     stroke-width="2"
+     stroke-linecap="round"
+     id="path3" />
+  <path
+     d="m 8,14 c 0.91221,1.2144 2.3645,2 4.0004,2 1.6358,0 3.0881,-0.7856 4.0003,-2"
+     stroke="#323232"
+     stroke-width="2"
+     stroke-linecap="round"
+     id="path4" />
+  <path
+     d="M 9,10.0112 V 10"
+     stroke="#323232"
+     stroke-width="2"
+     stroke-linecap="round"
+     id="path5" />
+  <path
+     d="M 15,10.0112 V 10"
+     stroke="#323232"
+     stroke-width="2"
+     stroke-linecap="round"
+     id="path6" />
+  <path
+     d="M 3,8.976 C 3,4.05476 4.05476,3 8.976,3"
+     stroke="#323232"
+     stroke-width="2"
+     stroke-linecap="round"
+     id="path7" />
+</svg>

@@ -1,31 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Student Dashboard</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}"
-    />
-  </head>
-  <body>
-    <div class="dashboard-container">
-      <h2>Welcome, {{ session.username }}</h2>
-      <a class="logout-btn" href="/logout">Logout</a>
+{% extends "base.html" %} {% block title %}Student Dashboard{% endblock %} {%
+block content %}
+<div class="dashboard-container">
+  <h2>Welcome, {{ session.username }}</h2>
+  <a class="logout-btn" href="/logout">Logout</a>
 
-      <h2>Student Attendance</h2>
-      <table>
-        <tr>
-          <th>Date</th>
-          <th>Status</th>
-        </tr>
-        {% for row in attendance %}
-        <tr>
-          <td>{{ row['date'] }}</td>
-          <td>{{ row['status'] }}</td>
-        </tr>
-        {% endfor %}
-      </table>
-    </div>
-  </body>
-</html>
+  <h2>Student Attendance</h2>
+  <table>
+    <tr>
+      <th>Date</th>
+      <th>Subject</th>
+      <th>Day</th>
+      <th>Status</th>
+    </tr>
+    {% for row in attendance %}
+    <tr>
+      <td>{{ row['date'] }}</td>
+      <td>{{ row['subject'] }}</td>
+      <td>{{ row['day'] }}</td>
+      <td>{{ row['status'] }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
