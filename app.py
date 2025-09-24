@@ -92,6 +92,25 @@ def student_dashboard():
     if session.get("role") != "student":
         return redirect("/")
     db = get_db()
+    subjects = db.execute("""
+        SELECT sub.code as subject_code, sub.name as subject, t.name as teacher, c.name as class_name, c.id as class_id FROM students s
+        JOIN classes c ON s.class_id = c.id
+        JOIN teacherSubjects ts ON c.id = ts.class_id
+        JOIN subjects sub ON ts.subject_id = sub.id
+        JOIN teachers t ON ts.teacher_id = t.id
+        WHERE s.user_id=?
+    """, (session["user_id"],)).fetchall()
+
+    session["class_name"] = subjects[0]["class_name"] if subjects else None
+    session["class_id"] = subjects[0]["class_id"] if subjects else None
+    
+    periods = db.execute("""
+        SELECT sub.name as subject_name, p.day, p.start_time, p.end_time FROM periods p
+        JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id
+        JOIN subjects sub ON ts.subject_id = sub.id
+        WHERE ts.class_id = ?
+    """, (session["class_id"],)).fetchall()
+
     attendance = db.execute("""
         SELECT a.date, a.status, sub.name as subject, p.day as day FROM attendance a 
         JOIN periods p ON a.period_id = p.id
@@ -99,7 +118,7 @@ def student_dashboard():
         JOIN subjects sub ON ts.subject_id = sub.id
         WHERE a.student_id=(SELECT id FROM students WHERE user_id=?)
     """, (session["user_id"],)).fetchall()
-    return render_template("student_dashboard.html", attendance=attendance)
+    return render_template("student_dashboard.html", subjects=subjects, attendance=attendance, periods=periods)
 
 # ---------------- Teacher Dashboard ----------------
 @app.route("/teacher")

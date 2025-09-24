@@ -1,25 +1,72 @@
 {% extends "base.html" %} {% block title %}Student Dashboard{% endblock %} {%
 block content %}
 <div class="dashboard-container">
-  <h2>Welcome, {{ session.username }}</h2>
-  <a class="logout-btn" href="/logout">Logout</a>
+  <div class="header">
+    <h2>Welcome, {{ session.username }}</h2>
+    <h3>{{ session.class_name }}</h3>
+    <a class="logout-btn" href="/logout">Logout</a>
+  </div>
+  {% if session.class_name %}
+  <div class="compartments">
+    <div class="compartment">
+      <h2>Assigned Subjects</h2>
+      <table>
+        <tr>
+          <th>Subject Code</th>
+          <th>Subject Name</th>
+          <th>Teacher Name</th>
+        </tr>
+        {% for subject in subjects %}
+        <tr>
+          <td>{{ subject['subject_code'] }}</td>
+          <td>{{ subject['subject'] }}</td>
+          <td>{{ subject['teacher'] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    <div class="compartment">
+      <h2>Class Timetable</h2>
+      <table>
+        <tr>
+          <th>Day</th>
+          <th>Subject Name</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+        </tr>
+        {% for period in periods %}
+        <tr>
+          <td>{{ period['day'] }}</td>
+          <td>{{ period['subject_name'] }}</td>
+          <td>{{ period['start_time'] }}</td>
+          <td>{{ period['end_time'] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
 
-  <h2>Student Attendance</h2>
-  <table>
-    <tr>
-      <th>Date</th>
-      <th>Subject</th>
-      <th>Day</th>
-      <th>Status</th>
-    </tr>
-    {% for row in attendance %}
-    <tr>
-      <td>{{ row['date'] }}</td>
-      <td>{{ row['subject'] }}</td>
-      <td>{{ row['day'] }}</td>
-      <td>{{ row['status'] }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+      <div class="compartment">
+        <h2>Student Attendance</h2>
+        <table>
+          <tr>
+            <th>Date</th>
+            <th>Subject</th>
+            <th>Day</th>
+            <th>Status</th>
+          </tr>
+          {% for row in attendance %}
+          <tr>
+            <td>{{ row['date'] }}</td>
+            <td>{{ row['subject'] }}</td>
+            <td>{{ row['day'] }}</td>
+            <td>{{ row['status'] }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% else %}
+      <p>No class assigned yet.</p>
+      {% endif %}
+    </div>
+    {% endblock %}
+  </div>
 </div>
-{% endblock %}
