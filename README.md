@@ -56,4 +56,4 @@ This system records attendance automatically through facial recognition, while a
    ```bash
    python app.py
    ```
-   The server will start at [https:/localhost:5000](https:/localhost:5000).
+   The server will start at [http://localhost:5000](http://localhost:5000).
