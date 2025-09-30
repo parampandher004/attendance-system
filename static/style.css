@@ -54,9 +54,41 @@ body {
   height: 100%;
   object-fit: cover;
 }
-h2 {
-  color: #333;
-  margin-bottom: 25px;
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #4f46e5, #3b82f6);
+  padding: 15px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  color: #fff;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+.header h2 {
+  font-size: 1.5rem;
+  margin: 0;
+  font-weight: 600;
+}
+.header h3 {
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 400;
+  opacity: 0.9;
+}
+.header .logout-btn {
+  background: #fff;
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+.header .logout-btn:hover {
+  background: #f3f4f6;
+  color: #1e40af;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 input,
 select,
@@ -82,19 +114,6 @@ button {
 }
 button:hover {
   background: #4292dc;
-}
-.logout-btn {
-  display: inline-block;
-  background-color: #e74c3c;
-  color: white;
-  text-decoration: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  margin-bottom: 30px;
-  transition: background-color 0.3s;
-}
-.logout-btn:hover {
-  background-color: #c0392b;
 }
 p {
   text-align: center;
@@ -130,12 +149,12 @@ td {
   text-align: center;
   transition: background 0.3s ease;
 }
-tr:nth-child(even) {
+/* tr:nth-child(even) {
   background-color: #f8f9fa;
-}
-tr:hover td {
+} */
+/* tr:hover td {
   background-color: #e1f0ff;
-}
+} */
 tr td:first-child {
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
@@ -143,6 +162,24 @@ tr td:first-child {
 tr td:last-child {
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
+}
+tr.status-scheduled {
+  background: #e0f2fe;
+  color: #075985;
+}
+tr.status-running {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+}
+tr.status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+  text-decoration: line-through;
+}
+tr.status-completed {
+  background: #f3f4f6;
+  color: #374151;
 }
 .filter-controls {
   display: flex;

@@ -2,12 +2,10 @@
 block content %}
 <div class="dashboard-container">
   <div class="compartments">
-    <div class="compartment">
-      <div class="header">
-        <h2>Welcome, {{ session.name }}</h2>
-        <h3>{{ session.class_name }}</h3>
-        <a class="logout-btn" href="/logout">Logout</a>
-      </div>
+    <div class="compartment header">
+      <h2>Welcome, {{ session.name }}</h2>
+      <h3>{{ session.class_name }}</h3>
+      <a class="logout-btn" href="/logout">Logout</a>
     </div>
     <div class="compartment">
       <h2>Today's Periods</h2>
@@ -23,11 +21,11 @@ block content %}
         </thead>
         <tbody id="periods-body">
           {% for period in today_periods %}
-          <tr>
+          <tr class="status-{{ period['status']|lower }}">
             <td>{{ period['subject_name'] }}</td>
             <td>{{ period['start_time'] }}</td>
             <td>{{ period['end_time'] }}</td>
-            <td>{{ period['status'] }}</td>
+            <td>Class: status-{{ period['status'] | lower }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -36,53 +34,53 @@ block content %}
       <p>No periods scheduled for today.</p>
       {% endif %}
     </div>
-    {% if session.class_name %}
-    <div class="compartments">
-      <div class="compartment">
-        <h2>Assigned Subjects</h2>
-        <table>
-          <tr>
-            <th>Subject Code</th>
-            <th>Subject Name</th>
-            <th>Teacher Name</th>
-          </tr>
-          {% for subject in subjects %}
-          <tr>
-            <td>{{ subject['subject_code'] }}</td>
-            <td>{{ subject['subject'] }}</td>
-            <td>{{ subject['teacher'] }}</td>
-          </tr>
-          {% endfor %}
-        </table>
-      </div>
-      <div class="compartment">
-        <h2>Class Timetable</h2>
-        <table>
-          <tr>
-            <th>Day</th>
-            <th>Subject Name</th>
-            <th>Start Time</th>
-            <th>End Time</th>
-          </tr>
-          {% for timetable in timetables %}
-          <tr>
-            <td>{{ timetable['day'] }}</td>
-            <td>{{ timetable['subject_name'] }}</td>
-            <td>{{ timetable['start_time'] }}</td>
-            <td>{{ timetable['end_time'] }}</td>
-          </tr>
-          {% endfor %}
-        </table>
+  </div>
+  {% if session.class_name %}
+  <div class="compartments">
+    <div class="compartment">
+      <h2>Assigned Subjects</h2>
+      <table>
+        <tr>
+          <th>Subject Code</th>
+          <th>Subject Name</th>
+          <th>Teacher Name</th>
+        </tr>
+        {% for subject in subjects %}
+        <tr>
+          <td>{{ subject['subject_code'] }}</td>
+          <td>{{ subject['subject'] }}</td>
+          <td>{{ subject['teacher'] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    <div class="compartment">
+      <h2>Class Timetable</h2>
+      <table>
+        <tr>
+          <th>Day</th>
+          <th>Subject Name</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+        </tr>
+        {% for timetable in timetables %}
+        <tr>
+          <td>{{ timetable['day'] }}</td>
+          <td>{{ timetable['subject_name'] }}</td>
+          <td>{{ timetable['start_time'] }}</td>
+          <td>{{ timetable['end_time'] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
 
-        {% else %}
-        <p>No class assigned yet.</p>
-        {% endif %}
-      </div>
+      {% else %}
+      <p>No class assigned yet.</p>
+      {% endif %}
     </div>
   </div>
 
-  <h2>Student Attendance</h2>
   <div class="attendance-compartment">
+    <h2>Student Attendance</h2>
     <div class="filter-controls">
       <label for="subject_filter">Subject:</label>
       <select name="subject" id="subject_filter" onchange="applyFilters()">
@@ -155,6 +153,7 @@ block content %}
         tbody.innerHTML = "";
         data.forEach((period) => {
           let row = document.createElement("tr");
+          row.classList.add("status-" + period.status.toLowerCase());
           row.innerHTML = `
             <td>${period.subject_name}</td>
             <td>${period.start_time}</td>
