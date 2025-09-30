@@ -1,37 +1,256 @@
 {% extends "base.html" %} {% block title %}Teacher Dashboard{% endblock %} {%
-block style %} .btn { display: inline-block; background-color: #3498db; color:
-white; text-decoration: none; padding: 10px 20px; border-radius: 5px;
-margin-bottom: 20px; transition: background-color 0.3s; } .btn:hover {
-background-color: #2980b9; } table { width: 100%; border-collapse: collapse;
-margin-top: 20px; } th, td { padding: 12px 15px; text-align: left; } th {
-background-color: #2ecc71; color: white; } tr:nth-child(even) {
-background-color: #f2f2f2; } tr:hover { background-color: #d6f5e0; } {% endblock
-%} {% block content %}
+block content %}
 <div class="dashboard-container">
-  <h2>Welcome, {{ session.username }}</h2>
-  <a class="btn logout-btn" href="/logout">Logout</a>
-  <a class="btn" href="/upload">Upload Student Images</a>
+  <div class="compartments">
+    <div class="compartment header">
+      <h2>Welcome, {{ session.name }}</h2>
+      <a class="btn logout-btn" href="/logout">Logout</a>
+      <a class="btn" href="/upload">Upload Student Images</a>
+    </div>
+    <div class="compartment">
+      <h2>Today's Periods</h2>
+      {% if today_periods %}
+      <table>
+        <thead>
+          <tr>
+            <th>Class Name</th>
+            <th>Subject Name</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="periods-body">
+          {% for period in today_periods %}
+          <tr>
+            <td>{{ period['class_name'] }}</td>
+            <td>{{ period['subject_name'] }}</td>
+            <td>{{ period['start_time'] }}</td>
+            <td>{{ period['end_time'] }}</td>
+            <td>{{ period['status'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>No periods scheduled for today.</p>
+      {% endif %}
+    </div>
+    <div class="compartments">
+      <div class="compartment">
+        <h2>Assigned Classes</h2>
+        {% if classes %}
+        <table>
+          <tr>
+            <th>Class Name</th>
+            <th>Subject Code</th>
+            <th>Subject Name</th>
+          </tr>
+          {% for cls in classes %}
+          <tr>
+            <td>{{ cls['class_name'] }}</td>
+            <td>{{ cls['subject_code'] }}</td>
+            <td>{{ cls['subject'] }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% endif %} {% if not classes %}
+        <p>No classes assigned yet.</p>
+        {% endif %}
+      </div>
+      <div class="compartment">
+        <h2>Class Timetables</h2>
+        {% if timetables %}
+        <table>
+          <tr>
+            <th>Class Name</th>
+            <th>Day</th>
+            <th>Subject Name</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+          </tr>
+          {% for period in timetables %}
+          <tr>
+            <td>{{ period['class_name'] }}</td>
+            <td>{{ period['day'] }}</td>
+            <td>{{ period['subject_name'] }}</td>
+            <td>{{ period['start_time'] }}</td>
+            <td>{{ period['end_time'] }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% endif %} {% if not timetables %}
+        <p>No timetables available.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="attendance-compartment">
+      <h2>All Students Attendance</h2>
+      <div class="filter-controls">
+        <label for="subject_filter">Subject:</label>
+        <select name="subject" id="subject_filter" onchange="applyFilters()">
+          <option value="">-- All Subjects --</option>
+          {% for subject in subjects %}
+          <option value="{{ subject['subject'] }}">
+            {{ subject['subject'] }}
+          </option>
+          {% endfor %}
+        </select>
 
-  <h2>All Students Attendance</h2>
-  <table>
-    <tr>
-      <th>Name</th>
-      <th>Roll No</th>
-      <th>Date</th>
-      <th>Subject</th>
-      <th>Day</th>
-      <th>Status</th>
-    </tr>
-    {% for row in attendance %}
-    <tr>
-      <td>{{ row['name'] }}</td>
-      <td>{{ row['roll_no'] }}</td>
-      <td>{{ row['date'] }}</td>
-      <td>{{ row['subject'] }}</td>
-      <td>{{ row['day'] }}</td>
-      <td>{{ row['status'] }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+        <label for="date_filter">Date:</label>
+        <input
+          type="date"
+          name="date"
+          id="date_filter"
+          onchange="applyFilters()"
+        />
+
+        <label for="status_filter">Status:</label>
+        <select name="status" id="status_filter" onchange="applyFilters()">
+          <option value="">-- All Statuses --</option>
+          <option value="present">Present</option>
+          <option value="absent">Absent</option>
+        </select>
+
+        <label for="day_filter">Day:</label>
+        <select name="day" id="day_filter" onchange="applyFilters()">
+          <option value="">-- All Days --</option>
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+          <option value="Saturday">Saturday</option>
+          <option value="Sunday">Sunday</option>
+        </select>
+
+        <button type="button" onclick="resetFilters()">Reset Filters</button>
+      </div>
+
+      <table id="attendance-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Roll No</th>
+            <th>Date</th>
+            <th>Subject</th>
+            <th>Day</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in attendance %}
+          <tr>
+            <td>{{ row['name'] }}</td>
+            <td>{{ row['roll_no'] }}</td>
+            <td>{{ row['date'] }}</td>
+            <td>{{ row['subject'] }}</td>
+            <td>{{ row['day'] }}</td>
+            <td>{{ row['status'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
+<script>
+  function updatePeriods() {
+    fetch("/api/periods/today")
+      .then((response) => response.json())
+      .then((data) => {
+        let tbody = document.getElementById("periods-body");
+        tbody.innerHTML = "";
+        data.forEach((period) => {
+          let row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${period.class_name}</td>
+            <td>${period.subject_name}</td>
+            <td>${period.start_time}</td>
+            <td>${period.end_time}</td>
+            <td>${period.status}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      });
+  }
+  setInterval(updatePeriods, 60000);
+  updatePeriods();
+  // 1. Get references to filter elements
+  const subjectFilter = document.getElementById("subject_filter");
+  const dateFilter = document.getElementById("date_filter");
+  const statusFilter = document.getElementById("status_filter");
+  const dayFilter = document.getElementById("day_filter");
+
+  // 2. Get reference to the table body and its rows (FIXED HERE)
+  const attendanceTableBody = document.querySelector("#attendance-table tbody");
+  // Ensure rows is an array for reliable iteration
+  const rows = Array.from(attendanceTableBody.getElementsByTagName("tr"));
+
+  // Define column indices based on your <thead> structure:
+  // <th>Date</th> (0), <th>Subject</th> (1), <th>Day</th> (2), <th>Status</th> (3)
+  const COL_INDICES = {
+    date: 2,
+    subject: 3,
+    day: 4,
+    status: 5,
+  };
+
+  function applyFilters() {
+    // Get current filter values, lowercased for case-insensitive comparison
+    const subjectValue = subjectFilter.value.toLowerCase();
+    const dateValue = dateFilter.value; // Date comparison is case-sensitive (YYYY-MM-DD)
+    const statusValue = statusFilter.value.toLowerCase();
+    const dayValue = dayFilter.value.toLowerCase();
+
+    // Iterate through all table rows
+    rows.forEach((row) => {
+      // Check to ensure the row has cells before trying to access them
+      if (row.cells.length < 6) return;
+
+      // Get cell content, trim whitespace, and lowercase for comparison
+      const dateText = row.cells[COL_INDICES.date].innerText.trim();
+      const subjectText = row.cells[COL_INDICES.subject].innerText
+        .trim()
+        .toLowerCase();
+      const dayText = row.cells[COL_INDICES.day].innerText.trim().toLowerCase();
+      const statusText = row.cells[COL_INDICES.status].innerText
+        .trim()
+        .toLowerCase();
+
+      let showRow = true;
+
+      // Filter 1: Subject
+      if (subjectValue && subjectText !== subjectValue) {
+        showRow = false;
+      }
+
+      // Filter 2: Date (uses YYYY-MM-DD string comparison)
+      if (showRow && dateValue && dateText !== dateValue) {
+        showRow = false;
+      }
+
+      // Filter 3: Status
+      if (showRow && statusValue && statusText !== statusValue) {
+        showRow = false;
+      }
+
+      // Filter 4: Day
+      if (showRow && dayValue && dayText !== dayValue) {
+        showRow = false;
+      }
+
+      // Apply display style
+      row.style.display = showRow ? "" : "none";
+    });
+  }
+
+  function resetFilters() {
+    subjectFilter.value = "";
+    dateFilter.value = "";
+    statusFilter.value = "";
+    dayFilter.value = "";
+    applyFilters();
+  }
+</script>
 {% endblock %}

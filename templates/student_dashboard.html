@@ -1,72 +1,248 @@
 {% extends "base.html" %} {% block title %}Student Dashboard{% endblock %} {%
 block content %}
 <div class="dashboard-container">
-  <div class="header">
-    <h2>Welcome, {{ session.username }}</h2>
-    <h3>{{ session.class_name }}</h3>
-    <a class="logout-btn" href="/logout">Logout</a>
-  </div>
-  {% if session.class_name %}
   <div class="compartments">
     <div class="compartment">
-      <h2>Assigned Subjects</h2>
-      <table>
-        <tr>
-          <th>Subject Code</th>
-          <th>Subject Name</th>
-          <th>Teacher Name</th>
-        </tr>
-        {% for subject in subjects %}
-        <tr>
-          <td>{{ subject['subject_code'] }}</td>
-          <td>{{ subject['subject'] }}</td>
-          <td>{{ subject['teacher'] }}</td>
-        </tr>
-        {% endfor %}
-      </table>
+      <div class="header">
+        <h2>Welcome, {{ session.name }}</h2>
+        <h3>{{ session.class_name }}</h3>
+        <a class="logout-btn" href="/logout">Logout</a>
+      </div>
     </div>
     <div class="compartment">
-      <h2>Class Timetable</h2>
+      <h2>Today's Periods</h2>
+      {% if today_periods %}
       <table>
-        <tr>
-          <th>Day</th>
-          <th>Subject Name</th>
-          <th>Start Time</th>
-          <th>End Time</th>
-        </tr>
-        {% for period in periods %}
-        <tr>
-          <td>{{ period['day'] }}</td>
-          <td>{{ period['subject_name'] }}</td>
-          <td>{{ period['start_time'] }}</td>
-          <td>{{ period['end_time'] }}</td>
-        </tr>
-        {% endfor %}
-      </table>
-
-      <div class="compartment">
-        <h2>Student Attendance</h2>
-        <table>
+        <thead>
           <tr>
-            <th>Date</th>
-            <th>Subject</th>
-            <th>Day</th>
+            <th>Subject Name</th>
+            <th>Start Time</th>
+            <th>End Time</th>
             <th>Status</th>
           </tr>
-          {% for row in attendance %}
+        </thead>
+        <tbody id="periods-body">
+          {% for period in today_periods %}
           <tr>
-            <td>{{ row['date'] }}</td>
-            <td>{{ row['subject'] }}</td>
-            <td>{{ row['day'] }}</td>
-            <td>{{ row['status'] }}</td>
+            <td>{{ period['subject_name'] }}</td>
+            <td>{{ period['start_time'] }}</td>
+            <td>{{ period['end_time'] }}</td>
+            <td>{{ period['status'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>No periods scheduled for today.</p>
+      {% endif %}
+    </div>
+    {% if session.class_name %}
+    <div class="compartments">
+      <div class="compartment">
+        <h2>Assigned Subjects</h2>
+        <table>
+          <tr>
+            <th>Subject Code</th>
+            <th>Subject Name</th>
+            <th>Teacher Name</th>
+          </tr>
+          {% for subject in subjects %}
+          <tr>
+            <td>{{ subject['subject_code'] }}</td>
+            <td>{{ subject['subject'] }}</td>
+            <td>{{ subject['teacher'] }}</td>
           </tr>
           {% endfor %}
         </table>
       </div>
-      {% else %}
-      <p>No class assigned yet.</p>
-      {% endif %}
+      <div class="compartment">
+        <h2>Class Timetable</h2>
+        <table>
+          <tr>
+            <th>Day</th>
+            <th>Subject Name</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+          </tr>
+          {% for timetable in timetables %}
+          <tr>
+            <td>{{ timetable['day'] }}</td>
+            <td>{{ timetable['subject_name'] }}</td>
+            <td>{{ timetable['start_time'] }}</td>
+            <td>{{ timetable['end_time'] }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+
+        {% else %}
+        <p>No class assigned yet.</p>
+        {% endif %}
+      </div>
     </div>
-    {% endblock %}
+  </div>
+
+  <h2>Student Attendance</h2>
+  <div class="attendance-compartment">
+    <div class="filter-controls">
+      <label for="subject_filter">Subject:</label>
+      <select name="subject" id="subject_filter" onchange="applyFilters()">
+        <option value="">-- All Subjects --</option>
+        {% for subject in subjects %}
+        <option value="{{ subject['subject'] }}">
+          {{ subject['subject'] }}
+        </option>
+        {% endfor %}
+      </select>
+
+      <label for="date_filter">Date:</label>
+      <input
+        type="date"
+        name="date"
+        id="date_filter"
+        onchange="applyFilters()"
+      />
+
+      <label for="status_filter">Status:</label>
+      <select name="status" id="status_filter" onchange="applyFilters()">
+        <option value="">-- All Statuses --</option>
+        <option value="present">Present</option>
+        <option value="absent">Absent</option>
+      </select>
+
+      <label for="day_filter">Day:</label>
+      <select name="day" id="day_filter" onchange="applyFilters()">
+        <option value="">-- All Days --</option>
+        <option value="Monday">Monday</option>
+        <option value="Tuesday">Tuesday</option>
+        <option value="Wednesday">Wednesday</option>
+        <option value="Thursday">Thursday</option>
+        <option value="Friday">Friday</option>
+        <option value="Saturday">Saturday</option>
+        <option value="Sunday">Sunday</option>
+      </select>
+
+      <button type="button" onclick="resetFilters()">Reset Filters</button>
+    </div>
+
+    <table id="attendance-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Subject</th>
+          <th>Day</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in attendance %}
+        <tr>
+          <td>{{ row['date'] }}</td>
+          <td>{{ row['subject'] }}</td>
+          <td>{{ row['day'] }}</td>
+          <td>{{ row['status'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
+<script>
+  function updatePeriods() {
+    fetch("/api/periods/today")
+      .then((response) => response.json())
+      .then((data) => {
+        let tbody = document.getElementById("periods-body");
+        tbody.innerHTML = "";
+        data.forEach((period) => {
+          let row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${period.subject_name}</td>
+            <td>${period.start_time}</td>
+            <td>${period.end_time}</td>
+            <td>${period.status}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      });
+  }
+  setInterval(updatePeriods, 60000);
+  updatePeriods();
+
+  // 1. Get references to filter elements
+  const subjectFilter = document.getElementById("subject_filter");
+  const dateFilter = document.getElementById("date_filter");
+  const statusFilter = document.getElementById("status_filter");
+  const dayFilter = document.getElementById("day_filter");
+
+  // 2. Get reference to the table body and its rows (FIXED HERE)
+  const attendanceTableBody = document.querySelector("#attendance-table tbody");
+  // Ensure rows is an array for reliable iteration
+  const rows = Array.from(attendanceTableBody.getElementsByTagName("tr"));
+
+  // Define column indices based on your <thead> structure:
+  // <th>Date</th> (0), <th>Subject</th> (1), <th>Day</th> (2), <th>Status</th> (3)
+  const COL_INDICES = {
+    date: 0,
+    subject: 1,
+    day: 2,
+    status: 3,
+  };
+
+  function applyFilters() {
+    // Get current filter values, lowercased for case-insensitive comparison
+    const subjectValue = subjectFilter.value.toLowerCase();
+    const dateValue = dateFilter.value; // Date comparison is case-sensitive (YYYY-MM-DD)
+    const statusValue = statusFilter.value.toLowerCase();
+    const dayValue = dayFilter.value.toLowerCase();
+
+    // Iterate through all table rows
+    rows.forEach((row) => {
+      // Check to ensure the row has cells before trying to access them
+      if (row.cells.length < 4) return;
+
+      // Get cell content, trim whitespace, and lowercase for comparison
+      const dateText = row.cells[COL_INDICES.date].innerText.trim();
+      const subjectText = row.cells[COL_INDICES.subject].innerText
+        .trim()
+        .toLowerCase();
+      const dayText = row.cells[COL_INDICES.day].innerText.trim().toLowerCase();
+      const statusText = row.cells[COL_INDICES.status].innerText
+        .trim()
+        .toLowerCase();
+
+      let showRow = true;
+
+      // Filter 1: Subject
+      if (subjectValue && subjectText !== subjectValue) {
+        showRow = false;
+      }
+
+      // Filter 2: Date (uses YYYY-MM-DD string comparison)
+      if (showRow && dateValue && dateText !== dateValue) {
+        showRow = false;
+      }
+
+      // Filter 3: Status
+      if (showRow && statusValue && statusText !== statusValue) {
+        showRow = false;
+      }
+
+      // Filter 4: Day
+      if (showRow && dayValue && dayText !== dayValue) {
+        showRow = false;
+      }
+
+      // Apply display style
+      row.style.display = showRow ? "" : "none";
+    });
+  }
+
+  function resetFilters() {
+    subjectFilter.value = "";
+    dateFilter.value = "";
+    statusFilter.value = "";
+    dayFilter.value = "";
+    applyFilters();
+  }
+</script>
+{% endblock %}
