@@ -40,6 +40,7 @@ body {
   flex-wrap: wrap;
   gap: 30px;
   margin-top: 20px;
+  align-items: center;
 }
 .compartment {
   flex: 1;
@@ -102,8 +103,60 @@ button {
   border: 1px solid #ccc;
   background: #f9f9f9;
 }
+input {
+  border-bottom: 1px solid #6dabe4;
+}
 #studentFields {
   display: none;
+}
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 100; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+  max-width: 500px; /* Max width for better look */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.close-btn {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+.modal-content label,
+.modal-content input {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+}
+.modal-content input[type="text"],
+.modal-content input[type="time"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; /* Crucial for padding/border not breaking width */
 }
 button {
   background: #6dabe4;

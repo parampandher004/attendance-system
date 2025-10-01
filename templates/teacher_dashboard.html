@@ -9,7 +9,49 @@ block content %}
     </div>
     <div class="compartment">
       <h2>Today's Periods</h2>
-      {% if today_periods %}
+      <div id="add-class-modal" class="modal">
+        <div class="modal-content">
+          <span class="close-btn">&times;</span>
+          <h2>Add New Class Schedule</h2>
+
+          <form id="add-class-form">
+            <label for="className">Class Name:</label>
+            <select id="className" name="class_name" required>
+              <option value="">Select Class</option>
+            </select>
+            <br />
+
+            <label for="subjectName">Subject Name:</label>
+            <select id="subjectName" name="ts_id" required disabled>
+              <option value="">Select Subject</option>
+            </select>
+            <br />
+
+            <label for="startTime">Start Time:</label>
+            <input
+              type="time"
+              id="startTime"
+              name="start_time"
+              required
+            /><br />
+
+            <label for="endTime">End Time:</label>
+            <input type="time" id="endTime" name="end_time" required /><br />
+
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" required /><br />
+            <input type="hidden" name="day" id="day" />
+            <input type="hidden" name="status" value="scheduled" />
+
+            <button type="submit" class="btn">Save Class</button>
+          </form>
+          <p id="modal-message" style="color: red"></p>
+        </div>
+      </div>
+
+      <button class="btn add-class-btn" id="open-add-class-modal">
+        ➕ Add New Class
+      </button>
       <table>
         <thead>
           <tr>
@@ -20,162 +62,309 @@ block content %}
             <th>Status</th>
           </tr>
         </thead>
-        <tbody id="periods-body">
-          {% for period in today_periods %}
-          <tr>
-            <td>{{ period['class_name'] }}</td>
-            <td>{{ period['subject_name'] }}</td>
-            <td>{{ period['start_time'] }}</td>
-            <td>{{ period['end_time'] }}</td>
-            <td>{{ period['status'] }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
+        <tbody id="periods-body"></tbody>
       </table>
-      {% else %}
-      <p>No periods scheduled for today.</p>
+      <p id="no-periods-message" style="display: none">
+        No periods scheduled for today.
+      </p>
+    </div>
+  </div>
+  <div class="compartments">
+    <div class="compartment">
+      <h2>Assigned Classes</h2>
+      {% if classes %}
+      <table>
+        <tr>
+          <th>Class Name</th>
+          <th>Subject Code</th>
+          <th>Subject Name</th>
+        </tr>
+        {% for cls in classes %}
+        <tr>
+          <td>{{ cls['class_name'] }}</td>
+          <td>{{ cls['subject_code'] }}</td>
+          <td>{{ cls['subject'] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %} {% if not classes %}
+      <p>No classes assigned yet.</p>
       {% endif %}
     </div>
-    <div class="compartments">
-      <div class="compartment">
-        <h2>Assigned Classes</h2>
-        {% if classes %}
-        <table>
-          <tr>
-            <th>Class Name</th>
-            <th>Subject Code</th>
-            <th>Subject Name</th>
-          </tr>
-          {% for cls in classes %}
-          <tr>
-            <td>{{ cls['class_name'] }}</td>
-            <td>{{ cls['subject_code'] }}</td>
-            <td>{{ cls['subject'] }}</td>
-          </tr>
-          {% endfor %}
-        </table>
-        {% endif %} {% if not classes %}
-        <p>No classes assigned yet.</p>
-        {% endif %}
-      </div>
-      <div class="compartment">
-        <h2>Class Timetables</h2>
-        {% if timetables %}
-        <table>
-          <tr>
-            <th>Class Name</th>
-            <th>Day</th>
-            <th>Subject Name</th>
-            <th>Start Time</th>
-            <th>End Time</th>
-          </tr>
-          {% for period in timetables %}
-          <tr>
-            <td>{{ period['class_name'] }}</td>
-            <td>{{ period['day'] }}</td>
-            <td>{{ period['subject_name'] }}</td>
-            <td>{{ period['start_time'] }}</td>
-            <td>{{ period['end_time'] }}</td>
-          </tr>
-          {% endfor %}
-        </table>
-        {% endif %} {% if not timetables %}
-        <p>No timetables available.</p>
-        {% endif %}
-      </div>
-    </div>
-    <div class="attendance-compartment">
-      <h2>All Students Attendance</h2>
-      <div class="filter-controls">
-        <label for="subject_filter">Subject:</label>
-        <select name="subject" id="subject_filter" onchange="applyFilters()">
-          <option value="">-- All Subjects --</option>
-          {% for subject in subjects %}
-          <option value="{{ subject['subject'] }}">
-            {{ subject['subject'] }}
-          </option>
-          {% endfor %}
-        </select>
-
-        <label for="date_filter">Date:</label>
-        <input
-          type="date"
-          name="date"
-          id="date_filter"
-          onchange="applyFilters()"
-        />
-
-        <label for="status_filter">Status:</label>
-        <select name="status" id="status_filter" onchange="applyFilters()">
-          <option value="">-- All Statuses --</option>
-          <option value="present">Present</option>
-          <option value="absent">Absent</option>
-        </select>
-
-        <label for="day_filter">Day:</label>
-        <select name="day" id="day_filter" onchange="applyFilters()">
-          <option value="">-- All Days --</option>
-          <option value="Monday">Monday</option>
-          <option value="Tuesday">Tuesday</option>
-          <option value="Wednesday">Wednesday</option>
-          <option value="Thursday">Thursday</option>
-          <option value="Friday">Friday</option>
-          <option value="Saturday">Saturday</option>
-          <option value="Sunday">Sunday</option>
-        </select>
-
-        <button type="button" onclick="resetFilters()">Reset Filters</button>
-      </div>
-
-      <table id="attendance-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Roll No</th>
-            <th>Date</th>
-            <th>Subject</th>
-            <th>Day</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in attendance %}
-          <tr>
-            <td>{{ row['name'] }}</td>
-            <td>{{ row['roll_no'] }}</td>
-            <td>{{ row['date'] }}</td>
-            <td>{{ row['subject'] }}</td>
-            <td>{{ row['day'] }}</td>
-            <td>{{ row['status'] }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
+    <div class="compartment">
+      <h2>Class Timetables</h2>
+      {% if timetables %}
+      <table>
+        <tr>
+          <th>Class Name</th>
+          <th>Day</th>
+          <th>Subject Name</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+        </tr>
+        {% for period in timetables %}
+        <tr>
+          <td>{{ period['class_name'] }}</td>
+          <td>{{ period['day'] }}</td>
+          <td>{{ period['subject_name'] }}</td>
+          <td>{{ period['start_time'] }}</td>
+          <td>{{ period['end_time'] }}</td>
+        </tr>
+        {% endfor %}
       </table>
+      {% endif %} {% if not timetables %}
+      <p>No timetables available.</p>
+      {% endif %}
     </div>
+  </div>
+  <div class="attendance-compartment">
+    <h2>All Students Attendance</h2>
+    <div class="filter-controls">
+      <label for="subject_filter">Subject:</label>
+      <select name="subject" id="subject_filter" onchange="applyFilters()">
+        <option value="">-- All Subjects --</option>
+        {% for subject in subjects %}
+        <option value="{{ subject['subject'] }}">
+          {{ subject['subject'] }}
+        </option>
+        {% endfor %}
+      </select>
+
+      <label for="date_filter">Date:</label>
+      <input
+        type="date"
+        name="date"
+        id="date_filter"
+        onchange="applyFilters()"
+      />
+
+      <label for="status_filter">Status:</label>
+      <select name="status" id="status_filter" onchange="applyFilters()">
+        <option value="">-- All Statuses --</option>
+        <option value="present">Present</option>
+        <option value="absent">Absent</option>
+      </select>
+
+      <label for="day_filter">Day:</label>
+      <select name="day" id="day_filter" onchange="applyFilters()">
+        <option value="">-- All Days --</option>
+        <option value="Monday">Monday</option>
+        <option value="Tuesday">Tuesday</option>
+        <option value="Wednesday">Wednesday</option>
+        <option value="Thursday">Thursday</option>
+        <option value="Friday">Friday</option>
+        <option value="Saturday">Saturday</option>
+        <option value="Sunday">Sunday</option>
+      </select>
+
+      <button type="button" onclick="resetFilters()">Reset Filters</button>
+    </div>
+
+    <table id="attendance-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Roll No</th>
+          <th>Date</th>
+          <th>Subject</th>
+          <th>Day</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in attendance %}
+        <tr>
+          <td>{{ row['name'] }}</td>
+          <td>{{ row['roll_no'] }}</td>
+          <td>{{ row['date'] }}</td>
+          <td>{{ row['subject'] }}</td>
+          <td>{{ row['day'] }}</td>
+          <td>{{ row['status'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Get the elements
+    const modal = document.getElementById("add-class-modal");
+    const openBtn = document.getElementById("open-add-class-modal");
+    const closeBtn = document.querySelector(".close-btn");
+    const form = document.getElementById("add-class-form");
+    const message = document.getElementById("modal-message");
+    const ALL_CLASSES = {{ classes | tojson }};
+
+    const classNames = [...new Set(ALL_CLASSES.map(row => row.class_name))];
+
+    // Populate subject dropdown based on selected class
+    const classSelect = document.getElementById("className");
+    const subjectSelect = document.getElementById("subjectName");
+
+    classSelect.innerHTML = '<option value="">Select Class</option>' + classNames.map(cls => `<option value="${cls}">${cls}</option>`).join('');
+
+    classSelect.addEventListener("change", () => {
+        const selectedClass = classSelect.value;
+        const subjects = ALL_CLASSES.filter(row => row.class_name === selectedClass);
+        subjectSelect.innerHTML = '<option value="">Select Subject</option>' + [...new Set(subjects)].map(sub => `<option value="${sub.id}">${sub.subject}</option>`).join('');
+        subjectSelect.disabled = subjects.length === 0;
+    });
+
+    // Function to open the modal
+    openBtn.onclick = function () {
+      modal.style.display = "block";
+      message.textContent = ""; // Clear previous messages
+      form.reset(); // Clear the form fields
+    };
+
+    // Function to close the modal using the (x) button
+    closeBtn.onclick = function () {
+      modal.style.display = "none";
+    };
+
+    // Function to close the modal when clicking outside the content
+    window.onclick = function (event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
+
+    // 💡 Attach the form submission handler here
+    form.addEventListener("submit", handleAddClassSubmit);
+  });
+
+  // The form submission function will be defined in the next step
   function updatePeriods() {
+    const tbody = document.getElementById("periods-body");
+    const noPeriodsMessage = document.getElementById("no-periods-message");
+
+    tbody.innerHTML = "";
+    noPeriodsMessage.style.display = "none";
+
     fetch("/api/periods/today")
       .then((response) => response.json())
       .then((data) => {
-        let tbody = document.getElementById("periods-body");
-        tbody.innerHTML = "";
-        data.forEach((period) => {
-          let row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${period.class_name}</td>
+        if (data.length > 0) {
+          data.forEach((period) => {
+            let row = document.createElement("tr");
+            row.classList.add("status-" + period.status.toLowerCase());
+            row.innerHTML = `
+              <td>${period.class_name}</td>
             <td>${period.subject_name}</td>
             <td>${period.start_time}</td>
             <td>${period.end_time}</td>
-            <td>${period.status}</td>
+            <td>
+              <select class="status-dropdown" data-period-id="${
+                period.id
+              }" onchange="updatePeriodStatus(this)">
+                <option value="scheduled" ${
+                  period.status === "scheduled" ? "selected" : ""
+                }>Scheduled</option>
+                <option value="running" ${
+                  period.status === "running" ? "selected" : ""
+                }>Running</option>
+                <option value="completed" ${
+                  period.status === "completed" ? "selected" : ""
+                }>Completed</option>
+                <option value="cancelled" ${
+                  period.status === "cancelled" ? "selected" : ""
+                }>Cancelled</option>
+              </select>
+            </td>
           `;
-          tbody.appendChild(row);
-        });
+            tbody.appendChild(row);
+          });
+        } else {
+          noPeriodsMessage.style.display = "block";
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching periods:", error);
+        noPeriodsMessage.textContent =
+          "Error fetching periods. Please try again later.";
+        noPeriodsMessage.style.display = "block";
       });
   }
   setInterval(updatePeriods, 60000);
   updatePeriods();
+  // Function to handle the form submission
+  function handleAddClassSubmit(event) {
+    event.preventDefault(); // Stop the default form submission (page reload)
+
+    const form = event.target;
+    const formData = new FormData(form);
+    const periodData = Object.fromEntries(formData.entries());
+
+    const modal = document.getElementById("add-class-modal");
+    const message = document.getElementById("modal-message");
+
+    message.textContent = "Saving...";
+
+    // 1. Send data to Flask backend
+    fetch("/api/classes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(periodData),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          // Check for non-200 status codes
+          return response.json().then((err) => {
+            throw new Error(err.error || "Failed to add class.");
+          });
+        }
+        return response.json();
+      })
+      .then((data) => {
+        message.textContent = "Class added successfully!";
+        message.style.color = "green";
+
+        // 2. Close the modal after a brief delay
+        setTimeout(() => {
+          modal.style.display = "none";
+          message.style.color = "red"; // Reset color
+        }, 1500);
+      })
+      .catch((error) => {
+        console.error("Error adding class:", error);
+        message.textContent = `Error: ${error.message}`;
+        message.style.color = "red";
+      });
+  }
+
+  function updatePeriodStatus(selectElement) {
+    const periodId = selectElement.getAttribute("data-period-id");
+    const newStatus = selectElement.value;
+    const tableRow = selectElement.closest("tr");
+
+    fetch(`/api/periods/${periodId}/status`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status: newStatus }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Status updated successfully:", data);
+
+        // Update row class based on new status
+        tableRow.className = ""; // Clear existing classes
+        tableRow.classList.add("status-" + newStatus.toLowerCase());
+      })
+      .catch((error) => {
+        console.error("Error updating status:", error);
+        alert("Failed to update status. Please try again.");
+      });
+  }
   // 1. Get references to filter elements
   const subjectFilter = document.getElementById("subject_filter");
   const dateFilter = document.getElementById("date_filter");

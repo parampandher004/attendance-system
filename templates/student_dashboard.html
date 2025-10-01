@@ -9,7 +9,6 @@ block content %}
     </div>
     <div class="compartment">
       <h2>Today's Periods</h2>
-      {% if today_periods %}
       <table>
         <thead>
           <tr>
@@ -19,20 +18,12 @@ block content %}
             <th>Status</th>
           </tr>
         </thead>
-        <tbody id="periods-body">
-          {% for period in today_periods %}
-          <tr class="status-{{ period['status']|lower }}">
-            <td>{{ period['subject_name'] }}</td>
-            <td>{{ period['start_time'] }}</td>
-            <td>{{ period['end_time'] }}</td>
-            <td>Class: status-{{ period['status'] | lower }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
+        <tbody id="periods-body"></tbody>
       </table>
-      {% else %}
-      <p>No periods scheduled for today.</p>
-      {% endif %}
+
+      <p id="no-periods-message" style="display: none">
+        No periods scheduled for today.
+      </p>
     </div>
   </div>
   {% if session.class_name %}
@@ -146,22 +137,35 @@ block content %}
 </div>
 <script>
   function updatePeriods() {
+    const tbody = document.getElementById("periods-body");
+    const noPeriodsMessage = document.getElementById("no-periods-message");
+
+    tbody.innerHTML = "";
+    noPeriodsMessage.style.display = "none";
+
     fetch("/api/periods/today")
       .then((response) => response.json())
       .then((data) => {
-        let tbody = document.getElementById("periods-body");
-        tbody.innerHTML = "";
-        data.forEach((period) => {
-          let row = document.createElement("tr");
-          row.classList.add("status-" + period.status.toLowerCase());
-          row.innerHTML = `
-            <td>${period.subject_name}</td>
-            <td>${period.start_time}</td>
-            <td>${period.end_time}</td>
-            <td>${period.status}</td>
-          `;
-          tbody.appendChild(row);
-        });
+        if (data.length > 0) {
+          data.forEach((period) => {
+            let row = document.createElement("tr");
+            row.classList.add("status-" + period.status.toLowerCase());
+            row.innerHTML = `
+              <td>${period.subject_name}</td>
+              <td>${period.start_time}</td>
+              <td>${period.end_time}</td>
+              <td>${period.status.toUpperCase()}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        } else {
+          noPeriodsMessage.style.display = "block";
+        }
+      })
+      .catch((error) => {
+        noPeriodsMessage.textContent =
+          "Error fetching periods. Please try again later.";
+        noPeriodsMessage.style.display = "block";
       });
   }
   setInterval(updatePeriods, 60000);

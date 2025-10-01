@@ -173,13 +173,6 @@ def student_dashboard():
         {"subject_name": row["subject_name"], "day": DAY_MAP[f"{row["day"]}"], "start_time": row["start_time"], "end_time": row["end_time"]}
         for row in rows
     ]
-    
-    today_periods = db.execute("""
-        SELECT sub.name as subject_name, p.start_time, p.end_time, p.status FROM periods p
-        JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id
-        JOIN subjects sub ON ts.subject_id = sub.id
-        WHERE ts.class_id = ? AND p.date = ?
-    """, (session["class_id"], datetime.now().strftime("%d/%m/%Y"))).fetchall()
 
     rows = db.execute("""
         SELECT p.date, a.status, sub.name as subject, p.day as day FROM attendance a 
@@ -191,7 +184,7 @@ def student_dashboard():
 
     attendance = [{"date": row["date"], "status": row["status"], "subject": row["subject"], "day": DAY_MAP[f"{row["day"]}"]} for row in rows]
 
-    return render_template("student_dashboard.html", subjects=subjects, attendance=attendance, timetables=timetables, today_periods=today_periods)
+    return render_template("student_dashboard.html", subjects=subjects, attendance=attendance, timetables=timetables)
 
 # ---------------- Teacher Dashboard ----------------
 @app.route("/teacher")
@@ -199,21 +192,17 @@ def teacher_dashboard():
     if session.get("role") != "teacher":
         return redirect("/")
     db = get_db()
-    classes = db.execute("""
-        SELECT DISTINCT c.name as class_name, sub.code as subject_code, sub.name as subject FROM classes c
+    rows = db.execute("""
+        SELECT DISTINCT ts.id, c.name as class_name, sub.code as subject_code, sub.name as subject FROM classes c
         JOIN teacherSubjects ts ON c.id = ts.class_id
         JOIN subjects sub ON ts.subject_id = sub.id
         JOIN teachers t ON ts.teacher_id = t.id
         WHERE t.user_id=?
     """, (session["user_id"],)).fetchall()
     
-    today_periods = db.execute("""
-        SELECT c.name as class_name, sub.name as subject_name, p.start_time, p.end_time, p.status FROM periods p
-        JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id
-        JOIN subjects sub ON ts.subject_id = sub.id
-        JOIN classes c ON ts.class_id = c.id
-        WHERE ts.teacher_id = (SELECT id FROM teachers WHERE user_id=?) AND p.date = ?
-    """, (session["user_id"], datetime.now().strftime("%d/%m/%Y"))).fetchall()
+    classes = []
+    for row in rows:
+        classes.append(dict(id=row["id"], class_name=row["class_name"], subject_code=row["subject_code"], subject=row["subject"]))
     
     rows = db.execute("""
         SELECT c.name as class_name, sub.name as subject_name, p.day, p.start_time, p.end_time FROM weekly_periods p
@@ -241,7 +230,7 @@ def teacher_dashboard():
 
     attendance = [{"name": row["name"], "roll_no": row["roll_no"], "date": row["date"], "day": DAY_MAP[f"{row["day"]}"], "subject": row["subject"], "status": row["status"]} for row in rows]
 
-    return render_template("teacher_dashboard.html", attendance=attendance, classes=classes, timetables=timetables, today_periods=today_periods)
+    return render_template("teacher_dashboard.html", attendance=attendance, classes=classes, timetables=timetables)
 
 
 # ---------------- Upload Images for Encoding ----------------
@@ -294,13 +283,58 @@ def get_periods_today():
     elif session.get("role") == "teacher":
         db = get_db()
         today_periods = db.execute("""
-            SELECT c.name as class_name, sub.name as subject_name, p.start_time, p.end_time, p.status FROM periods p
+            SELECT p.id, c.name as class_name, sub.name as subject_name, p.start_time, p.end_time, p.status FROM periods p
             JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id
             JOIN subjects sub ON ts.subject_id = sub.id
             JOIN classes c ON ts.class_id = c.id
             WHERE ts.teacher_id = (SELECT id FROM teachers WHERE user_id=?) AND p.date = ?
         """, (session["user_id"], datetime.now().strftime("%d/%m/%Y"))).fetchall()
         return jsonify([dict(row) for row in today_periods])
+    
+# ---------------- API to Add Class ----------------
+@app.route("/api/classes", methods=["POST"])
+def add_class():
+    if session.get("role") != "teacher":
+        return jsonify({"error": "Unauthorized"}), 403
+    if not request.json:
+        return jsonify({"error": "No data provided"}), 400
+
+    teacher_subject_id = request.json.get("ts_id")
+    start_time = request.json.get("start_time")
+    start_time = datetime.strptime(start_time, "%H:%M").strftime("%H:%M:%S") if start_time else None    
+    end_time = request.json.get("end_time")
+    end_time = datetime.strptime(end_time, "%H:%M").strftime("%H:%M:%S") if end_time else None
+    date = request.json.get("date")  # optional, default to today
+    date = datetime.strptime(date, "%Y-%m-%d").strftime("%d/%m/%Y") if date else datetime.now().strftime("%d/%m/%Y")
+    day = datetime.strptime(date, "%d/%m/%Y").strftime("%w") if date else datetime.now().strftime("%w")
+    status = request.json.get("status", "scheduled")
+
+    if not teacher_subject_id or not day or not start_time or not end_time:
+        return jsonify({"error": "Missing required fields"}), 400    
+
+    db = get_db()
+    db.execute("INSERT INTO periods (teacher_subject_id, day, start_time, end_time, date, status) VALUES (?, ?, ?, ?, ?, ?)",
+               (teacher_subject_id, day, start_time, end_time, date, status))
+    db.commit()
+    return jsonify({"message": "Class added successfully"}), 201
+
+
+# ---------------- API to Update Period Status ----------------
+@app.route("/api/periods/<int:period_id>/status", methods=["POST"])
+def update_period_status_api(period_id):
+    if session.get("role") != "teacher":
+        return jsonify({"error": "Unauthorized"}), 403
+    if not request.json or "status" not in request.json:
+        return jsonify({"error": "No status provided"}), 400
+
+    new_status = request.json["status"]
+    if new_status not in ["scheduled", "running", "completed", "cancelled"]:
+        return jsonify({"error": "Invalid status"}), 400
+
+    db = get_db()
+    db.execute("UPDATE periods SET status = ? WHERE id = ?", (new_status, period_id))
+    db.commit()
+    return jsonify({"message": "Status updated successfully"}), 200
 
 # ---------------- API to Add Attendance ----------------
 @app.route("/api/attendance", methods=["POST"])
@@ -324,4 +358,4 @@ def add_attendance():
 
 if __name__ == "__main__":
     scheduler.start()
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
