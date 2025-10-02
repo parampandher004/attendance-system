@@ -3,23 +3,164 @@ content %}
 <div class="main-content">
   <div class="container">
     <div class="form-side">
-      <h2>Sign Up</h2>
+      <h2 class="form-title">Sign Up</h2>
       <form method="post">
-        Username: <input type="text" name="username" required /> Password:
-        <input type="password" name="password" required />
-        Name: <input type="text" name="name" required />
-
-        Role:
-        <select name="role" id="role" onchange="toggleStudentFields()" required>
-          <option value="student">Student</option>
-          <option value="teacher">Teacher</option>
-        </select>
-
-        <div id="studentFields">
-          Roll No: <input type="text" name="roll_no" />
+        <div class="group">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="#434343"
+          >
+            <path
+              d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z"
+            />
+          </svg>
+          <input
+            type="text"
+            name="username"
+            class="input"
+            placeholder="Username"
+            required
+          />
+        </div>
+        <div class="group">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="#333333"
+          >
+            <path
+              d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H240v400Zm240-120q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80ZM240-160v-400 400Z"
+            />
+          </svg>
+          <input
+            type="password"
+            name="password"
+            id="password"
+            placeholder="Password"
+            class="input"
+            required
+          />
+          <button
+            class="toggle-password-btn"
+            type="button"
+            onclick="togglePassword()"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              class="toggle-on-icon"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#434343"
+            >
+              <path
+                d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z"
+              />
+            </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="toggle-off-icon"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#434343"
+            >
+              <path
+                d="m644-428-58-58q9-47-27-88t-93-32l-58-58q17-8 34.5-12t37.5-4q75 0 127.5 52.5T660-500q0 20-4 37.5T644-428Zm128 126-58-56q38-29 67.5-63.5T832-500q-50-101-143.5-160.5T480-720q-29 0-57 4t-55 12l-62-62q41-17 84-25.5t90-8.5q151 0 269 83.5T920-500q-23 59-60.5 109.5T772-302Zm20 246L624-222q-35 11-70.5 16.5T480-200q-151 0-269-83.5T40-500q21-53 53-98.5t73-81.5L56-792l56-56 736 736-56 56ZM222-624q-29 26-53 57t-41 67q50 101 143.5 160.5T480-280q20 0 39-2.5t39-5.5l-36-38q-11 3-21 4.5t-21 1.5q-75 0-127.5-52.5T300-500q0-11 1.5-21t4.5-21l-84-82Zm319 93Zm-151 75Z"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="group">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="#333333"
+          >
+            <path
+              d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Zm0 400Z"
+            />
+          </svg>
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            class="input"
+            required
+          />
         </div>
 
-        <button type="submit">Sign Up</button>
+        <div class="group">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="#434343"
+          >
+            <path
+              d="M560-440h200v-80H560v80Zm0-120h200v-80H560v80ZM200-320h320v-22q0-45-44-71.5T360-440q-72 0-116 26.5T200-342v22Zm160-160q33 0 56.5-23.5T440-560q0-33-23.5-56.5T360-640q-33 0-56.5 23.5T280-560q0 33 23.5 56.5T360-480ZM160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm0-80h640v-480H160v480Zm0 0v-480 480Z"
+            />
+          </svg>
+          <div class="custom-select-wrapper">
+            <input type="hidden" name="role" id="roleValue" value="teacher" />
+
+            <div class="custom-select input" id="roleSelectButton">
+              Teacher
+              <span class="select-arrow" style="color: var(--pakistan-green)">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+                </svg>
+              </span>
+            </div>
+
+            <ul class="options-list" id="roleOptionsList">
+              <li class="option-item" data-value="teacher">Teacher</li>
+              <li class="option-item" data-value="student">Student</li>
+            </ul>
+          </div>
+        </div>
+        <div id="studentFields">
+          <div class="group">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="icon"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#434343"
+            >
+              <path
+                d="m240-160 40-160H120l20-80h160l40-160H180l20-80h160l40-160h80l-40 160h160l40-160h80l-40 160h160l-20 80H660l-40 160h160l-20 80H600l-40 160h-80l40-160H360l-40 160h-80Zm140-240h160l40-160H420l-40 160Z"
+              />
+            </svg>
+            <input
+              type="text"
+              class="input"
+              name="roll_no"
+              placeholder="Roll No"
+            />
+          </div>
+        </div>
+        <div class="group">
+          <button class="submit-btn" type="submit">Sign Up</button>
+        </div>
       </form>
       <p>Already have an account? <a href="/">Login Here</a></p>
     </div>
@@ -740,11 +881,112 @@ content %}
 </div>
 
 <script>
-  function toggleStudentFields() {
-    var role = document.getElementById("role").value;
-    var fields = document.getElementById("studentFields");
-    fields.style.display = role === "student" ? "block" : "none";
+  document.addEventListener("DOMContentLoaded", () => {
+    // --- Core Logic: Show/Hide Student Fields ---
+    function toggleStudentFields() {
+      // Read the value from the hidden input associated with the Role dropdown
+      const roleInput = document.getElementById("roleValue");
+      if (!roleInput) {
+        console.error("Role hidden input not found.");
+        return;
+      }
+
+      const role = roleInput.value;
+      const fields = document.getElementById("studentFields");
+
+      // Set the display property
+      fields.style.display = role === "student" ? "block" : "none";
+    }
+    // -------------------------------------------------------------------
+
+    // --- Custom Dropdown Setup Function ---
+    function setupCustomDropdown(buttonId, listId, inputId, callback = null) {
+      const button = document.getElementById(buttonId);
+      const list = document.getElementById(listId);
+      const hiddenInput = document.getElementById(inputId);
+      const wrapper = button.closest(".custom-select-wrapper");
+
+      if (!button || !list || !hiddenInput) return;
+
+      // Toggle Dropdown Visibility
+      button.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        // Close all other open dropdowns
+        document.querySelectorAll(".options-list.show").forEach((openlist) => {
+          if (openlist !== list) {
+            openlist.classList.remove("show");
+            openlist.previousElementSibling.classList.remove("active");
+          }
+        });
+
+        // Toggle this dropdown
+        list.classList.toggle("show");
+        button.classList.toggle("active");
+      });
+
+      // Handle Option Selection
+      list.querySelectorAll(".option-item").forEach((item) => {
+        item.addEventListener("click", (e) => {
+          const value = e.target.getAttribute("data-value");
+          const text = e.target.textContent;
+
+          // 1. Update the visual button text
+          button.textContent = text;
+          // 2. Add the custom arrow back
+          button.innerHTML += `<span class="select-arrow" style="color: var(--pakistan-green);">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                        </span>`;
+
+          // 3. Update the hidden input
+          hiddenInput.value = value;
+
+          // 4. Close the dropdown
+          list.classList.remove("show");
+          button.classList.remove("active");
+
+          // 5. Execute custom callback function (e.g., toggle fields)
+          if (callback) {
+            callback(value);
+          }
+        });
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener("click", (e) => {
+        if (!wrapper.contains(e.target)) {
+          list.classList.remove("show");
+          button.classList.remove("active");
+        }
+      });
+    }
+
+    // --- Initialize Dropdowns ---
+
+    // 1. Initialize Role Dropdown (Attach toggleStudentFields as the callback)
+    setupCustomDropdown(
+      "roleSelectButton",
+      "roleOptionsList",
+      "roleValue",
+      toggleStudentFields // This runs when a role is selected
+    );
+
+    // --- Execute Initial Toggle on Load ---
+    toggleStudentFields();
+  });
+  function togglePassword() {
+    const passwordInput = document.getElementById("password");
+    const toggleOnIcon = document.getElementsByClassName("toggle-on-icon")[0];
+    const toggleOffIcon = document.getElementsByClassName("toggle-off-icon")[0];
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      toggleOnIcon.style.display = "inline";
+      toggleOffIcon.style.display = "none";
+    } else {
+      passwordInput.type = "password";
+      toggleOnIcon.style.display = "none";
+      toggleOffIcon.style.display = "inline";
+    }
   }
-  toggleStudentFields();
 </script>
 {% endblock %}
