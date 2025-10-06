@@ -1,56 +1,192 @@
 {% extends "base.html" %} {% block title %}Teacher Dashboard{% endblock %} {%
 block content %}
 <div class="dashboard-container">
-  <div class="compartments">
-    <div class="compartment header">
-      <h2>Welcome, {{ session.name }}</h2>
-      <a class="btn logout-btn" href="/logout">Logout</a>
-      <a class="btn" href="/upload">Upload Student Images</a>
-    </div>
-    <div class="compartment">
+  <div class="header">
+    <h2>Welcome, {{ session.name }}</h2>
+    <a class="btn logout-btn" href="/logout">Logout</a>
+    <a class="btn" href="/upload">Upload Student Images</a>
+  </div>
+  <div class="compartments odd-background" style="margin-top: 40px">
+    <div class="compartment" style="margin-top: 30px">
       <h2>Today's Periods</h2>
       <div id="add-class-modal" class="modal">
         <div class="modal-content">
-          <span class="close-btn">&times;</span>
-          <h2>Add New Class Schedule</h2>
+          <div style="width: 100%">
+            <span class="close-btn"
+              ><svg
+                width="24"
+                height="24"
+                viewBox="0 0 6.3499999 6.3499999"
+                fill="none"
+              >
+                <path
+                  id="rect1"
+                  style="stroke-width: 0.454438"
+                  d="M 0.56638171,-0.56638171 C 0.42177738,-0.42177738 0.33252088,-0.22160664 0.33252088,0 c 0,0.44321328 0.35666386,0.79987714 0.79987712,0.79987714 H 3.6902509 V 3.35773 c 0,0.4432133 0.3566639,0.7998772 0.7998772,0.7998772 0.4432132,0 0.7998771,-0.3566639 0.7998771,-0.7998772 V 0.79987714 h 2.5578529 c 0.4432133,0 0.7998771,-0.35666386 0.7998771,-0.79987714 0,-0.44321328 -0.3566638,-0.79987714 -0.7998771,-0.79987714 H 5.2900052 V -3.35773 c 0,-0.4432133 -0.3566639,-0.7998772 -0.7998771,-0.7998772 -0.4432133,0 -0.7998772,0.3566639 -0.7998772,0.7998772 v 2.55785286 H 1.132398 c -0.22160662,0 -0.42141195,0.0888911 -0.56601629,0.23349543 z"
+                  transform="rotate(45)"
+                />
+              </svg>
+            </span>
+            <h2>Add New Class Schedule</h2>
 
-          <form id="add-class-form">
-            <label for="className">Class Name:</label>
-            <select id="className" name="class_name" required>
-              <option value="">Select Class</option>
-            </select>
-            <br />
+            <form id="add-class-form">
+              <div class="group" style="max-width: 1000px">
+                <label for="value-className" class="input-label"
+                  >Class Name:</label
+                >
+                <select
+                  id="className"
+                  name="class_name"
+                  class="js-custom-dropdown"
+                  required
+                >
+                  <option value="">Select Class</option>
+                </select>
+                <br />
+              </div>
+              <div class="group" style="max-width: 1000px">
+                <label for="subjectName" class="input-label"
+                  >Subject Name:</label
+                >
+                <select
+                  id="subjectName"
+                  name="ts_id"
+                  class="js-custom-dropdown"
+                  required
+                  disabled
+                >
+                  <option value="">Select Subject</option>
+                </select>
+                <br />
+              </div>
 
-            <label for="subjectName">Subject Name:</label>
-            <select id="subjectName" name="ts_id" required disabled>
-              <option value="">Select Subject</option>
-            </select>
-            <br />
+              <div
+                class="js-time-picker group"
+                style="max-width: 1000px"
+                data-hour-id="startHour"
+                data-minute-id="startMinute"
+                data-hidden-id="start_time_hidden"
+              >
+                <label for="startHour" class="input-label">Start Time</label>
 
-            <label for="startTime">Start Time:</label>
-            <input
-              type="time"
-              id="startTime"
-              name="start_time"
-              required
-            /><br />
+                <div class="time-selector-group">
+                  <!-- Hour Dropdown -->
+                  <select id="startHour" class="time-select-field"></select>
 
-            <label for="endTime">End Time:</label>
-            <input type="time" id="endTime" name="end_time" required /><br />
+                  <span class="time-separator">:</span>
 
-            <label for="date">Date:</label>
-            <input type="date" id="date" name="date" required /><br />
-            <input type="hidden" name="day" id="day" />
-            <input type="hidden" name="status" value="scheduled" />
+                  <!-- Minute Dropdown -->
+                  <select id="startMinute" class="time-select-field"></select>
+                </div>
 
-            <button type="submit" class="btn">Save Class</button>
-          </form>
-          <p id="modal-message" style="color: red"></p>
+                <!-- Hidden input for form submission -->
+                <input
+                  type="hidden"
+                  name="start_time"
+                  id="start_time_hidden"
+                  value="09:00"
+                />
+              </div>
+
+              <div
+                class="js-time-picker group"
+                style="max-width: 1000px"
+                data-hour-id="endHour"
+                data-minute-id="endMinute"
+                data-hidden-id="end_time_hidden"
+              >
+                <label for="endHour" class="input-label">End Time</label>
+
+                <div class="time-selector-group">
+                  <!-- Hour Dropdown -->
+                  <select id="endHour" class="time-select-field"></select>
+
+                  <span class="time-separator">:</span>
+
+                  <!-- Minute Dropdown -->
+                  <select id="endMinute" class="time-select-field"></select>
+                </div>
+
+                <!-- Hidden input for form submission -->
+                <input
+                  type="hidden"
+                  name="end_time"
+                  id="end_time_hidden"
+                  value="17:00"
+                />
+              </div>
+
+              <div class="calendar-wrapper">
+                <div class="input-wrapper group" style="max-width: 1000px">
+                  <label for="modalDateInput" class="input-label"
+                    >Event Date</label
+                  >
+                  <input
+                    type="text"
+                    id="modalDateInput"
+                    name="date"
+                    class="date-input custom-select"
+                    placeholder="Click to select date"
+                    readonly
+                  />
+                </div>
+                <div class="calendar-container">
+                  <div class="calendar-header">
+                    <button type="button" class="cal-nav-btn prev-month-btn">
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M15 18l-6-6 6-6" />
+                      </svg>
+                    </button>
+                    <div class="month-year"></div>
+                    <button type="button" class="cal-nav-btn next-month-btn">
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M9 18l6-6-6-6" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="calendar-grid"></div>
+                </div>
+              </div>
+
+              <input type="hidden" name="day" id="day" />
+              <input type="hidden" name="status" value="scheduled" />
+
+              <button type="submit" class="submit-btn">Save Class</button>
+            </form>
+          </div>
         </div>
       </div>
-
-      <button class="btn add-class-btn" id="open-add-class-modal">
-        ➕ Add New Class
+      <button class="add-class-btn" id="open-add-class-modal">
+        <svg
+          width="24"
+          height="24"
+          fill="none"
+          viewBox="0 0 6.3499999 6.3499999"
+        >
+          <path
+            id="rect1"
+            style="stroke-width: 0.347035"
+            d="M 0.17862885,2.7424668 C 0.06820064,2.852895 3.9235273e-5,3.0057569 3.9235273e-5,3.1749885 c 0,0.3384632 0.272369084727,0.6108323 0.610832274727,0.6108323 H 2.5641954 v 1.9533239 c 0,0.3384632 0.2723692,0.6108323 0.6108324,0.6108323 0.3384631,0 0.6108322,-0.2723691 0.6108322,-0.6108323 V 3.7858208 h 1.953324 c 0.3384632,0 0.6108322,-0.2723691 0.6108322,-0.6108323 0,-0.3384632 -0.272369,-0.6108323 -0.6108322,-0.6108323 H 3.78586 V 0.61083234 C 3.78586,0.27236911 3.5134909,0 3.1750278,0 2.8365646,0 2.5641954,0.27236911 2.5641954,0.61083234 V 2.5641562 H 0.61087151 c -0.16923159,0 -0.32181446,0.067882 -0.43224266,0.1783106 z"
+          /></svg
+        >Schedule Class
       </button>
       <table>
         <thead>
@@ -78,12 +214,28 @@ block content %}
           <th>Class Name</th>
           <th>Subject Code</th>
           <th>Subject Name</th>
+          <th></th>
         </tr>
         {% for cls in classes %}
         <tr>
           <td>{{ cls['class_name'] }}</td>
           <td>{{ cls['subject_code'] }}</td>
           <td>{{ cls['subject'] }}</td>
+          <td>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 6.3499999 6.3499999"
+              fill="none"
+              onclick="viewClassStudents('{{ cls['class_name'] }}')"
+            >
+              <path
+                id="rect2"
+                style="fill-opacity: 1; stroke-width: 0.278307"
+                d="M 1.9905633,4.5649819e-4 C 1.8262455,-0.00615141 1.6524289,0.05902133 1.5182407,0.19320962 1.2796837,0.43176659 1.2595679,0.79546623 1.4727654,1.0086637 l 2.164209,2.164209 -2.164209,2.1642089 C 1.2595679,5.5502791 1.2796836,5.9139787 1.5182407,6.1525358 1.7567976,6.3910927 2.1204973,6.4117253 2.3336948,6.1985278 L 4.9738437,3.5583789 C 5.1401298,3.3920927 5.1640316,3.1341312 5.0534253,2.915524 5.0290986,2.859759 4.994519,2.8085586 4.9495557,2.7635953 L 2.3336947,0.1477344 C 2.2404209,0.05446051 2.1183659,0.00559597 1.9905633,4.5649819e-4 Z"
+              />
+            </svg>
+          </td>
         </tr>
         {% endfor %}
       </table>
@@ -91,6 +243,25 @@ block content %}
       <p>No classes assigned yet.</p>
       {% endif %}
     </div>
+    <div id="studentModal" class="modal hidden">
+      <div class="modal-content">
+        <h2>Class 10A - Attendance Overview</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Roll No</th>
+              <th>Name</th>
+              <th>Attended</th>
+              <th>Total</th>
+              <th>%</th>
+            </tr>
+          </thead>
+          <tbody id="studentList"></tbody>
+        </table>
+        <button onclick="closeModal()">Close</button>
+      </div>
+    </div>
+
     <div class="compartment">
       <h2>Class Timetables</h2>
       {% if timetables %}
@@ -117,75 +288,134 @@ block content %}
       {% endif %}
     </div>
   </div>
-  <div class="attendance-compartment">
-    <h2>All Students Attendance</h2>
-    <div class="filter-controls">
-      <label for="subject_filter">Subject:</label>
-      <select name="subject" id="subject_filter" onchange="applyFilters()">
-        <option value="">-- All Subjects --</option>
-        {% for subject in subjects %}
-        <option value="{{ subject['subject'] }}">
-          {{ subject['subject'] }}
-        </option>
-        {% endfor %}
-      </select>
+  <div class="compartments odd-background">
+    <div class="compartment">
+      <h2>All Students Attendance</h2>
+      <div
+        class="filter-controls"
+        id="teacher-filter-controls"
+        style="display: flex"
+        data-table-id="attendance-table"
+      >
+        <div class="group" style="flex: 1">
+          <label for="subject_filter">Subject:</label>
+          <select name="subject" id="subject_filter" class="js-custom-dropdown">
+            <option value="">All Subjects</option>
+            {% for cls in classes %}
+            <option value="{{ cls['subject'] | trim | lower }}">
+              {{ cls['subject'] }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="calendar-wrapper" style="flex: 1">
+          <div class="input-wrapper group">
+            <label for="filterDateInput" class="input-label">Date:</label>
+            <input
+              type="text"
+              id="filterDateInput"
+              class="date-input custom-select"
+              placeholder="       Filter by date"
+              readonly
+            />
+          </div>
+          <div class="calendar-container">
+            <div class="calendar-header">
+              <button type="button" class="cal-nav-btn prev-month-btn">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <div class="month-year"></div>
+              <button type="button" class="cal-nav-btn next-month-btn">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+            <div class="calendar-grid"></div>
+          </div>
+        </div>
+        <div class="group" style="flex: 1">
+          <label for="status_filter">Status:</label>
+          <select name="status" id="status_filter" class="js-custom-dropdown">
+            <option value="">All Statuses</option>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+          </select>
+        </div>
 
-      <label for="date_filter">Date:</label>
-      <input
-        type="date"
-        name="date"
-        id="date_filter"
-        onchange="applyFilters()"
-      />
+        <div class="group" style="flex: 1">
+          <label for="day_filter">Day:</label>
+          <select name="day" id="day_filter" class="js-custom-dropdown">
+            <option value="">All Days</option>
+            <option value="monday">Monday</option>
+            <option value="tuesday">Tuesday</option>
+            <option value="wednesday">Wednesday</option>
+            <option value="thursday">Thursday</option>
+            <option value="friday">Friday</option>
+            <option value="saturday">Saturday</option>
+            <option value="sunday">Sunday</option>
+          </select>
+        </div>
+        <button
+          type="button"
+          class="submit-btn"
+          onclick="resetFilters('teacher-filter-controls')"
+        >
+          Reset Filters
+        </button>
+      </div>
 
-      <label for="status_filter">Status:</label>
-      <select name="status" id="status_filter" onchange="applyFilters()">
-        <option value="">-- All Statuses --</option>
-        <option value="present">Present</option>
-        <option value="absent">Absent</option>
-      </select>
-
-      <label for="day_filter">Day:</label>
-      <select name="day" id="day_filter" onchange="applyFilters()">
-        <option value="">-- All Days --</option>
-        <option value="Monday">Monday</option>
-        <option value="Tuesday">Tuesday</option>
-        <option value="Wednesday">Wednesday</option>
-        <option value="Thursday">Thursday</option>
-        <option value="Friday">Friday</option>
-        <option value="Saturday">Saturday</option>
-        <option value="Sunday">Sunday</option>
-      </select>
-
-      <button type="button" onclick="resetFilters()">Reset Filters</button>
+      <table id="attendance-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Roll No</th>
+            <th>Date</th>
+            <th>Subject</th>
+            <th>Day</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in attendance %}
+          <tr>
+            <td>{{ row['name'] }}</td>
+            <td>{{ row['roll_no'] }}</td>
+            <td>{{ row['date'] }}</td>
+            <td>{{ row['subject'] }}</td>
+            <td>{{ row['day'] }}</td>
+            <td>{{ row['status'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-
-    <table id="attendance-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Roll No</th>
-          <th>Date</th>
-          <th>Subject</th>
-          <th>Day</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in attendance %}
-        <tr>
-          <td>{{ row['name'] }}</td>
-          <td>{{ row['roll_no'] }}</td>
-          <td>{{ row['date'] }}</td>
-          <td>{{ row['subject'] }}</td>
-          <td>{{ row['day'] }}</td>
-          <td>{{ row['status'] }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
   </div>
 </div>
+
+<script src="{{ url_for('static', filename='custom-time.js')}}"></script>
+<script src="{{ url_for('static', filename='custom-calendar.js')}}"></script>
+<script src="{{ url_for('static', filename='custom-dropdown.js') }}"></script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     // Get the elements
@@ -202,20 +432,57 @@ block content %}
     const classSelect = document.getElementById("className");
     const subjectSelect = document.getElementById("subjectName");
 
-    classSelect.innerHTML = '<option value="">Select Class</option>' + classNames.map(cls => `<option value="${cls}">${cls}</option>`).join('');
 
-    classSelect.addEventListener("change", () => {
-        const selectedClass = classSelect.value;
-        const subjects = ALL_CLASSES.filter(row => row.class_name === selectedClass);
-        subjectSelect.innerHTML = '<option value="">Select Subject</option>' + [...new Set(subjects)].map(sub => `<option value="${sub.id}">${sub.subject}</option>`).join('');
-        subjectSelect.disabled = subjects.length === 0;
+    // --- MODAL DROPDOWN LOGIC ---
+
+    // 1. Define the function that updates the subject dropdown
+    function updateSubjectDropdown(selectedClass) {
+      // Find the wrapper that the custom dropdown created.
+      const subjectWrapper = document.getElementById("wrapper-subjectName");
+      if (!subjectWrapper) return;
+
+      // Create a new <select> element to replace the old one.
+      const newSubjectSelect = document.createElement("select");
+      newSubjectSelect.id = "subjectName";
+      newSubjectSelect.name = "ts_id";
+      newSubjectSelect.className = "js-custom-dropdown";
+      newSubjectSelect.required = true;
+
+      const subjects = ALL_CLASSES.filter(row => row.class_name === selectedClass);
+      newSubjectSelect.disabled = subjects.length === 0;
+
+      // Populate the new select element
+      newSubjectSelect.innerHTML = '<option value="">Select Subject</option>' +
+        subjects.map(sub => `<option value="${sub.id}">${sub.subject}</option>`).join('');
+
+      // Replace the old wrapper with our new, clean <select> element
+      subjectWrapper.parentNode.replaceChild(newSubjectSelect, subjectWrapper);
+
+      // Now, transform the new <select> into a custom dropdown
+      transformSelectToCustomDropdown(newSubjectSelect);
+    }
+
+    // 2. Populate and transform the class dropdown initially
+    classSelect.innerHTML = '<option value="">Select Class</option>' +
+      classNames.map(cls => `<option value="${cls}">${cls}</option>`).join('');
+
+    transformSelectToCustomDropdown(classSelect, (value) => {
+      updateSubjectDropdown(value);
     });
+
+    // 3. Perform an initial setup for the (disabled) subject dropdown
+    transformSelectToCustomDropdown(subjectSelect);
+
+    // --- END MODAL DROPDOWN LOGIC ---
 
     // Function to open the modal
     openBtn.onclick = function () {
       modal.style.display = "block";
-      message.textContent = ""; // Clear previous messages
       form.reset(); // Clear the form fields
+
+      // Reset dropdowns to their initial state when opening
+      // This will now correctly rebuild and re-initialize the dropdowns
+      updateSubjectDropdown("");
     };
 
     // Function to close the modal using the (x) button
@@ -232,7 +499,27 @@ block content %}
 
     // 💡 Attach the form submission handler here
     form.addEventListener("submit", handleAddClassSubmit);
+
+     // Listen for date selection on the filter calendar
+    const filterDateInput = document.getElementById('filterDateInput');
+    if (filterDateInput) {
+      filterDateInput.addEventListener('dateSelected', (e) => {
+        // Call your filter function when a date is selected
+        teacherApplyFilters(e.detail.date, null, 'date_filter');
+      });
+    }
   });
+
+  // A helper function you need in your template scope
+  function getDisplayStatus(status) {
+    switch (status) {
+      case 'scheduled': return 'Scheduled';
+      case 'running': return 'Running';
+      case 'completed': return 'Completed';
+      case 'cancelled': return 'Cancelled';
+      default: return 'Status';
+    }
+  }
 
   // The form submission function will be defined in the next step
   function updatePeriods() {
@@ -255,26 +542,30 @@ block content %}
             <td>${period.start_time}</td>
             <td>${period.end_time}</td>
             <td>
-              <select class="status-dropdown" data-period-id="${
-                period.id
-              }" onchange="updatePeriodStatus(this)">
-                <option value="scheduled" ${
-                  period.status === "scheduled" ? "selected" : ""
-                }>Scheduled</option>
-                <option value="running" ${
-                  period.status === "running" ? "selected" : ""
-                }>Running</option>
-                <option value="completed" ${
-                  period.status === "completed" ? "selected" : ""
-                }>Completed</option>
-                <option value="cancelled" ${
-                  period.status === "cancelled" ? "selected" : ""
-                }>Cancelled</option>
-              </select>
+              <div class="custom-select-wrapper" id="status-wrapper-${period.id}">
+                <input type="hidden" name="status-${period.id}" id="statusValue-${period.id}" value="${period.status}" />
+
+                <div class="custom-select" id="statusSelectButton-${period.id}">
+                  ${getDisplayStatus(period.status)}
+                  <span class="select-arrow">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+                    </svg>
+                  </span>
+                </div>
+
+                <ul class="options-list" id="statusOptionsList-${period.id}">
+                  <li class="option-item" data-value="scheduled">Scheduled</li>
+                  <li class="option-item" data-value="running">Running</li>
+                  <li class="option-item" data-value="completed">Completed</li>
+                  <li class="option-item" data-value="cancelled">Cancelled</li>
+                </ul>
+              </div>
             </td>
           `;
             tbody.appendChild(row);
           });
+          initializeStatusDropdowns();
         } else {
           noPeriodsMessage.style.display = "block";
         }
@@ -285,9 +576,69 @@ block content %}
           "Error fetching periods. Please try again later.";
         noPeriodsMessage.style.display = "block";
       });
+    }
+    setInterval(updatePeriods, 60000);
+    updatePeriods();
+
+   function updatePeriodStatus(periodId, newStatus) {
+    const wrapper = document.getElementById(`status-wrapper-${periodId}`);
+
+    if (!wrapper) {
+        console.error("Wrapper not found for period ID:", periodId);
+        return;
+    }
+
+    const row = wrapper.closest("tr");
+    if (!row) {
+        console.error("Row not found for period ID:", periodId);
+        return;
+    }
+
+    // Make the API call to update the status
+    fetch(`/api/periods/${periodId}/status`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        return response.json();
+    })
+    .then((data) => {
+        console.log("Status updated successfully:", data);
+
+        // Update row class based on new status
+        row.className = ""; // Clear existing classes
+        row.classList.add("status-" + newStatus.toLowerCase());
+    })
+    .catch((error) => {
+        console.error("Error updating status:", error);
+        alert("Failed to update status. Please try again.");
+    });
   }
-  setInterval(updatePeriods, 60000);
-  updatePeriods();
+
+  function initializeStatusDropdowns() {
+    document.querySelectorAll('.custom-select-wrapper[id^="status-wrapper-"]').forEach((wrapper) => {
+        const periodId = wrapper.id.replace('status-wrapper-', '');
+
+        const buttonId = `statusSelectButton-${periodId}`;
+        const listId = `statusOptionsList-${periodId}`;
+        const inputId = `statusValue-${periodId}`;
+
+        const statusCallback = (newValue) => {
+            if (typeof updatePeriodStatus === 'function') {
+                updatePeriodStatus(periodId, newValue);
+            }
+        };
+
+        // This is your original custom dropdown setup function
+        setupCustomDropdown(buttonId, listId, inputId, statusCallback);
+    });
+  }
   // Function to handle the form submission
   function handleAddClassSubmit(event) {
     event.preventDefault(); // Stop the default form submission (page reload)
@@ -297,9 +648,8 @@ block content %}
     const periodData = Object.fromEntries(formData.entries());
 
     const modal = document.getElementById("add-class-modal");
-    const message = document.getElementById("modal-message");
 
-    message.textContent = "Saving...";
+    showToast("Saving...", "info", 4000);
 
     // 1. Send data to Flask backend
     fetch("/api/classes", {
@@ -319,127 +669,17 @@ block content %}
         return response.json();
       })
       .then((data) => {
-        message.textContent = "Class added successfully!";
-        message.style.color = "green";
+        showToast(data.message, "success", 4000);
 
         // 2. Close the modal after a brief delay
         setTimeout(() => {
           modal.style.display = "none";
-          message.style.color = "red"; // Reset color
         }, 1500);
       })
       .catch((error) => {
         console.error("Error adding class:", error);
-        message.textContent = `Error: ${error.message}`;
-        message.style.color = "red";
+        showToast(error.message, "error", 4000);
       });
-  }
-
-  function updatePeriodStatus(selectElement) {
-    const periodId = selectElement.getAttribute("data-period-id");
-    const newStatus = selectElement.value;
-    const tableRow = selectElement.closest("tr");
-
-    fetch(`/api/periods/${periodId}/status`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status: newStatus }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Status updated successfully:", data);
-
-        // Update row class based on new status
-        tableRow.className = ""; // Clear existing classes
-        tableRow.classList.add("status-" + newStatus.toLowerCase());
-      })
-      .catch((error) => {
-        console.error("Error updating status:", error);
-        alert("Failed to update status. Please try again.");
-      });
-  }
-  // 1. Get references to filter elements
-  const subjectFilter = document.getElementById("subject_filter");
-  const dateFilter = document.getElementById("date_filter");
-  const statusFilter = document.getElementById("status_filter");
-  const dayFilter = document.getElementById("day_filter");
-
-  // 2. Get reference to the table body and its rows (FIXED HERE)
-  const attendanceTableBody = document.querySelector("#attendance-table tbody");
-  // Ensure rows is an array for reliable iteration
-  const rows = Array.from(attendanceTableBody.getElementsByTagName("tr"));
-
-  // Define column indices based on your <thead> structure:
-  // <th>Date</th> (0), <th>Subject</th> (1), <th>Day</th> (2), <th>Status</th> (3)
-  const COL_INDICES = {
-    date: 2,
-    subject: 3,
-    day: 4,
-    status: 5,
-  };
-
-  function applyFilters() {
-    // Get current filter values, lowercased for case-insensitive comparison
-    const subjectValue = subjectFilter.value.toLowerCase();
-    const dateValue = dateFilter.value; // Date comparison is case-sensitive (YYYY-MM-DD)
-    const statusValue = statusFilter.value.toLowerCase();
-    const dayValue = dayFilter.value.toLowerCase();
-
-    // Iterate through all table rows
-    rows.forEach((row) => {
-      // Check to ensure the row has cells before trying to access them
-      if (row.cells.length < 6) return;
-
-      // Get cell content, trim whitespace, and lowercase for comparison
-      const dateText = row.cells[COL_INDICES.date].innerText.trim();
-      const subjectText = row.cells[COL_INDICES.subject].innerText
-        .trim()
-        .toLowerCase();
-      const dayText = row.cells[COL_INDICES.day].innerText.trim().toLowerCase();
-      const statusText = row.cells[COL_INDICES.status].innerText
-        .trim()
-        .toLowerCase();
-
-      let showRow = true;
-
-      // Filter 1: Subject
-      if (subjectValue && subjectText !== subjectValue) {
-        showRow = false;
-      }
-
-      // Filter 2: Date (uses YYYY-MM-DD string comparison)
-      if (showRow && dateValue && dateText !== dateValue) {
-        showRow = false;
-      }
-
-      // Filter 3: Status
-      if (showRow && statusValue && statusText !== statusValue) {
-        showRow = false;
-      }
-
-      // Filter 4: Day
-      if (showRow && dayValue && dayText !== dayValue) {
-        showRow = false;
-      }
-
-      // Apply display style
-      row.style.display = showRow ? "" : "none";
-    });
-  }
-
-  function resetFilters() {
-    subjectFilter.value = "";
-    dateFilter.value = "";
-    statusFilter.value = "";
-    dayFilter.value = "";
-    applyFilters();
   }
 </script>
 {% endblock %}

@@ -118,7 +118,7 @@ content %}
 
             <div class="custom-select input" id="roleSelectButton">
               Teacher
-              <span class="select-arrow" style="color: var(--pakistan-green)">
+              <span class="select-arrow">
                 <svg
                   width="12"
                   height="12"
@@ -898,68 +898,6 @@ content %}
       fields.style.display = role === "student" ? "block" : "none";
     }
     // -------------------------------------------------------------------
-
-    // --- Custom Dropdown Setup Function ---
-    function setupCustomDropdown(buttonId, listId, inputId, callback = null) {
-      const button = document.getElementById(buttonId);
-      const list = document.getElementById(listId);
-      const hiddenInput = document.getElementById(inputId);
-      const wrapper = button.closest(".custom-select-wrapper");
-
-      if (!button || !list || !hiddenInput) return;
-
-      // Toggle Dropdown Visibility
-      button.addEventListener("click", (e) => {
-        e.stopPropagation();
-
-        // Close all other open dropdowns
-        document.querySelectorAll(".options-list.show").forEach((openlist) => {
-          if (openlist !== list) {
-            openlist.classList.remove("show");
-            openlist.previousElementSibling.classList.remove("active");
-          }
-        });
-
-        // Toggle this dropdown
-        list.classList.toggle("show");
-        button.classList.toggle("active");
-      });
-
-      // Handle Option Selection
-      list.querySelectorAll(".option-item").forEach((item) => {
-        item.addEventListener("click", (e) => {
-          const value = e.target.getAttribute("data-value");
-          const text = e.target.textContent;
-
-          // 1. Update the visual button text
-          button.textContent = text;
-          // 2. Add the custom arrow back
-          button.innerHTML += `<span class="select-arrow" style="color: var(--pakistan-green);">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
-                        </span>`;
-
-          // 3. Update the hidden input
-          hiddenInput.value = value;
-
-          // 4. Close the dropdown
-          list.classList.remove("show");
-          button.classList.remove("active");
-
-          // 5. Execute custom callback function (e.g., toggle fields)
-          if (callback) {
-            callback(value);
-          }
-        });
-      });
-
-      // Close dropdown when clicking outside
-      document.addEventListener("click", (e) => {
-        if (!wrapper.contains(e.target)) {
-          list.classList.remove("show");
-          button.classList.remove("active");
-        }
-      });
-    }
 
     // --- Initialize Dropdowns ---
 

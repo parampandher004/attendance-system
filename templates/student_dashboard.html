@@ -1,13 +1,13 @@
 {% extends "base.html" %} {% block title %}Student Dashboard{% endblock %} {%
 block content %}
 <div class="dashboard-container">
-  <div class="compartments">
-    <div class="compartment header">
-      <h2>Welcome, {{ session.name }}</h2>
-      <h3>{{ session.class_name }}</h3>
-      <a class="logout-btn" href="/logout">Logout</a>
-    </div>
-    <div class="compartment">
+  <div class="header">
+    <h2>Welcome, {{ session.name }}</h2>
+    <h3>{{ session.class_name }}</h3>
+    <a class="logout-btn" href="/logout">Logout</a>
+  </div>
+  <div class="compartments odd-background" style="margin-top: 40px">
+    <div class="compartment" style="margin-top: 30px">
       <h2>Today's Periods</h2>
       <table>
         <thead>
@@ -70,72 +70,148 @@ block content %}
     </div>
   </div>
 
-  <div class="attendance-compartment">
-    <h2>Student Attendance</h2>
-    <div class="filter-controls">
-      <label for="subject_filter">Subject:</label>
-      <select name="subject" id="subject_filter" onchange="applyFilters()">
-        <option value="">-- All Subjects --</option>
-        {% for subject in subjects %}
-        <option value="{{ subject['subject'] }}">
-          {{ subject['subject'] }}
-        </option>
-        {% endfor %}
-      </select>
+  <div class="compartments odd-background">
+    <div class="compartment">
+      <h2>Student Attendance</h2>
+      <div
+        class="filter-controls"
+        id="student-filter-controls"
+        style="display: flex"
+        data-table-id="attendance-table"
+      >
+        <div class="group" style="flex: 1">
+          <label for="st_subject_filter">Subject:</label>
+          <select
+            name="subject"
+            id="st_subject_filter"
+            class="js-custom-dropdown"
+          >
+            <option value="">All Subjects</option>
+            {% for subject in subjects %}
+            <option value="{{ subject['subject'] }}">
+              {{ subject['subject'] }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
 
-      <label for="date_filter">Date:</label>
-      <input
-        type="date"
-        name="date"
-        id="date_filter"
-        onchange="applyFilters()"
-      />
+        <div class="calendar-wrapper" style="flex: 1">
+          <div class="input-wrapper group">
+            <label for="stFilterDateInput" class="input-label">Date:</label>
+            <input
+              type="text"
+              id="stFilterDateInput"
+              class="date-input custom-select"
+              placeholder="     Filter by date"
+              readonly
+            />
+          </div>
+          <div class="calendar-container">
+            <div class="calendar-header">
+              <button type="button" class="cal-nav-btn prev-month-btn">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <div class="month-year"></div>
+              <button type="button" class="cal-nav-btn next-month-btn">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+            <div class="calendar-grid"></div>
+          </div>
+        </div>
+        <div class="group" style="flex: 1">
+          <label for="st_status_filter">Status:</label>
+          <select
+            name="status"
+            id="st_status_filter"
+            class="js-custom-dropdown"
+          >
+            <option value="">All Statuses</option>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+          </select>
+        </div>
+        <div class="group" style="flex: 1">
+          <label for="st_day_filter">Day:</label>
+          <select name="day" id="st_day_filter" class="js-custom-dropdown">
+            <option value="">All Days</option>
+            <option value="monday">Monday</option>
+            <option value="tuesday">Tuesday</option>
+            <option value="wednesday">Wednesday</option>
+            <option value="thursday">Thursday</option>
+            <option value="friday">Friday</option>
+            <option value="saturday">Saturday</option>
+            <option value="sunday">Sunday</option>
+          </select>
+        </div>
 
-      <label for="status_filter">Status:</label>
-      <select name="status" id="status_filter" onchange="applyFilters()">
-        <option value="">-- All Statuses --</option>
-        <option value="present">Present</option>
-        <option value="absent">Absent</option>
-      </select>
+        <button
+          type="button"
+          class="submit-btn"
+          onclick="resetFilters('student-filter-controls')"
+        >
+          Reset Filters
+        </button>
+      </div>
 
-      <label for="day_filter">Day:</label>
-      <select name="day" id="day_filter" onchange="applyFilters()">
-        <option value="">-- All Days --</option>
-        <option value="Monday">Monday</option>
-        <option value="Tuesday">Tuesday</option>
-        <option value="Wednesday">Wednesday</option>
-        <option value="Thursday">Thursday</option>
-        <option value="Friday">Friday</option>
-        <option value="Saturday">Saturday</option>
-        <option value="Sunday">Sunday</option>
-      </select>
-
-      <button type="button" onclick="resetFilters()">Reset Filters</button>
+      <table id="attendance-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Subject</th>
+            <th>Day</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in attendance %}
+          <tr>
+            <td>{{ row['date'] }}</td>
+            <td>{{ row['subject'] }}</td>
+            <td>{{ row['day'] }}</td>
+            <td>{{ row['status'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-
-    <table id="attendance-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Subject</th>
-          <th>Day</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in attendance %}
-        <tr>
-          <td>{{ row['date'] }}</td>
-          <td>{{ row['subject'] }}</td>
-          <td>{{ row['day'] }}</td>
-          <td>{{ row['status'] }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
   </div>
 </div>
+<script src="{{ url_for('static', filename='custom-calendar.js') }}"></script>
+<script src="{{ url_for('static', filename='custom-dropdown.js') }}"></script>
 <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Listen for date selection on the student filter calendar
+    const stFilterDateInput = document.getElementById("stFilterDateInput");
+    if (stFilterDateInput) {
+      stFilterDateInput.addEventListener("dateSelected", (e) => {
+        // Call your filter function when a date is selected
+        studentApplyFilters(e.detail.date, null, "st_date_filter");
+      });
+    }
+  });
   function updatePeriods() {
     const tbody = document.getElementById("periods-body");
     const noPeriodsMessage = document.getElementById("no-periods-message");
@@ -170,82 +246,5 @@ block content %}
   }
   setInterval(updatePeriods, 60000);
   updatePeriods();
-
-  // 1. Get references to filter elements
-  const subjectFilter = document.getElementById("subject_filter");
-  const dateFilter = document.getElementById("date_filter");
-  const statusFilter = document.getElementById("status_filter");
-  const dayFilter = document.getElementById("day_filter");
-
-  // 2. Get reference to the table body and its rows (FIXED HERE)
-  const attendanceTableBody = document.querySelector("#attendance-table tbody");
-  // Ensure rows is an array for reliable iteration
-  const rows = Array.from(attendanceTableBody.getElementsByTagName("tr"));
-
-  // Define column indices based on your <thead> structure:
-  // <th>Date</th> (0), <th>Subject</th> (1), <th>Day</th> (2), <th>Status</th> (3)
-  const COL_INDICES = {
-    date: 0,
-    subject: 1,
-    day: 2,
-    status: 3,
-  };
-
-  function applyFilters() {
-    // Get current filter values, lowercased for case-insensitive comparison
-    const subjectValue = subjectFilter.value.toLowerCase();
-    const dateValue = dateFilter.value; // Date comparison is case-sensitive (YYYY-MM-DD)
-    const statusValue = statusFilter.value.toLowerCase();
-    const dayValue = dayFilter.value.toLowerCase();
-
-    // Iterate through all table rows
-    rows.forEach((row) => {
-      // Check to ensure the row has cells before trying to access them
-      if (row.cells.length < 4) return;
-
-      // Get cell content, trim whitespace, and lowercase for comparison
-      const dateText = row.cells[COL_INDICES.date].innerText.trim();
-      const subjectText = row.cells[COL_INDICES.subject].innerText
-        .trim()
-        .toLowerCase();
-      const dayText = row.cells[COL_INDICES.day].innerText.trim().toLowerCase();
-      const statusText = row.cells[COL_INDICES.status].innerText
-        .trim()
-        .toLowerCase();
-
-      let showRow = true;
-
-      // Filter 1: Subject
-      if (subjectValue && subjectText !== subjectValue) {
-        showRow = false;
-      }
-
-      // Filter 2: Date (uses YYYY-MM-DD string comparison)
-      if (showRow && dateValue && dateText !== dateValue) {
-        showRow = false;
-      }
-
-      // Filter 3: Status
-      if (showRow && statusValue && statusText !== statusValue) {
-        showRow = false;
-      }
-
-      // Filter 4: Day
-      if (showRow && dayValue && dayText !== dayValue) {
-        showRow = false;
-      }
-
-      // Apply display style
-      row.style.display = showRow ? "" : "none";
-    });
-  }
-
-  function resetFilters() {
-    subjectFilter.value = "";
-    dateFilter.value = "";
-    statusFilter.value = "";
-    dayFilter.value = "";
-    applyFilters();
-  }
 </script>
 {% endblock %}

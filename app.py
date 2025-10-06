@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 import os, sqlite3, pickle, hashlib
-from flask import Flask, jsonify, render_template, request, redirect, session
+from flask import Flask, jsonify, render_template, request, redirect, session, flash
 from werkzeug.utils import secure_filename
 # from deepface import DeepFace
 
@@ -100,10 +100,12 @@ def signup():
                 db.execute("INSERT INTO teachers (name, user_id) VALUES (?, ?)",
                            (name, user_id))
                 db.commit()
-
-            return redirect("/")  # After signup, go to login
+                
+            flash("Account created successfully! Please log in.", "success")
+            return redirect("/") 
         except sqlite3.IntegrityError:
-            return "Username or Roll Number already exists!"
+            flash("Username already exists!", "error")
+            return render_template("signup.html")
 
     return render_template("signup.html")
 
@@ -118,9 +120,9 @@ def login():
         db.row_factory = sqlite3.Row
         user = db.execute("SELECT * FROM users WHERE username=? AND password=?", 
                           (username, hashed_password)).fetchone()
-        user_name = db.execute("SELECT name FROM students WHERE user_id=?",
-                          (user["id"],)).fetchone()
         if user:
+            user_name = db.execute("SELECT name FROM students WHERE user_id=?",
+                          (user["id"],)).fetchone()
             session["user_id"] = user["id"]
             session["username"] = user["username"]
             session["role"] = user["role"]
@@ -129,12 +131,15 @@ def login():
                 student = db.execute("SELECT id, class_id FROM students Where user_id=?",
                           (user["id"],)).fetchone()
                 session["class_id"] = student["class_id"]
-                
+               
+                flash(f"Welcome, {session['name']}! You are logged in as a {session['role']}.", "success")
                 return redirect("/student")
             else:
+                flash(f"Welcome, {session['name']}! You are logged in as a {session['role']}.", "success")
                 return redirect("/teacher")
         else:
-            return "Invalid credentials"
+            flash("Invalid credentials!", "error")
+            return render_template("login.html")
         db.close()
     return render_template("login.html")
 
@@ -142,6 +147,7 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()  # Clears all session data
+    flash("You have been logged out.", "success")
     return redirect("/")  # Redirect to login page
 
 
@@ -305,7 +311,6 @@ def add_class():
     end_time = request.json.get("end_time")
     end_time = datetime.strptime(end_time, "%H:%M").strftime("%H:%M:%S") if end_time else None
     date = request.json.get("date")  # optional, default to today
-    date = datetime.strptime(date, "%Y-%m-%d").strftime("%d/%m/%Y") if date else datetime.now().strftime("%d/%m/%Y")
     day = datetime.strptime(date, "%d/%m/%Y").strftime("%w") if date else datetime.now().strftime("%w")
     status = request.json.get("status", "scheduled")
 
