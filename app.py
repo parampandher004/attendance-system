@@ -272,6 +272,32 @@ def teacher_dashboard():
 #         return "No valid faces detected!"
 #     return render_template("upload.html")
 
+# ---------- Student's List ------------------
+@app.route("/api/classes/<ts_id>/students", methods=["GET"])
+def get_students(ts_id):
+    db = get_db()
+    if session.get("role") != "teacher":
+        flash("Unauthorized", "error")
+        return jsonify({"error": "Unauthorized"}), 403
+    students = db.execute("""
+        SELECT 
+            s.roll_no,
+            s.name,
+            COUNT(DISTINCT a.period_id) AS total_classes,
+            SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) AS attended,
+            ROUND(
+                (CAST(SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) AS FLOAT) /
+                NULLIF(COUNT(DISTINCT a.period_id), 0)) * 100, 1
+            ) AS percentage
+        FROM students s
+        LEFT JOIN attendance a ON a.student_id = s.id
+        LEFT JOIN periods p ON a.period_id = p.id
+        LEFT JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id
+        WHERE ts.id = ?
+        GROUP BY s.id
+        ORDER BY s.roll_no
+        """, (ts_id,)).fetchall()
+    return jsonify([dict(row) for row in students])
 
 # ------------API to Get Today's Periods ------------
 @app.route("/api/periods/today", methods=["GET"])

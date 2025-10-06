@@ -227,7 +227,7 @@ block content %}
               height="24"
               viewBox="0 0 6.3499999 6.3499999"
               fill="none"
-              onclick="viewClassStudents('{{ cls['class_name'] }}')"
+              onclick="viewClassStudents('{{ cls['id'] }}')"
             >
               <path
                 id="rect2"
@@ -243,22 +243,38 @@ block content %}
       <p>No classes assigned yet.</p>
       {% endif %}
     </div>
-    <div id="studentModal" class="modal hidden">
+    <div id="studentModal" class="modal">
       <div class="modal-content">
-        <h2>Class 10A - Attendance Overview</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Roll No</th>
-              <th>Name</th>
-              <th>Attended</th>
-              <th>Total</th>
-              <th>%</th>
-            </tr>
-          </thead>
-          <tbody id="studentList"></tbody>
-        </table>
-        <button onclick="closeModal()">Close</button>
+        <div style="width: 100%">
+          <h2 id="studentModalTitle"></h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Roll No</th>
+                <th>Name</th>
+                <th>Attended</th>
+                <th>Total</th>
+                <th>%</th>
+              </tr>
+            </thead>
+            <tbody id="studentList"></tbody>
+          </table>
+          <span onclick="closeModal()" class="close-btn"
+            ><svg
+              width="24"
+              height="24"
+              viewBox="0 0 6.3499999 6.3499999"
+              fill="none"
+            >
+              <path
+                id="rect1"
+                style="stroke-width: 0.454438"
+                d="M 0.56638171,-0.56638171 C 0.42177738,-0.42177738 0.33252088,-0.22160664 0.33252088,0 c 0,0.44321328 0.35666386,0.79987714 0.79987712,0.79987714 H 3.6902509 V 3.35773 c 0,0.4432133 0.3566639,0.7998772 0.7998772,0.7998772 0.4432132,0 0.7998771,-0.3566639 0.7998771,-0.7998772 V 0.79987714 h 2.5578529 c 0.4432133,0 0.7998771,-0.35666386 0.7998771,-0.79987714 0,-0.44321328 -0.3566638,-0.79987714 -0.7998771,-0.79987714 H 5.2900052 V -3.35773 c 0,-0.4432133 -0.3566639,-0.7998772 -0.7998771,-0.7998772 -0.4432133,0 -0.7998772,0.3566639 -0.7998772,0.7998772 v 2.55785286 H 1.132398 c -0.22160662,0 -0.42141195,0.0888911 -0.56601629,0.23349543 z"
+                transform="rotate(45)"
+              />
+            </svg>
+          </span>
+        </div>
       </div>
     </div>
 
@@ -520,6 +536,33 @@ block content %}
       default: return 'Status';
     }
   }
+
+  function viewClassStudents(tsId) {
+    const classes = {{ classes | tojson }};
+    fetch(`/api/classes/${tsId}/students`)
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById("studentList");
+        tbody.innerHTML = "";
+        data.forEach(s => {
+          const color = s.percentage >= 75 ? 'green' : s.percentage >= 50 ? 'orange' : 'red';
+          tbody.innerHTML += `
+            <tr>
+              <td>${s.roll_no}</td>
+              <td>${s.name}</td>
+              <td>${s.attended}</td>
+              <td>${s.total_classes}</td>
+              <td style="color:${color}">${s.percentage.toFixed(1)}%</td>
+            </tr>`;
+        });
+        document.getElementById("studentModal").style.display = "block";
+        document.getElementById("studentModalTitle").textContent = classes.find(c => c.id == tsId).class_name;
+      });
+  }
+  function closeModal() {
+    document.getElementById("studentModal").style.display = "none";
+  }
+
 
   // The form submission function will be defined in the next step
   function updatePeriods() {
