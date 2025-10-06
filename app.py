@@ -65,7 +65,7 @@ def update_period_status():
  
 # ---------------- Scheduler Setup ----------------   
 scheduler = BackgroundScheduler()
-scheduler.add_job(generate_today_periods, 'cron', hour=15, minute=33)
+scheduler.add_job(generate_today_periods, 'cron', hour=15, minute=56)
 scheduler.add_job(update_period_status, 'interval', minutes=1)
 
 
@@ -254,40 +254,6 @@ def teacher_dashboard():
 
     return render_template("teacher_dashboard.html", attendance=attendance, classes=classes, timetables=timetables)
 
-
-# ---------------- Upload Images for Encoding ----------------
-# @app.route("/upload", methods=["GET", "POST"])
-# def upload_images():
-#     if session.get("role") != "teacher":
-#         return redirect("/")
-#     if request.method == "POST":
-#         student_id = request.form["student_id"]
-#         files = request.files.getlist("images")
-#         student_folder = os.path.join(app.config["UPLOAD_FOLDER"], student_id)
-#         os.makedirs(student_folder, exist_ok=True)
-
-#         encodings = []
-#         for file in files:
-#             filename = secure_filename(file.filename)
-#             filepath = os.path.join(student_folder, filename)
-#             file.save(filepath)
-
-#             # Generate embedding
-#             try:
-#                 embedding = DeepFace.represent(img_path=filepath, model_name="Facenet")[0]["embedding"]
-#                 encodings.append(embedding)
-#             except:
-#                 print(f"Face not detected in {filename}")
-
-#         if encodings:
-#             db = get_db()
-#             db.execute("INSERT INTO face_encodings (student_id, encoding) VALUES (?, ?)",
-#                        (student_id, pickle.dumps(encodings)))
-#             db.commit()
-#             return f"Uploaded {len(encodings)} face images for student {student_id}"
-#         return "No valid faces detected!"
-#     return render_template("upload.html")
-
 # ---------- Student's List ------------------
 @app.route("/api/classes/<ts_id>/students", methods=["GET"])
 def get_students(ts_id):
@@ -299,16 +265,16 @@ def get_students(ts_id):
         SELECT 
             s.roll_no,
             s.name,
-            COUNT(DISTINCT a.period_id) AS total_classes,
+            COUNT(DISTINCT p.id) AS total_classes,
             SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) AS attended,
             ROUND(
                 (CAST(SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) AS FLOAT) /
                 NULLIF(COUNT(DISTINCT a.period_id), 0)) * 100, 1
             ) AS percentage
         FROM students s
-        LEFT JOIN attendance a ON a.student_id = s.id
-        LEFT JOIN periods p ON a.period_id = p.id
-        LEFT JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id
+        LEFT JOIN teacherSubjects ts ON ts.class_id = s.class_id
+        LEFT JOIN periods p ON ts.id = p.teacher_subject_id
+        LEFT JOIN attendance a ON a.period_id = p.id
         WHERE ts.id = ?
         GROUP BY s.id
         ORDER BY s.roll_no
@@ -383,25 +349,43 @@ def update_period_status_api(period_id):
     db.commit()
     return jsonify({"message": "Status updated successfully"}), 200
 
-# ---------------- API to Add Attendance ----------------
-@app.route("/api/attendance", methods=["POST"])
-def add_attendance():
-    if not request.json:
-        return jsonify({"error": "No data provided"}), 400
-
-    student_id = request.json.get("student_id")
-    status = request.json.get("status", "present")
-    date = request.json.get("date")  # optional, default to today
-
-    if not student_id:
-        return jsonify({"error": "student_id is required"}), 400
-
+# ----------------- API to Get Period Students ----------------
+@app.route("/api/periods/<int:period_id>/students", methods=["GET"])
+def get_period_students_api(period_id):
+    if session.get("role") != "teacher":
+        return jsonify({"error": "Unauthorized"}), 403
     db = get_db()
-    db.execute("INSERT INTO attendance (student_id, date, status) VALUES (?, ?, ?)",
-               (student_id, date, status))
-    db.commit()
-    return jsonify({"message": "Attendance added successfully"}), 200
+    students = db.execute("SELECT s.id, s.roll_no, s.name, a.status FROM periods p JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id JOIN students s ON ts.class_id = s.class_id LEFT JOIN attendance a ON p.id = a.period_id WHERE p.id = ?", (period_id,)).fetchall()
+    return jsonify([dict(row) for row in students])
 
+# ---------------- API to Add Attendance ----------------
+@app.route("/api/periods/<int:period_id>/students/<int:student_id>", methods=["POST"])
+def add_attendance_api(period_id, student_id):
+    if session.get("role") != "teacher":
+        return jsonify({"error": "Unauthorized"}), 403
+    db = get_db()
+    db.execute("INSERT INTO attendance (period_id, student_id, status) VALUES (?, ?, ?)", (period_id, student_id, "present"))
+    db.commit()
+    return jsonify({"message": "Attendance added successfully"}), 201
+
+# ---------------- API to Remove Attendance ----------------
+@app.route("/api/periods/<int:period_id>/students/<int:student_id>", methods=["DELETE"])
+def remove_attendance_api(period_id, student_id):
+    if session.get("role") != "teacher":
+        return jsonify({"error": "Unauthorized"}), 403
+    db = get_db()
+    db.execute("DELETE FROM attendance WHERE period_id = ? AND student_id = ?", (period_id, student_id))
+    db.commit()
+    return jsonify({"message": "Attendance removed successfully"}), 200
+
+# ----------------- API to get currently running Class ------------------
+@app.route("/api/classes/<int:class_id>", methods=["GET"])
+def get_current_class_api(class_id):
+    if session.get("role") != "teacher":
+        return jsonify({"error": "Unauthorized"}), 403
+    db = get_db()
+    current_class = db.execute("SELECT p.status FROM periods p JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id WHERE ts.class_id = ? AND p.status = 'running'", (class_id,)).fetchone()
+    return jsonify(dict(current_class))
 
 if __name__ == "__main__":
     scheduler.start()

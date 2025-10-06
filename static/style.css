@@ -421,7 +421,6 @@ table {
   margin-top: 20px;
   font-family: "Inter", Arial, Helvetica, sans-serif;
   border-radius: 10px;
-  overflow: hidden;
 }
 th {
   text-align: center;
@@ -449,6 +448,12 @@ td svg:hover {
 tr {
   background-color: var(--alice-blue);
 }
+thead tr:first-child th:first-child {
+  border-top-left-radius: 10px;
+}
+thead tr:first-child th:last-child {
+  border-top-right-radius: 10px;
+}
 table tr:last-child td:first-child {
   border-bottom-left-radius: 8px;
 }
@@ -472,6 +477,34 @@ tr.status-cancelled {
 tr.status-completed {
   background: #f3f4f6;
   color: #374151;
+}
+td .add-attendance {
+  font-family: "Inter", Arial, Helvetica, sans-serif;
+  border-radius: 10px;
+  padding: 5px 10px;
+  border: none;
+  background-color: var(--deep-sea-green);
+  color: var(--honeydew);
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+td .add-attendance:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+td .remove-attendance {
+  font-family: "Inter", Arial, Helvetica, sans-serif;
+  border-radius: 10px;
+  padding: 5px 10px;
+  border: none;
+  background-color: var(--red-pantone);
+  color: var(--honeydew);
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+td .remove-attendance:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 .filter-controls {
   display: flex;

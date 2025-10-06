@@ -46,7 +46,7 @@ block content %}
           <td>{{ subject['teacher'] }}</td>
           <td>{{ subject['attended'] }}</td>
           <td>{{ subject['total_classes'] }}</td>
-          <td>{{ subject['percentage'] }}%</td>
+          <td>{{ subject['percentage'] | int }}%</td>
         </tr>
         {% endfor %}
       </table>
