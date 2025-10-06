@@ -35,12 +35,18 @@ block content %}
           <th>Subject Code</th>
           <th>Subject Name</th>
           <th>Teacher Name</th>
+          <th>Attended</th>
+          <th>Total</th>
+          <th>%</th>
         </tr>
         {% for subject in subjects %}
         <tr>
           <td>{{ subject['subject_code'] }}</td>
           <td>{{ subject['subject'] }}</td>
           <td>{{ subject['teacher'] }}</td>
+          <td>{{ subject['attended'] }}</td>
+          <td>{{ subject['total_classes'] }}</td>
+          <td>{{ subject['percentage'] }}%</td>
         </tr>
         {% endfor %}
       </table>

@@ -158,12 +158,28 @@ def student_dashboard():
         return redirect("/")
     db = get_db()
     subjects = db.execute("""
-        SELECT sub.code as subject_code, sub.name as subject, t.name as teacher, c.name as class_name, c.id as class_id FROM students s
+        SELECT 
+            sub.code as subject_code, 
+            sub.name as subject, 
+            t.name as teacher, 
+            c.name as class_name, 
+            c.id as class_id, 
+            COUNT(DISTINCT p.id) AS total_classes,
+            SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) AS attended,
+            ROUND(
+                (CAST(SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) AS FLOAT) /
+                 NULLIF(COUNT(DISTINCT p.id), 0)) * 100, 1
+            ) AS percentage 
+        FROM students s
         JOIN classes c ON s.class_id = c.id
         JOIN teacherSubjects ts ON c.id = ts.class_id
         JOIN subjects sub ON ts.subject_id = sub.id
         JOIN teachers t ON ts.teacher_id = t.id
+        LEFT JOIN periods p ON ts.id = p.teacher_subject_id
+        LEFT JOIN attendance a ON p.id = a.period_id
         WHERE s.user_id=?
+        GROUP BY ts.id
+        ORDER BY sub.name
     """, (session["user_id"],)).fetchall()
 
     session["class_name"] = subjects[0]["class_name"] if subjects else None
