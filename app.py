@@ -384,7 +384,7 @@ def get_current_class_api(class_id):
     if session.get("role") != "teacher":
         return jsonify({"error": "Unauthorized"}), 403
     db = get_db()
-    current_class = db.execute("SELECT p.status FROM periods p JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id WHERE ts.class_id = ? AND p.status = 'running'", (class_id,)).fetchone()
+    current_class = db.execute("SELECT p.status p.id FROM periods p JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id WHERE ts.class_id = ? AND p.status = 'running'", (class_id,)).fetchone()
     return jsonify(dict(current_class))
 
 if __name__ == "__main__":
