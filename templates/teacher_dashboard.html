@@ -243,34 +243,38 @@ block content %}
       <h2>Assigned Classes</h2>
       {% if classes %}
       <table>
-        <tr>
-          <th>Class Name</th>
-          <th>Subject Code</th>
-          <th>Subject Name</th>
-          <th></th>
-        </tr>
-        {% for cls in classes %}
-        <tr>
-          <td>{{ cls['class_name'] }}</td>
-          <td>{{ cls['subject_code'] }}</td>
-          <td>{{ cls['subject'] }}</td>
-          <td>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 6.3499999 6.3499999"
-              fill="none"
-              onclick="viewClassStudents('{{ cls['id'] }}')"
-            >
-              <path
-                id="rect2"
-                style="fill-opacity: 1; stroke-width: 0.278307"
-                d="M 1.9905633,4.5649819e-4 C 1.8262455,-0.00615141 1.6524289,0.05902133 1.5182407,0.19320962 1.2796837,0.43176659 1.2595679,0.79546623 1.4727654,1.0086637 l 2.164209,2.164209 -2.164209,2.1642089 C 1.2595679,5.5502791 1.2796836,5.9139787 1.5182407,6.1525358 1.7567976,6.3910927 2.1204973,6.4117253 2.3336948,6.1985278 L 4.9738437,3.5583789 C 5.1401298,3.3920927 5.1640316,3.1341312 5.0534253,2.915524 5.0290986,2.859759 4.994519,2.8085586 4.9495557,2.7635953 L 2.3336947,0.1477344 C 2.2404209,0.05446051 2.1183659,0.00559597 1.9905633,4.5649819e-4 Z"
-              />
-            </svg>
-          </td>
-        </tr>
-        {% endfor %}
+        <thead>
+          <tr>
+            <th>Class Name</th>
+            <th>Subject Code</th>
+            <th>Subject Name</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cls in classes %}
+          <tr>
+            <td>{{ cls['class_name'] }}</td>
+            <td>{{ cls['subject_code'] }}</td>
+            <td>{{ cls['subject'] }}</td>
+            <td>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 6.3499999 6.3499999"
+                fill="none"
+                onclick="viewClassStudents('{{ cls['id'] }}')"
+              >
+                <path
+                  id="rect2"
+                  style="fill-opacity: 1; stroke-width: 0.278307"
+                  d="M 1.9905633,4.5649819e-4 C 1.8262455,-0.00615141 1.6524289,0.05902133 1.5182407,0.19320962 1.2796837,0.43176659 1.2595679,0.79546623 1.4727654,1.0086637 l 2.164209,2.164209 -2.164209,2.1642089 C 1.2595679,5.5502791 1.2796836,5.9139787 1.5182407,6.1525358 1.7567976,6.3910927 2.1204973,6.4117253 2.3336948,6.1985278 L 4.9738437,3.5583789 C 5.1401298,3.3920927 5.1640316,3.1341312 5.0534253,2.915524 5.0290986,2.859759 4.994519,2.8085586 4.9495557,2.7635953 L 2.3336947,0.1477344 C 2.2404209,0.05446051 2.1183659,0.00559597 1.9905633,4.5649819e-4 Z"
+                />
+              </svg>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
       </table>
       {% endif %} {% if not classes %}
       <p>No classes assigned yet.</p>
@@ -315,22 +319,26 @@ block content %}
       <h2>Class Timetables</h2>
       {% if timetables %}
       <table>
-        <tr>
-          <th>Class Name</th>
-          <th>Day</th>
-          <th>Subject Name</th>
-          <th>Start Time</th>
-          <th>End Time</th>
-        </tr>
-        {% for period in timetables %}
-        <tr>
-          <td>{{ period['class_name'] }}</td>
-          <td>{{ period['day'] }}</td>
-          <td>{{ period['subject_name'] }}</td>
-          <td>{{ period['start_time'] }}</td>
-          <td>{{ period['end_time'] }}</td>
-        </tr>
-        {% endfor %}
+        <thead>
+          <tr>
+            <th>Class Name</th>
+            <th>Day</th>
+            <th>Subject Name</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for period in timetables %}
+          <tr>
+            <td>{{ period['class_name'] }}</td>
+            <td>{{ period['day'] }}</td>
+            <td>{{ period['subject_name'] }}</td>
+            <td>{{ period['start_time'] }}</td>
+            <td>{{ period['end_time'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
       </table>
       {% endif %} {% if not timetables %}
       <p>No timetables available.</p>

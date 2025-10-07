@@ -31,43 +31,51 @@ block content %}
     <div class="compartment">
       <h2>Assigned Subjects</h2>
       <table>
-        <tr>
-          <th>Subject Code</th>
-          <th>Subject Name</th>
-          <th>Teacher Name</th>
-          <th>Attended</th>
-          <th>Total</th>
-          <th>%</th>
-        </tr>
-        {% for subject in subjects %}
-        <tr>
-          <td>{{ subject['subject_code'] }}</td>
-          <td>{{ subject['subject'] }}</td>
-          <td>{{ subject['teacher'] }}</td>
-          <td>{{ subject['attended'] }}</td>
-          <td>{{ subject['total_classes'] }}</td>
-          <td>{{ subject['percentage'] | int }}%</td>
-        </tr>
-        {% endfor %}
+        <thead>
+          <tr>
+            <th>Subject Code</th>
+            <th>Subject Name</th>
+            <th>Teacher Name</th>
+            <th>Attended</th>
+            <th>Total</th>
+            <th>%</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for subject in subjects %}
+          <tr>
+            <td>{{ subject['subject_code'] }}</td>
+            <td>{{ subject['subject'] }}</td>
+            <td>{{ subject['teacher'] }}</td>
+            <td>{{ subject['attended'] }}</td>
+            <td>{{ subject['total_classes'] }}</td>
+            <td>{{ subject['percentage'] | int }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
       </table>
     </div>
     <div class="compartment">
       <h2>Class Timetable</h2>
       <table>
-        <tr>
-          <th>Day</th>
-          <th>Subject Name</th>
-          <th>Start Time</th>
-          <th>End Time</th>
-        </tr>
-        {% for timetable in timetables %}
-        <tr>
-          <td>{{ timetable['day'] }}</td>
-          <td>{{ timetable['subject_name'] }}</td>
-          <td>{{ timetable['start_time'] }}</td>
-          <td>{{ timetable['end_time'] }}</td>
-        </tr>
-        {% endfor %}
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>Subject Name</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for timetable in timetables %}
+          <tr>
+            <td>{{ timetable['day'] }}</td>
+            <td>{{ timetable['subject_name'] }}</td>
+            <td>{{ timetable['start_time'] }}</td>
+            <td>{{ timetable['end_time'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
       </table>
 
       {% else %}
