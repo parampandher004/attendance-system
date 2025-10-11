@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <title>Attendance System – {% block title %}{% endblock %}</title>
@@ -25,6 +25,20 @@
           toast.classList.remove("show");
         }, duration);
       }
+      function toggleDarkMode() {
+        if (document.documentElement.getAttribute("data-theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "light");
+          localStorage.setItem("theme", "light");
+          return;
+        } else if (
+          document.documentElement.getAttribute("data-theme") === "light"
+        ) {
+          document.documentElement.setAttribute("data-theme", "dark");
+          localStorage.setItem("theme", "dark");
+          return;
+        }
+      }
+
       // --- Custom Dropdown Setup Function ---
       function setupCustomDropdown(buttonId, listId, inputId, callback = null) {
         const button = document.getElementById(buttonId);
@@ -93,14 +107,23 @@
   <body>
     {% with messages = get_flashed_messages(with_categories=true) %}
     <div class="toast" id="toast"></div>
-    {% if messages %}
+
     <script>
       document.addEventListener("DOMContentLoaded", function() {
-       {% for category, message in messages %}
-         showToast("{{ message }}", "{{ category }}", 4000);
-       {% endfor %}
+
+        const theme = localStorage.getItem("theme");
+        const themeToggle = document.querySelector(".slider-input");
+        if (theme === "light") {
+          if (themeToggle) themeToggle.checked = true;
+          document.documentElement.setAttribute("data-theme", "light");
+        }
+        {% if messages %}
+          {% for category, message in messages %}
+            showToast("{{ message }}", "{{ category }}", 4000);
+          {% endfor %}
+        {% endif %}
       });
     </script>
-    {% endif %} {% endwith %}{% block content %}{% endblock %}
+    {% endwith %}{% block content %}{% endblock %}
   </body>
 </html>
