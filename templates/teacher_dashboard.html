@@ -4,9 +4,10 @@ block content %}
   <div class="header">
     <h2>Welcome, {{ session.name }}</h2>
     <a class="logout-btn" href="/logout">Logout</a>
+    <div></div>
     <div
       class="toggle-switch"
-      style="position: relative; transform: scale(0.7)"
+      style="position: relative; transform: scale(0.7); top: auto; right: auto"
     >
       <label class="slider-label">
         <input
@@ -190,19 +191,21 @@ block content %}
         <button class="add-class-btn" id="open-add-class-modal">
           Schedule Class
         </button>
-        <table id="periods-table" style="display: none">
-          <thead>
-            <tr>
-              <th>Class Name</th>
-              <th>Subject Name</th>
-              <th>Start Time</th>
-              <th>End Time</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="periods-body"></tbody>
-        </table>
+        <div class="table-container">
+          <table id="periods-table" style="display: none">
+            <thead>
+              <tr>
+                <th>Class Name</th>
+                <th>Subject Name</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="periods-body"></tbody>
+          </table>
+        </div>
         <p id="no-periods-message" style="display: none">
           No periods scheduled for today.
         </p>
@@ -212,17 +215,19 @@ block content %}
       <div class="modal-content" style="max-width: 100%">
         <div style="width: 100%">
           <h2 id="periodModalTitle"></h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Roll No</th>
-                <th>Name</th>
-                <th>Present</th>
-                <th>Absent</th>
-              </tr>
-            </thead>
-            <tbody id="studentAttendanceList"></tbody>
-          </table>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Roll No</th>
+                  <th>Name</th>
+                  <th>Present</th>
+                  <th>Absent</th>
+                </tr>
+              </thead>
+              <tbody id="studentAttendanceList"></tbody>
+            </table>
+          </div>
           <span onclick="closePeriodModal()" class="close-btn"
             ><svg
               width="24"
@@ -245,40 +250,42 @@ block content %}
       <div class="compartment">
         <h2>Assigned Classes</h2>
         {% if classes %}
-        <table>
-          <thead>
-            <tr>
-              <th>Class Name</th>
-              <th>Subject Code</th>
-              <th>Subject Name</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for cls in classes %}
-            <tr>
-              <td>{{ cls['class_name'] }}</td>
-              <td>{{ cls['subject_code'] }}</td>
-              <td>{{ cls['subject'] }}</td>
-              <td>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 6.3499999 6.3499999"
-                  fill="none"
-                  onclick="viewClassStudents('{{ cls['id'] }}')"
-                >
-                  <path
-                    id="rect2"
-                    style="fill-opacity: 1; stroke-width: 0.278307"
-                    d="M 1.9905633,4.5649819e-4 C 1.8262455,-0.00615141 1.6524289,0.05902133 1.5182407,0.19320962 1.2796837,0.43176659 1.2595679,0.79546623 1.4727654,1.0086637 l 2.164209,2.164209 -2.164209,2.1642089 C 1.2595679,5.5502791 1.2796836,5.9139787 1.5182407,6.1525358 1.7567976,6.3910927 2.1204973,6.4117253 2.3336948,6.1985278 L 4.9738437,3.5583789 C 5.1401298,3.3920927 5.1640316,3.1341312 5.0534253,2.915524 5.0290986,2.859759 4.994519,2.8085586 4.9495557,2.7635953 L 2.3336947,0.1477344 C 2.2404209,0.05446051 2.1183659,0.00559597 1.9905633,4.5649819e-4 Z"
-                  />
-                </svg>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Class Name</th>
+                <th>Subject Code</th>
+                <th>Subject Name</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cls in classes %}
+              <tr>
+                <td>{{ cls['class_name'] }}</td>
+                <td>{{ cls['subject_code'] }}</td>
+                <td>{{ cls['subject'] }}</td>
+                <td>
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 6.3499999 6.3499999"
+                    fill="none"
+                    onclick="viewClassStudents('{{ cls['id'] }}')"
+                  >
+                    <path
+                      id="rect2"
+                      style="fill-opacity: 1; stroke-width: 0.278307"
+                      d="M 1.9905633,4.5649819e-4 C 1.8262455,-0.00615141 1.6524289,0.05902133 1.5182407,0.19320962 1.2796837,0.43176659 1.2595679,0.79546623 1.4727654,1.0086637 l 2.164209,2.164209 -2.164209,2.1642089 C 1.2595679,5.5502791 1.2796836,5.9139787 1.5182407,6.1525358 1.7567976,6.3910927 2.1204973,6.4117253 2.3336948,6.1985278 L 4.9738437,3.5583789 C 5.1401298,3.3920927 5.1640316,3.1341312 5.0534253,2.915524 5.0290986,2.859759 4.994519,2.8085586 4.9495557,2.7635953 L 2.3336947,0.1477344 C 2.2404209,0.05446051 2.1183659,0.00559597 1.9905633,4.5649819e-4 Z"
+                    />
+                  </svg>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
         {% endif %} {% if not classes %}
         <p>No classes assigned yet.</p>
         {% endif %}
@@ -287,18 +294,20 @@ block content %}
         <div class="modal-content" style="max-width: 100%">
           <div style="width: 100%">
             <h2 id="studentModalTitle"></h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>Roll No</th>
-                  <th>Name</th>
-                  <th>Attended</th>
-                  <th>Total</th>
-                  <th>%</th>
-                </tr>
-              </thead>
-              <tbody id="studentList"></tbody>
-            </table>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Attended</th>
+                    <th>Total</th>
+                    <th>%</th>
+                  </tr>
+                </thead>
+                <tbody id="studentList"></tbody>
+              </table>
+            </div>
             <span onclick="closeModal()" class="close-btn"
               ><svg
                 width="24"
@@ -321,28 +330,30 @@ block content %}
       <div class="compartment">
         <h2>Class Timetables</h2>
         {% if timetables %}
-        <table>
-          <thead>
-            <tr>
-              <th>Class Name</th>
-              <th>Day</th>
-              <th>Subject Name</th>
-              <th>Start Time</th>
-              <th>End Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for period in timetables %}
-            <tr>
-              <td>{{ period['class_name'] }}</td>
-              <td>{{ period['day'] }}</td>
-              <td>{{ period['subject_name'] }}</td>
-              <td>{{ period['start_time'] }}</td>
-              <td>{{ period['end_time'] }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Class Name</th>
+                <th>Day</th>
+                <th>Subject Name</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for period in timetables %}
+              <tr>
+                <td>{{ period['class_name'] }}</td>
+                <td>{{ period['day'] }}</td>
+                <td>{{ period['subject_name'] }}</td>
+                <td>{{ period['start_time'] }}</td>
+                <td>{{ period['end_time'] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
         {% endif %} {% if not timetables %}
         <p>No timetables available.</p>
         {% endif %}
@@ -354,7 +365,6 @@ block content %}
         <div
           class="filter-controls"
           id="teacher-filter-controls"
-          style="display: flex"
           data-table-id="attendance-table"
         >
           <div class="group" style="flex: 1">
@@ -448,31 +458,32 @@ block content %}
             Reset Filters
           </button>
         </div>
-
-        <table id="attendance-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Roll No</th>
-              <th>Date</th>
-              <th>Subject</th>
-              <th>Day</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in attendance %}
-            <tr>
-              <td>{{ row['name'] }}</td>
-              <td>{{ row['roll_no'] }}</td>
-              <td>{{ row['date'] }}</td>
-              <td>{{ row['subject'] }}</td>
-              <td>{{ row['day'] }}</td>
-              <td>{{ row['status'] }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <div class="table-container">
+          <table id="attendance-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Roll No</th>
+                <th>Date</th>
+                <th>Subject</th>
+                <th>Day</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in attendance %}
+              <tr>
+                <td>{{ row['name'] }}</td>
+                <td>{{ row['roll_no'] }}</td>
+                <td>{{ row['date'] }}</td>
+                <td>{{ row['subject'] }}</td>
+                <td>{{ row['day'] }}</td>
+                <td>{{ row['status'] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </main>
@@ -542,7 +553,7 @@ block content %}
 
     // Function to open the modal
     openBtn.onclick = function () {
-      modal.style.display = "block";
+      modal.style.display = "flex";
       form.reset(); // Clear the form fields
 
       // Reset dropdowns to their initial state when opening
@@ -768,7 +779,7 @@ block content %}
             `;
           }
         });
-        document.getElementById("periodModal").style.display = "block";
+        document.getElementById("periodModal").style.display = "flex";
 
       });
   }
