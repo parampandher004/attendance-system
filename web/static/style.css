@@ -99,6 +99,22 @@ body {
   grid-area: main;
 }
 
+.bottom-navbar {
+  position: fixed;
+  z-index: 1000;
+  bottom: 10%;
+  margin: auto;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  background-color: var(--bg-default);
+  border: 1px solid var(--text-muted);
+  border-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  width: min(80%, 800px);
+}
+
 .compartments {
   display: flex;
   position: relative;
@@ -819,6 +835,9 @@ td .remove-attendance:hover {
 }
 
 @media (max-width: 768px) {
+  :root {
+    font-size: 12px;
+  }
   .form-side,
   .image-side {
     width: 100%;

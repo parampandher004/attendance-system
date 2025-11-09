@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:17.6
+    container_name: my_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/1_init.sql
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/2_seed.sql
+    ports:
+      - "5432:5432"
+
+  web:
+    build: ./web
+    container_name: flask_web
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgres://postgres:password@db:5432/mydb
+    volumes:
+      - ./web:/app
+    restart: always
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+
+volumes:
+  db_data:

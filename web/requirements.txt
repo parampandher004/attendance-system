@@ -1,0 +1,6 @@
+flask
+werkzeug
+apscheduler
+gunicorn
+python-dotenv
+psycopg2-binary

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+      charset="UTF-8"
+    />
+    <title>Attendance System – {% block title %}{% endblock %}</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="{{ url_for('static', filename='favicon.svg') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <style>
+      {% block style %} {% endblock%}
+    </style>
+    <script src="{{ url_for('static', filename='base.js')}}"></script>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <div class="header">
+        <h2>Welcome, {{ session.name }}</h2>
+        <h3>{{ session.class_name }}</h3>
+        <a class="logout-btn" href="/logout">Logout</a>
+        <div
+          class="toggle-switch"
+          style="position: relative; scale: 0.7; top: auto; right: auto"
+        >
+          <label class="slider-label">
+            <input
+              type="checkbox"
+              class="slider-input"
+              onclick="toggleDarkMode()"
+            />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      {% block content %}{% endblock %}
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    <div class="toast" id="toast"></div>
+
+    <script src="{{ url_for('static', filename='custom-calendar.js') }}"></script>
+    <script src="{{ url_for('static', filename='custom-dropdown.js') }}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+
+        const theme = localStorage.getItem("theme");
+        const themeToggle = document.querySelector(".slider-input");
+        if (theme === "light") {
+          if (themeToggle) themeToggle.checked = true;
+          document.documentElement.setAttribute("data-theme", "light");
+        }
+        {% if messages %}
+          {% for category, message in messages %}
+            showToast("{{ message }}", "{{ category }}", 4000);
+          {% endfor %}
+        {% endif %}
+      });
+    </script>
+    {% endwith %}
+  </body>
+</html>
