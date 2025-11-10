@@ -253,6 +253,7 @@ block content %}
                   width="24"
                   height="24"
                   viewBox="0 0 6.3499999 6.3499999"
+                  class="view-students"
                   fill="none"
                   onclick="viewClassStudents('{{ cls['id'] }}')"
                 >
@@ -350,7 +351,6 @@ block content %}
         data-table-id="attendance-table"
       >
         <div class="group" style="flex: 1">
-          <label for="subject_filter">Subject:</label>
           <select name="subject" id="subject_filter" class="js-custom-dropdown">
             <option value="">All Subjects</option>
             {% for cls in classes %}
@@ -362,7 +362,6 @@ block content %}
         </div>
         <div class="calendar-wrapper" style="flex: 1">
           <div class="input-wrapper group">
-            <label for="filterDateInput" class="input-label">Date:</label>
             <input
               type="text"
               id="filterDateInput"
@@ -407,7 +406,6 @@ block content %}
           </div>
         </div>
         <div class="group" style="flex: 1">
-          <label for="status_filter">Status:</label>
           <select name="status" id="status_filter" class="js-custom-dropdown">
             <option value="">All Statuses</option>
             <option value="present">Present</option>
@@ -416,7 +414,6 @@ block content %}
         </div>
 
         <div class="group" style="flex: 1">
-          <label for="day_filter">Day:</label>
           <select name="day" id="day_filter" class="js-custom-dropdown">
             <option value="">All Days</option>
             <option value="monday">Monday</option>
@@ -467,7 +464,6 @@ block content %}
 </div>
 
 <script src="{{ url_for('static', filename='custom-time.js')}}"></script>
-<script src="{{ url_for('static', filename='custom-calendar.js')}}"></script>
 <script src="{{ url_for('static', filename='custom-dropdown.js') }}"></script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
@@ -563,7 +559,6 @@ block content %}
     }
   });
 
-  // A helper function you need in your template scope
   function getDisplayStatus(status) {
     switch (status) {
       case 'scheduled': return 'Scheduled';
@@ -595,7 +590,7 @@ block content %}
               <td style="color:${color}">${percentage}%</td>
             </tr>`;
         });
-        document.getElementById("studentModal").style.display = "block";
+        document.getElementById("studentModal").style.display = "flex";
         document.getElementById("studentModalTitle").textContent = classes.find(c => c.id == tsId).class_name;
       });
   }

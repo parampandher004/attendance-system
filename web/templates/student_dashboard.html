@@ -1,7 +1,6 @@
 {% extends "base.html" %} {% block title %}Student Dashboard{% endblock %} {%
 block content %}
 <div class="main" id="main">
-  <div class="compartments"></div>
   {% if session.class_name %}
   <div class="compartments">
     <div class="compartment">
@@ -89,14 +88,14 @@ block content %}
 
   <div class="compartments">
     <div class="compartment">
-      <h2>Student Attendance</h2>
+      <h2>Attendance History</h2>
+      <h2>Filters</h2>
       <div
         class="filter-controls"
         id="student-filter-controls"
         data-table-id="attendance-table"
       >
         <div class="group">
-          <label for="st_subject_filter">Subject:</label>
           <select
             name="subject"
             id="st_subject_filter"
@@ -113,7 +112,6 @@ block content %}
 
         <div class="calendar-wrapper">
           <div class="input-wrapper group">
-            <label for="stFilterDateInput" class="input-label">Date:</label>
             <input
               type="text"
               id="stFilterDateInput"
@@ -158,7 +156,6 @@ block content %}
           </div>
         </div>
         <div class="group">
-          <label for="st_status_filter">Status:</label>
           <select
             name="status"
             id="st_status_filter"
@@ -170,7 +167,6 @@ block content %}
           </select>
         </div>
         <div class="group">
-          <label for="st_day_filter">Day:</label>
           <select name="day" id="st_day_filter" class="js-custom-dropdown">
             <option value="">All Days</option>
             <option value="monday">Monday</option>

@@ -85,18 +85,21 @@ body {
   border: 1px solid var(--text-muted);
 }
 .dashboard-container {
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   background-color: var(--bg-dark);
-  overflow: auto;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  grid-template-areas: "header" "main";
+  overflow-y: auto;
   position: relative;
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .main {
   grid-area: main;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .bottom-navbar {
@@ -121,8 +124,10 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   gap: 2rem;
-  padding: 2rem;
+  padding: 2rem 1rem;
   align-items: start;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .compartment {
@@ -133,9 +138,12 @@ body {
   border: 1px solid var(--text-muted);
   text-align: center;
   justify-items: center;
-  width: 80%;
+  min-width: 300px;
+  width: 100%;
+  box-sizing: border-box;
 }
-.compartment h2 {
+.compartment h2,
+.modal h2 {
   color: var(--text-default);
 }
 .form-side,
@@ -211,6 +219,7 @@ form {
   grid-area: header;
   position: sticky;
   z-index: 1000;
+  max-width: 100%;
   top: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -221,6 +230,7 @@ form {
   padding: 2% 4%;
   border-bottom: 2px solid var(--bg-light);
   color: var(--text-default);
+  box-sizing: border-box;
 }
 .header h2 {
   font-size: 1.2rem;
@@ -470,7 +480,7 @@ form {
   z-index: 100;
   left: 0;
   top: 0;
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   overflow: auto;
   background-color: rgba(0, 0, 0, 0.4);
@@ -502,14 +512,12 @@ form {
   cursor: pointer;
 }
 .close-btn svg {
-  fill: var(--bg-light);
+  fill: var(--text-muted);
   width: 19.2px;
   height: 19.2px;
   transition: fill 0.1s ease;
 }
-.close-btn svg:hover {
-  fill: var(--text-muted);
-}
+
 .add-class-btn {
   position: relative;
   display: flex;
@@ -544,6 +552,7 @@ a:hover {
 .table-container {
   overflow-x: auto;
   width: 100%;
+  max-width: 100%;
 }
 table {
   width: 100%;
@@ -651,15 +660,15 @@ td .remove-attendance:hover {
 }
 .filter-controls {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
+  width: 100%;
   max-width: 100%;
   padding: 18px 20px;
-  background: var(--bg-light);
   border-radius: 2rem;
   align-items: center;
   margin-bottom: 25px;
-  border: 1px solid var(--text-muted);
+  box-sizing: border-box;
 }
 
 .filter-controls label {
@@ -674,14 +683,14 @@ td .remove-attendance:hover {
   width: 100%;
   display: flex;
   align-items: center;
+  position: relative;
 }
-/* Input Wrapper (.relative .mb-6) */
+
 .input-wrapper {
   position: relative;
   width: 100%;
 }
 
-/* Input Label (.block .mb-2 .font-medium) */
 .input-label {
   display: block;
   width: 100%;
@@ -690,22 +699,25 @@ td .remove-attendance:hover {
 }
 .date-input {
   padding: 0px;
+  text-align: center;
 }
 
 .date-input::placeholder {
   text-align: center;
+  color: var(--text-default);
 }
 
-/* --- Custom Calendar Component Styling --- */
 .calendar-container {
   font-family: "Inter", Arial, Helvetica, sans-serif;
   position: absolute;
   z-index: 100;
   width: 300px;
-  background-color: var(--bg-default);
+  background-color: var(--bg-dark);
   border-radius: 12px;
   padding: 15px;
   opacity: 0;
+  right: 0;
+  top: 100%;
   visibility: hidden;
   transform: translateY(10px);
   transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
@@ -813,7 +825,7 @@ td .remove-attendance:hover {
   -moz-appearance: none;
   appearance: none;
   text-align: center;
-  font-size: 16px;
+  font-size: 1rem;
   color: var(--text-default);
   background-color: transparent;
   cursor: pointer;
@@ -844,5 +856,23 @@ td .remove-attendance:hover {
   }
   .image-side {
     display: none;
+  }
+  .modal-content {
+    width: 95%;
+    max-width: 95%;
+    margin: 0 auto;
+    padding: 15px;
+  }
+
+  .filter-controls {
+    padding: 15px;
+  }
+
+  .compartments {
+    gap: 1rem;
+    padding: 1rem;
+  }
+  .calendar-container {
+    width: 100%;
   }
 }
