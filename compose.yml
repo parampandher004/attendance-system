@@ -27,6 +27,15 @@ services:
       - ./web:/app
     restart: always
 
+  face_service:
+    build: ./face_service
+    container_name: face_service
+    volumes:
+      - ./face_service:/app
+      - ./models:/app/models
+    ports:
+      - "8000:8000"
+
   pgadmin:
     image: dpage/pgadmin4
     environment:

@@ -1,6 +1,6 @@
-<h1 align="center">Face Recognition Attendance System (Web Interface)</h1>
+<h1 align="center">Face Recognition Attendance System</h1>
 
-<p> A web-based attendance management system built to run on **Raspberry Pi**, integrating with an AI-powered face recognition module.  
+<p> A web-based attendance management system built to run on <b>Raspberry Pi</b>, integrating with an AI-powered face recognition module.  
 This system records attendance automatically through facial recognition, while also providing a web interface for <b> students</b> and <b>teachers</b> to view and manage attendance data. </p>
 
 ## 🚀 Features
@@ -20,18 +20,17 @@ This system records attendance automatically through facial recognition, while a
 ### 🔹 General
 
 - Lightweight Flask-based web interface.
-- Stores data in a database (SQLite/MySQL/Postgres — depending on configuration).
-- Designed to run efficiently on Raspberry Pi.
+- Stores data in a database (Postgres).
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Backend**: Python (Flask)
-- **Frontend**: HTML, CSS (optionally Bootstrap/Tailwind)
-- **Database**: SQLite (default), can be extended to MySQL/Postgres
+- **Frontend**: HTML, CSS
+- **Database**: Postgres
 - **Hardware**: Raspberry Pi + Camera Module for face detection
-- **AI Module**: Face recognition system (integrated separately)
+- **AI Module**: Face recognition system
 
 ---
 
@@ -42,18 +41,18 @@ This system records attendance automatically through facial recognition, while a
    git clone https://github.com/parampandher004/attendance-system.git
    cd attendance-system
    ```
-2. **Create and activate a virtual environment**
+2. **create a directory models**
    ```bash
-   python3 -m venv venv
-   source venv/bin/activate   # On Linux/Mac
-   venv\Scripts\activate      # On Windows
+   mkdir models
    ```
-3. **Install dependencies**
+3. **Move your model in models directory**
+
+4. **Start Docker Containers**
    ```bash
-   pip install -r requirements.txt
+   docker compose up -d
    ```
-4. **Run the Flask app**
+5. **Stop Docker Containers**
    ```bash
-   python app.py
+   docker compose down
    ```
    The server will start at [http://localhost:5000](http://localhost:5000).
