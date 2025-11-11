@@ -1,5 +1,3 @@
-# detect_yolov8_faces.py
-# Path: detect_yolov8_faces.py
 """
 YOLOv8 Face Detection with TTA (multi-scale + flip), confidence-weighted clustering and NMS.
 - Install: pip install ultralytics opencv-python-headless numpy
@@ -14,11 +12,15 @@ from pathlib import Path
 import sys
 import cv2
 import numpy as np
+from ultralytics import YOLO
+import torch
 
 # Configuration (edit as needed)
 IMAGE_PATH = "image.jpg"              # input image
 MODEL_PATH = "models/yolov8x-face-lindevs.pt"        # set to your downloaded YOLOv8-face weights
 OUTPUT_PATH = "detection_yolov8_faces.jpg"
+
+model = YOLO(MODEL_PATH)
 
 SCALES = [1.0, 1.5, 2.0]              # TTA scales (1.0 = original). Add more for tiny faces.
 USE_FLIP = True                       # horizontal flip TTA
@@ -27,17 +29,6 @@ NMS_IOU = 0.45                        # final NMS threshold
 CLUSTER_IOU = 0.30                    # clustering IoU to merge many TTA boxes
 IMG_MAX_SIDE = 1600                   # resize longer side to avoid huge inputs (keeps aspect ratio)
 
-# ---------- Helpers ----------
-def ensure_ultralytics():
-    try:
-        import ultralytics  # noqa: F401
-    except Exception:
-        raise ImportError(
-            "Please install ultralytics package:\n\n"
-            "    pip install ultralytics\n\n"
-            "And download a YOLOv8-face weights file (e.g. yolov8x-face.pt) and place it next to this script.\n"
-            "If you want, ask me for a direct download link for a recommended weight."
-        )
 
 def iou(a, b):
     x1 = max(a[0], b[0]); y1 = max(a[1], b[1])
@@ -82,28 +73,16 @@ def weighted_cluster(boxes, confs, iou_thresh=0.3):
     return merged_boxes, merged_confs
 
 # ---------- Detection pipeline ----------
-def run_yolov8_face_detection(image_path: str, model_path: str, output_path: str):
-    ensure_ultralytics()
-    from ultralytics import YOLO
-    import torch
+def detect_faces(image):
 
     # choose device
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"[INFO] Using device: {device}")
 
-    # load model (will raise if file missing)
-    if not Path(model_path).exists():
-        raise FileNotFoundError(
-            f"Model not found: {model_path}\n"
-            "Download a YOLOv8-face weight (e.g. yolov8x-face.pt) and set MODEL_PATH accordingly."
-        )
-    model = YOLO(model_path)
     model.fuse()  # fuse conv+bn for faster inference
 
     # load image and keep original
-    img_bgr = cv2.imread(image_path)
-    if img_bgr is None:
-        raise FileNotFoundError(f"Could not load image: {image_path}")
+    img_bgr = image
     orig_h, orig_w = img_bgr.shape[:2]
     long_side = max(orig_h, orig_w)
     # optionally resize to limit input size while keeping aspect ratio
@@ -177,8 +156,7 @@ def run_yolov8_face_detection(image_path: str, model_path: str, output_path: str
                 all_confs.append(float(c))
 
     if not all_boxes:
-        print("[INFO] No faces detected.")
-        return
+        return {"message": "No faces detected"}
 
     # cluster and merge
     merged_boxes, merged_confs = weighted_cluster(all_boxes, all_confs, iou_thresh=CLUSTER_IOU)
@@ -198,24 +176,16 @@ def run_yolov8_face_detection(image_path: str, model_path: str, output_path: str
             final_boxes.append(merged_boxes[i])
             final_confs.append(merged_confs[i])
 
-    # draw results
-    out = img_bgr.copy()
+   # Crop faces from original image
+    faces = []
     for (box, conf) in zip(final_boxes, final_confs):
         x1, y1, x2, y2 = box
-        label = f"{conf*100:.1f}%"
-        cv2.rectangle(out, (x1, y1), (x2, y2), (0, 220, 0), 2)
-        cv2.putText(out, label, (x1, max(15, y1 - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 220, 0), 2)
+        # ensure valid slice ranges
+        y1s, y2s = max(0, y1), min(orig_h, y2 + 1)
+        x1s, x2s = max(0, x1), min(orig_w, x2 + 1)
+        crop = img_bgr[y1s:y2s, x1s:x2s].copy()
+        faces.append(crop)
 
-    print(f"[INFO] Final detections: {len(final_boxes)} faces")
-    cv2.imwrite(output_path, out)
-    print(f"[INFO] Saved visualization to: {output_path}")
+    return {"faces": faces, "boxes": final_boxes, "confs": final_confs}
     # show (optional)
     # cv2.imshow("YOLOv8 Face Detections", out); cv2.waitKey(0); cv2.destroyAllWindows()
-
-# ---------- Main ----------
-if __name__ == "__main__":
-    try:
-        run_yolov8_face_detection(IMAGE_PATH, MODEL_PATH, OUTPUT_PATH)
-    except Exception as e:
-        print("[ERROR]", e)
-        sys.exit(1)

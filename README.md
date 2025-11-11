@@ -43,7 +43,7 @@ This system records attendance automatically through facial recognition, while a
    ```
 2. **create a directory models**
    ```bash
-   mkdir models
+   mkdir face_service/models
    ```
 3. **Move your model in models directory**
 
@@ -55,4 +55,5 @@ This system records attendance automatically through facial recognition, while a
    ```bash
    docker compose down
    ```
-   The server will start at [http://localhost:5000](http://localhost:5000).
+   The web-interface server will start at [http://localhost:5000](http://localhost:5000).
+   The face_service server will start at [http://localhost:8000](http://localhost:8000).

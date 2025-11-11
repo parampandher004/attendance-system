@@ -432,4 +432,4 @@ def get_section(section):
 
 if __name__ == "__main__":
     scheduler.start()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)

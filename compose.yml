@@ -32,7 +32,6 @@ services:
     container_name: face_service
     volumes:
       - ./face_service:/app
-      - ./models:/app/models
     ports:
       - "8000:8000"
 

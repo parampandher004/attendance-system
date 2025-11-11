@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY models /app/models
+
 COPY . .
 
-CMD ["python", "detector.py"]
+CMD ["python", "service.py"]
