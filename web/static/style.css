@@ -551,8 +551,11 @@ a:hover {
 }
 .table-container {
   overflow-x: auto;
+  overflow-y: visible;
   width: 100%;
   max-width: 100%;
+  position: relative;
+  scrollbar-gutter: stable both-edges;
 }
 table {
   width: 100%;

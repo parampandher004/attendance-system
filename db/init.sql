@@ -85,6 +85,16 @@ CREATE TABLE public.classes (
 
 ALTER TABLE public.classes OWNER TO postgres;
 
+CREATE SEQUENCE public.classes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.classes_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.classes_id_seq OWNED BY public.classes.id;
+
 --
 -- Name: face_encodings; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -97,6 +107,16 @@ CREATE TABLE public.face_encodings (
 
 
 ALTER TABLE public.face_encodings OWNER TO postgres;
+
+CREATE SEQUENCE public.face_encodings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.face_encodings_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.face_encodings_id_seq OWNED BY public.face_encodings.id;
 
 --
 -- Name: periods; Type: TABLE; Schema: public; Owner: postgres
@@ -115,6 +135,17 @@ CREATE TABLE public.periods (
 
 
 ALTER TABLE public.periods OWNER TO postgres;
+
+CREATE SEQUENCE public.periods_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.periods_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.periods_id_seq OWNED BY public.periods.id;
+
 
 --
 -- Name: students; Type: TABLE; Schema: public; Owner: postgres
@@ -234,6 +265,16 @@ CREATE TABLE public.teachersubjects (
 
 ALTER TABLE public.teachersubjects OWNER TO postgres;
 
+CREATE SEQUENCE public.teachersubjects_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.teachersubjects_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.teachersubjects_id_seq OWNED BY public.teachersubjects.id;
+
 --
 -- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -284,6 +325,16 @@ CREATE TABLE public.weekly_periods (
 
 ALTER TABLE public.weekly_periods OWNER TO postgres;
 
+CREATE SEQUENCE public.weekly_periods_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.weekly_periods_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.weekly_periods_id_seq OWNED BY public.weekly_periods.id;
+
 --
 -- Name: attendance id; Type: DEFAULT; Schema: public; Owner: postgres
 --
@@ -317,6 +368,12 @@ ALTER TABLE ONLY public.teachers ALTER COLUMN id SET DEFAULT nextval('public.tea
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+ALTER TABLE ONLY public.classes ALTER COLUMN id SET DEFAULT nextval('public.classes_id_seq'::regclass);
+ALTER TABLE ONLY public.face_encodings ALTER COLUMN id SET DEFAULT nextval('public.face_encodings_id_seq'::regclass);
+ALTER TABLE ONLY public.periods ALTER COLUMN id SET DEFAULT nextval('public.periods_id_seq'::regclass);
+ALTER TABLE ONLY public.teachersubjects ALTER COLUMN id SET DEFAULT nextval('public.teachersubjects_id_seq'::regclass);
+ALTER TABLE ONLY public.weekly_periods ALTER COLUMN id SET DEFAULT nextval('public.weekly_periods_id_seq'::regclass);
 
 
 --

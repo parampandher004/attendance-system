@@ -36,6 +36,20 @@ def get_db():
 def hash_password(pwd):
     return hashlib.sha256(pwd.encode()).hexdigest()
 
+def serialize_rows(rows):
+    out = []
+    for r in rows:
+        row = dict(r)
+        for k, v in row.items():
+            # convert date / datetime / time (and any object with isoformat) to string
+            if hasattr(v, "isoformat") and not isinstance(v, str):
+                try:
+                    row[k] = v.isoformat()
+                except Exception:
+                    row[k] = str(v)
+        out.append(row)
+    return out
+
 # --------- Generate Today's periods ----------
 def generate_today_periods():
     today = date.today()
@@ -71,7 +85,7 @@ def update_period_status():
  
 # ---------------- Scheduler Setup ----------------   
 scheduler = BackgroundScheduler()
-scheduler.add_job(generate_today_periods, 'cron', hour=15, minute=56)
+scheduler.add_job(generate_today_periods, 'cron', hour=15, minute=27)
 scheduler.add_job(update_period_status, 'interval', minutes=1)
 
 
@@ -318,7 +332,7 @@ def get_periods_today():
         """, (session["class_id"], datetime.now().strftime("%Y-%m-%d")))
         today_periods = db.fetchall()
         db.connection.close()
-        return jsonify([dict(row) for row in today_periods])
+        return jsonify(serialize_rows(today_periods))
     
     elif session.get("role") == "teacher":
         db = get_db()
@@ -331,7 +345,7 @@ def get_periods_today():
         """, (session["user_id"], datetime.now().strftime("%Y-%m-%d")))
         today_periods = db.fetchall()
         db.connection.close()
-        return jsonify([dict(row) for row in today_periods])
+        return jsonify(serialize_rows(today_periods))
     
 # ---------------- API to Add Class ----------------
 @app.route("/api/classes", methods=["POST"])
