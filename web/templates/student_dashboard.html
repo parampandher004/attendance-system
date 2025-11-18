@@ -89,7 +89,6 @@ block content %}
   <div class="compartments">
     <div class="compartment">
       <h2>Attendance History</h2>
-      <h2>Filters</h2>
       <div
         class="filter-controls"
         id="student-filter-controls"
@@ -213,6 +212,14 @@ block content %}
   </div>
 </div>
 <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const stFilterDateInput = document.getElementById("stFilterDateInput");
+    if (stFilterDateInput) {
+      stFilterDateInput.addEventListener("dateSelected", (e) => {
+        studentApplyFilters(e.detail.date, null, "st_date_filter");
+      });
+    }
+  });
   setInterval(studentUpdatePeriods, 60000);
   studentUpdatePeriods();
 </script>

@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, time
 from apscheduler.schedulers.background import BackgroundScheduler
 import os, pickle, hashlib
 from flask import Flask, jsonify, render_template, request, redirect, session, flash
@@ -36,17 +36,35 @@ def get_db():
 def hash_password(pwd):
     return hashlib.sha256(pwd.encode()).hexdigest()
 
+def _format_time(v):
+    try:
+        # Format to "H:MM AM/PM" (removes leading zero)
+        s = v.strftime("%I:%M %p")
+        return s.lstrip("0")
+    except Exception:
+        return v
+
 def serialize_rows(rows):
     out = []
     for r in rows:
         row = dict(r)
         for k, v in row.items():
-            # convert date / datetime / time (and any object with isoformat) to string
+            if isinstance(v, datetime):
+                row[k] = v.strftime("%d/%m/%Y")
+                continue
+            if isinstance(v, date):
+                row[k] = v.strftime("%d/%m/%Y")
+                continue
+            if isinstance(v, time):
+                row[k] = _format_time(v)
+                continue
             if hasattr(v, "isoformat") and not isinstance(v, str):
                 try:
                     row[k] = v.isoformat()
                 except Exception:
                     row[k] = str(v)
+            if k.lower() == "status" and isinstance(v, str):
+                row[k] = v.capitalize()
         out.append(row)
     return out
 
@@ -62,6 +80,7 @@ def generate_today_periods():
         """, (today.strftime("%d/%m/%Y"), today.strftime("%w")))
     print(f"Generated periods for {today.strftime('%w')}")
     db.connection.commit()
+    db.connection.close()
     
 # --- Update period statuses automatically ----
 def update_period_status():
@@ -221,22 +240,24 @@ def student_dashboard():
     """, (session["class_id"],))
     rows = db.fetchall()
     timetables = [
-        {"subject_name": row["subject_name"], "day": DAY_MAP[f"{row['day']}"], "start_time": row["start_time"], "end_time": row["end_time"]}
+        {"subject_name": row["subject_name"], "day": DAY_MAP[f"{row['day']}"], "start_time": _format_time(row["start_time"]), "end_time": _format_time(row["end_time"])}
         for row in rows
     ]
 
     db.execute("""
-        SELECT p.date, a.status, sub.name as subject, p.day as day FROM attendance a 
-        JOIN periods p ON a.period_id = p.id
+        SELECT p.date, COALESCE(a.status, 'absent') as status, sub.name as subject, p.day as day FROM periods p 
         JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id
         JOIN subjects sub ON ts.subject_id = sub.id
-        WHERE a.student_id=(SELECT id FROM students WHERE user_id=%s)
+        JOIN classes c ON ts.class_id = c.id
+        JOIN students s ON c.id = s.class_id
+        LEFT JOIN attendance a ON p.id = a.period_id
+        WHERE s.user_id=(SELECT id FROM students WHERE user_id=%s)
     """, (session["user_id"],))
     rows = db.fetchall()
 
     attendance = [{"date": row["date"], "status": row["status"], "subject": row["subject"], "day": DAY_MAP[f"{row['day']}"]} for row in rows]
     db.connection.close()
-    return render_template("student_dashboard.html", subjects=subjects, attendance=attendance, timetables=timetables)
+    return render_template("student_dashboard.html", subjects=subjects, attendance=serialize_rows(attendance), timetables=timetables)
 
 # ---------------- Teacher Dashboard ----------------
 @app.route("/teacher")
@@ -267,17 +288,17 @@ def teacher_dashboard():
     rows = db.fetchall()
     
     timetables = [
-        {"class_name": row["class_name"], "subject_name": row["subject_name"], "day": DAY_MAP[f"{row['day']}"], "start_time": row["start_time"], "end_time": row["end_time"]}
+        {"class_name": row["class_name"], "subject_name": row["subject_name"], "day": DAY_MAP[f"{row['day']}"], "start_time": _format_time(row["start_time"]), "end_time": _format_time(row["end_time"])} 
         for row in rows
     ]
     
     db.execute("""
-        SELECT s.name as name, s.roll_no, p.date, p.day, sub.name as subject, a.status
-        FROM attendance a
-        JOIN students s ON a.student_id = s.id
-        JOIN periods p ON a.period_id = p.id
-        JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id
+        SELECT s.name as name, s.roll_no, p.date, p.day, sub.name as subject, COALESCE(a.status, 'absent') as status
+        FROM students s
+        JOIN teacherSubjects ts ON s.class_id = ts.class_id
+        JOIN periods p ON ts.id = p.teacher_subject_id
         JOIN subjects sub ON ts.subject_id = sub.id
+        LEFT JOIN attendance a ON p.id = a.period_id AND a.student_id = s.id
         WHERE ts.teacher_id = (SELECT id FROM teachers WHERE user_id=%s)
         ORDER BY p.date DESC 
         """, (session["user_id"],))
@@ -285,7 +306,7 @@ def teacher_dashboard():
 
     attendance = [{"name": row["name"], "roll_no": row["roll_no"], "date": row["date"], "day": DAY_MAP[f"{row['day']}"], "subject": row["subject"], "status": row["status"]} for row in rows]
     db.connection.close()
-    return render_template("teacher_dashboard.html", attendance=attendance, classes=classes, timetables=timetables)
+    return render_template("teacher_dashboard.html", attendance=serialize_rows(attendance), classes=classes, timetables=timetables)
 
 # ---------- Student's List ------------------
 @app.route("/api/classes/<ts_id>/students", methods=["GET"])
@@ -437,13 +458,6 @@ def get_current_class_api(class_id):
     current_class = db.fetchone()
     db.connection.close()
     return jsonify(dict(current_class) if current_class else {})
-
-# -------------------API to get Section -----------------------
-@app.route("/api/<section>", methods=["GET"])
-def get_section(section):
-    db = get_db()
-    if section == "st-periods":
-        return render_template("partials/st-periods.html")
 
 if __name__ == "__main__":
     scheduler.start()
