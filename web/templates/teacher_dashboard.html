@@ -26,7 +26,7 @@ block content %}
             <h2>Add New Class Schedule</h2>
 
             <form id="add-class-form">
-              <div class="group" style="max-width: 1000px">
+              <div class="group bt-margin" style="max-width: 1000px">
                 <label for="value-className" class="input-label"
                   >Class Name:</label
                 >
@@ -40,7 +40,7 @@ block content %}
                 </select>
                 <br />
               </div>
-              <div class="group" style="max-width: 1000px">
+              <div class="group bt-margin" style="max-width: 1000px">
                 <label for="subjectName" class="input-label"
                   >Subject Name:</label
                 >
@@ -57,7 +57,7 @@ block content %}
               </div>
 
               <div
-                class="js-time-picker group"
+                class="js-time-picker group bt-margin"
                 style="max-width: 1000px"
                 data-hour-id="startHour"
                 data-minute-id="startMinute"
@@ -85,7 +85,7 @@ block content %}
               </div>
 
               <div
-                class="js-time-picker group"
+                class="js-time-picker group bt-margin"
                 style="max-width: 1000px"
                 data-hour-id="endHour"
                 data-minute-id="endMinute"
@@ -113,9 +113,12 @@ block content %}
               </div>
 
               <div class="calendar-wrapper">
-                <div class="input-wrapper group" style="max-width: 1000px">
+                <div
+                  class="input-wrapper group bt-margin"
+                  style="max-width: 1000px"
+                >
                   <label for="modalDateInput" class="input-label"
-                    >Event Date:</label
+                    >Class Date:</label
                   >
                   <input
                     type="text"
@@ -173,7 +176,7 @@ block content %}
       <button class="add-class-btn" id="open-add-class-modal">
         Schedule Class
       </button>
-      <div class="table-container">
+      <div class="table-container" style="overflow: visible">
         <table id="periods-table" style="display: none">
           <thead>
             <tr>

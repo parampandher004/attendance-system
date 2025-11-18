@@ -360,8 +360,9 @@ def add_class():
     start_time = datetime.strptime(start_time, "%H:%M").strftime("%H:%M:%S") if start_time else None    
     end_time = request.json.get("end_time")
     end_time = datetime.strptime(end_time, "%H:%M").strftime("%H:%M:%S") if end_time else None
-    date = request.json.get("date")  # optional, default to today
-    day = datetime.strptime(date, "%d/%m/%Y").strftime("%w") if date else datetime.now().strftime("%w")
+    date = datetime.strptime(request.json.get("date"), "%d/%m/%Y").strftime("%Y-%m-%d") if request.json.get("date") else None
+    day = datetime.strptime(date, "%Y-%m-%d").strftime("%w") if date else datetime.now().strftime("%w")
+    
     status = request.json.get("status", "scheduled")
 
     if not teacher_subject_id or not day or not start_time or not end_time:
