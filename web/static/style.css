@@ -872,3 +872,46 @@ td .remove-attendance:hover {
     font-size: 12px;
   }
 }
+
+/* Very small screens: stacked card view for readability */
+@media (max-width: 572px) {
+  #periods-table,
+  #periods-table thead,
+  #periods-table tbody,
+  #periods-table th,
+  #periods-table td,
+  #periods-table tr {
+    display: block;
+  }
+
+  #periods-table thead {
+    display: none; /* header hidden in card mode */
+  }
+
+  #periods-table tr {
+    margin-bottom: 10px;
+    border: 1px solid var(--divider, #eee);
+    border-radius: 8px;
+    padding: 8px;
+    background: var(--bg-default, #fff);
+  }
+
+  #periods-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 8px;
+    white-space: normal;
+  }
+
+  #periods-table td::before {
+    content: attr(data-label); /* labels injected by JS */
+    font-weight: 600;
+    margin-right: 8px;
+    color: var(--text-muted, #666);
+    flex: 0 0 40%;
+  }
+
+  #periods-table td > * {
+    flex: 1;
+  }
+}

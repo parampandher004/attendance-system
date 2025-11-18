@@ -344,6 +344,7 @@ function updatePeriods() {
           tbody.appendChild(row);
         });
         initializeStatusDropdowns();
+        setTableDataLabels("periods-table");
       } else {
         noPeriodsMessage.style.display = "block";
       }
@@ -357,4 +358,15 @@ function updatePeriods() {
 }
 function closeModal() {
   document.getElementById("studentModal").style.display = "none";
+}
+function setTableDataLabels(tableId) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  const ths = table.querySelectorAll("thead th");
+  const headers = Array.from(ths).map((th) => th.textContent.trim());
+  table.querySelectorAll("tbody tr").forEach((row) => {
+    Array.from(row.children).forEach((td, i) => {
+      td.setAttribute("data-label", headers[i] || "");
+    });
+  });
 }
