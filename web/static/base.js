@@ -22,6 +22,7 @@ function studentUpdatePeriods() {
             `;
           tbody.appendChild(row);
         });
+        setTableDataLabels("periods-table");
       } else {
         noPeriodsMessage.style.display = "block";
       }
@@ -168,17 +169,42 @@ function viewPeriodStudents(periodId) {
               <td>${s.roll_no}</td>
               <td>${s.name}</td>
               <td style="color: green">Present</td>
-              <td><button class="remove-attendance" onClick="removeAttendance(${s.id}, ${periodId})">Remove</button></td>
-              </tr>
+              <td><button class="remove-attendance" onClick="removeAttendance(${s.id}, ${periodId})">
+               <svg
+                  viewBox="0 0 24 24"
+                  fill=none
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns:svg="http://www.w3.org/2000/svg">
+                  <path
+                    id="rect1"
+                    style="stroke-width:0.0194658"
+                    transform="rotate(90)"
+                    d="m 12,-24 c 1.662,0 3,1.29174 3,2.896277 V -2.8962774 C 15,-1.2917397 13.662,0 12,0 10.338,0 9,-1.2917397 9,-2.8962774 V -21.103723 C 9,-22.70826 10.338,-24 12,-24 Z" />
+                </svg> 
+              </button></td>
+            </tr>
             `;
         } else {
           tbody.innerHTML += `
             <tr>
               <td>${s.roll_no}</td>
               <td>${s.name}</td>
-              <td><button class="add-attendance" onClick="addAttendance(${s.id}, ${periodId})">Add</button></td>
+              <td><button class="add-attendance" onClick="addAttendance(${s.id}, ${periodId})">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill=none
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns:svg="http://www.w3.org/2000/svg">
+                  <path
+                    id="rect1"
+                    style="stroke-width:0.0194658"
+                    d="M 12 0 C 10.338 -5.6843419e-16 9 1.2917514 9 2.8962891 L 9 9 L 2.8962891 9 C 1.2917514 9 0 10.338 0 12 C -5.6843419e-16 13.662 1.2917514 15 2.8962891 15 L 9 15 L 9 21.103711 C 9 22.708249 10.338 24 12 24 C 13.662 24 15 22.708249 15 21.103711 L 15 15 L 21.103711 15 C 22.708249 15 24 13.662 24 12 C 24 10.338 22.708249 9 21.103711 9 L 15 9 L 15 2.8962891 C 15 1.2917514 13.662 0 12 0 z " />
+                  </svg>
+                  </button></td>
               <td style="color: red">Absent</td>
-                   </tr>
+            </tr>
             `;
         }
       });
@@ -297,7 +323,7 @@ function updatePeriods() {
             <td>${period.subject_name}</td>
             <td>${period.start_time}</td>
             <td>${period.end_time}</td>
-            <td>
+            <td style="overflow: visible;">
               <div class="custom-select-wrapper" id="status-wrapper-${period.id}">
                 <input type="hidden" name="status-${period.id}" id="statusValue-${period.id}" value="${period.status}" />
 
@@ -366,7 +392,7 @@ function setTableDataLabels(tableId) {
   const headers = Array.from(ths).map((th) => th.textContent.trim());
   table.querySelectorAll("tbody tr").forEach((row) => {
     Array.from(row.children).forEach((td, i) => {
-      td.setAttribute("data-label", headers[i] || "");
+      if (headers[i] !== "") td.setAttribute("data-label", headers[i] || "");
     });
   });
 }

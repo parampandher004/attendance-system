@@ -14,6 +14,8 @@
   --text-strong: hsl(0 0% 100%);
   --text-muted: hsl(0 0% 70%);
 
+  --shadow: hsl(0 0% 70% / 0.12);
+
   --error-color: hsl(0, 60%, 30%);
   --success-color: hsl(130, 59%, 30%);
   --info-color: hsl(204, 60%, 60%);
@@ -38,6 +40,8 @@
   --text-default: hsl(0 0% 10%);
   --text-strong: hsl(0 0% 0%);
   --text-muted: hsl(0 0% 30%);
+
+  --shadow: hsl(0 0% 30% / 0.25);
 
   --error-color: hsl(0, 60%, 70%);
   --success-color: hsl(130, 60%, 70%);
@@ -165,6 +169,7 @@ body {
   width: min(12vh, 14vw);
   height: min(6vh, 7vw);
   z-index: 2000;
+  scale: 0.7;
 }
 
 .slider-label {
@@ -273,7 +278,7 @@ form {
   width: min(60%, 400px);
   color: var(--text-strong);
   text-align: center;
-  border-radius: 100px;
+  border-radius: 1rem;
   padding: 1rem;
   position: fixed;
   z-index: 3000;
@@ -304,7 +309,7 @@ form {
   line-height: 2.75rem;
   padding: 0 5rem;
   padding-left: 3rem;
-  border-bottom: 3px solid var(--bg-light);
+  border-bottom: 2px solid var(--bg-light);
   border-top: none;
   border-left: none;
   border-right: none;
@@ -400,7 +405,7 @@ form {
   cursor: pointer;
   line-height: 2.75rem;
   z-index: 0;
-  border-bottom: 3px solid var(--bg-light);
+  border-bottom: 2px solid var(--bg-light);
   background-color: transparent;
   color: var(--text-default);
 }
@@ -426,7 +431,7 @@ form {
   overflow-y: auto;
   overflow-x: auto;
   align-items: center;
-  box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0.4rem 1.2rem var(--shadow);
   transition: max-height 0.4s ease-out, opacity 0.3s ease-out;
 }
 
@@ -443,6 +448,9 @@ form {
   color: var(--text-muted);
   transition: none;
   cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .option-item:hover {
@@ -627,34 +635,38 @@ tr.status-completed td .custom-select {
   border-radius: 0.5rem;
   border-color: transparent;
 }
-td .add-attendance {
-  font-family: "Fredoka", Arial, Helvetica, sans-serif;
-  border-radius: 1rem;
-  padding: 5px 10px;
-  border: none;
-  background-color: var(--success-color);
-  color: var(--text-default);
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-td .add-attendance:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
+td .add-attendance,
 td .remove-attendance {
-  font-family: "Fredoka", Arial, Helvetica, sans-serif;
-  border-radius: 10px;
-  padding: 5px 10px;
+  border-radius: 10rem;
+  padding: 0.75rem 0.75rem;
+  margin: 0;
   border: none;
-  background-color: var(--error-color);
-  color: var(--text-default);
   cursor: pointer;
+  background: var(--text-muted);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+td .add-attendance:hover,
 td .remove-attendance:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  background: var(--text-strong);
+  box-shadow: 0 4px 12px var(--shadow);
+  transform: translateY(-2px);
 }
+td .add-attendance svg,
+td .remove-attendance svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+td .add-attendance svg {
+  fill: var(--success-color);
+}
+td .remove-attendance svg {
+  fill: var(--error-color);
+}
+td .add-attendance:hover svg,
+td .remove-attendance:hover svg {
+  fill: var(--text-dark);
+}
+
 .filter-controls {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -799,7 +811,7 @@ td .remove-attendance:hover {
   display: flex;
   width: 100%;
   align-items: center;
-  border-bottom: 3px solid var(--bg-light);
+  border-bottom: 2px solid var(--bg-light);
   overflow: hidden;
   transition: border-color 0.2s;
 }
@@ -885,33 +897,39 @@ td .remove-attendance:hover {
   }
 
   #periods-table thead {
-    display: none; /* header hidden in card mode */
+    display: none;
   }
 
   #periods-table tr {
-    margin-bottom: 10px;
-    border: 1px solid var(--divider, #eee);
-    border-radius: 8px;
-    padding: 8px;
-    background: var(--bg-default, #fff);
+    margin-bottom: 1rem;
+    border: 1px solid var(--text-muted);
+    border-radius: 1rem;
+    padding: 1rem;
+    background: var(--bg-default);
   }
 
   #periods-table td {
     display: flex;
-    justify-content: space-between;
-    padding: 6px 8px;
-    white-space: normal;
+    padding: 0.75rem 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
   }
 
   #periods-table td::before {
-    content: attr(data-label); /* labels injected by JS */
+    content: attr(data-label);
     font-weight: 600;
-    margin-right: 8px;
-    color: var(--text-muted, #666);
-    flex: 0 0 40%;
+    margin-right: 1rem;
+    color: var(--text-muted);
+    text-align: start;
+    flex: 0 0 30%;
   }
 
-  #periods-table td > * {
-    flex: 1;
+  tr.status-scheduled td .custom-select,
+  tr.status-running td .custom-select,
+  tr.status-completed td .custom-select,
+  tr.status-cancelled td .custom-select {
+    max-width: 25%;
   }
 }
