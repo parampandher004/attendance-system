@@ -1,0 +1,736 @@
+{% extends "base.html" %} {% block title %}Admin Dashboard{% endblock %} {%
+block content %}
+
+<div class="main" id="main">
+  <div class="compartments">
+    <div class="compartment">
+      <h2>Today's Periods</h2>
+      <div id="add-class-modal" class="modal">
+        <div class="modal-content">
+          <div style="width: 100%">
+            <span class="close-btn"
+              ><svg
+                width="24"
+                height="24"
+                viewBox="0 0 6.3499999 6.3499999"
+                fill="none"
+              >
+                <path
+                  id="rect1"
+                  style="stroke-width: 0.454438"
+                  d="M 0.56638171,-0.56638171 C 0.42177738,-0.42177738 0.33252088,-0.22160664 0.33252088,0 c 0,0.44321328 0.35666386,0.79987714 0.79987712,0.79987714 H 3.6902509 V 3.35773 c 0,0.4432133 0.3566639,0.7998772 0.7998772,0.7998772 0.4432132,0 0.7998771,-0.3566639 0.7998771,-0.7998772 V 0.79987714 h 2.5578529 c 0.4432133,0 0.7998771,-0.35666386 0.7998771,-0.79987714 0,-0.44321328 -0.3566638,-0.79987714 -0.7998771,-0.79987714 H 5.2900052 V -3.35773 c 0,-0.4432133 -0.3566639,-0.7998772 -0.7998771,-0.7998772 -0.4432133,0 -0.7998772,0.3566639 -0.7998772,0.7998772 v 2.55785286 H 1.132398 c -0.22160662,0 -0.42141195,0.0888911 -0.56601629,0.23349543 z"
+                  transform="rotate(45)"
+                />
+              </svg>
+            </span>
+            <h2>Add New Class Schedule</h2>
+
+            <form id="add-class-form">
+              <div class="group bt-margin" style="max-width: 1000px">
+                <label for="value-className" class="input-label"
+                  >Class Name:</label
+                >
+                <select
+                  id="className"
+                  name="class_name"
+                  class="js-custom-dropdown"
+                  required
+                >
+                  <option value="">Select Class</option>
+                </select>
+                <br />
+              </div>
+              <div class="group bt-margin" style="max-width: 1000px">
+                <label for="subjectName" class="input-label"
+                  >Subject Name:</label
+                >
+                <select
+                  id="subjectName"
+                  name="ts_id"
+                  class="js-custom-dropdown"
+                  required
+                  disabled
+                >
+                  <option value="">Select Subject</option>
+                </select>
+                <br />
+              </div>
+
+              <div
+                class="js-time-picker group bt-margin"
+                style="max-width: 1000px"
+                data-hour-id="startHour"
+                data-minute-id="startMinute"
+                data-hidden-id="start_time_hidden"
+              >
+                <label for="startHour" class="input-label">Start Time:</label>
+
+                <div class="time-selector-group">
+                  <!-- Hour Dropdown -->
+                  <select id="startHour" class="time-select-field"></select>
+
+                  <span class="time-separator">:</span>
+
+                  <!-- Minute Dropdown -->
+                  <select id="startMinute" class="time-select-field"></select>
+                </div>
+
+                <!-- Hidden input for form submission -->
+                <input
+                  type="hidden"
+                  name="start_time"
+                  id="start_time_hidden"
+                  value="09:00"
+                />
+              </div>
+
+              <div
+                class="js-time-picker group bt-margin"
+                style="max-width: 1000px"
+                data-hour-id="endHour"
+                data-minute-id="endMinute"
+                data-hidden-id="end_time_hidden"
+              >
+                <label for="endHour" class="input-label">End Time:</label>
+
+                <div class="time-selector-group">
+                  <!-- Hour Dropdown -->
+                  <select id="endHour" class="time-select-field"></select>
+
+                  <span class="time-separator">:</span>
+
+                  <!-- Minute Dropdown -->
+                  <select id="endMinute" class="time-select-field"></select>
+                </div>
+
+                <!-- Hidden input for form submission -->
+                <input
+                  type="hidden"
+                  name="end_time"
+                  id="end_time_hidden"
+                  value="17:00"
+                />
+              </div>
+
+              <div class="calendar-wrapper">
+                <div
+                  class="input-wrapper group bt-margin"
+                  style="max-width: 1000px"
+                >
+                  <label for="modalDateInput" class="input-label"
+                    >Class Date:</label
+                  >
+                  <input
+                    type="text"
+                    id="modalDateInput"
+                    name="date"
+                    class="date-input input"
+                    placeholder="Click to select date"
+                    readonly
+                  />
+                </div>
+                <div class="calendar-container">
+                  <div class="calendar-header">
+                    <button type="button" class="cal-nav-btn prev-month-btn">
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M15 18l-6-6 6-6" />
+                      </svg>
+                    </button>
+                    <div class="month-year"></div>
+                    <button type="button" class="cal-nav-btn next-month-btn">
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M9 18l6-6-6-6" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="calendar-grid"></div>
+                </div>
+              </div>
+
+              <input type="hidden" name="day" id="day" />
+              <input type="hidden" name="status" value="scheduled" />
+
+              <button type="submit" class="submit-btn">Save Class</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="bt-margin"></div>
+      <button class="add-class-btn" id="open-add-class-modal">
+        Schedule Class
+      </button>
+      <div class="table-container" style="overflow: visible">
+        <table id="periods-table" style="display: none">
+          <thead>
+            <tr>
+              <th>Class Name</th>
+              <th>Subject Name</th>
+              <th>Assigned Teacher</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="periods-body"></tbody>
+        </table>
+      </div>
+      <p id="no-periods-message" style="display: none">
+        No periods scheduled for today.
+      </p>
+    </div>
+  </div>
+  <div id="periodModal" class="modal">
+    <div class="modal-content" style="max-width: 100%">
+      <div style="width: 100%">
+        <h2 id="periodModalTitle"></h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Roll No</th>
+                <th>Name</th>
+                <th>Present</th>
+                <th>Absent</th>
+              </tr>
+            </thead>
+            <tbody id="studentAttendanceList"></tbody>
+          </table>
+        </div>
+        <span onclick="closePeriodModal()" class="close-btn"
+          ><svg
+            width="24"
+            height="24"
+            viewBox="0 0 6.3499999 6.3499999"
+            fill="none"
+          >
+            <path
+              id="rect1"
+              style="stroke-width: 0.454438"
+              d="M 0.56638171,-0.56638171 C 0.42177738,-0.42177738 0.33252088,-0.22160664 0.33252088,0 c 0,0.44321328 0.35666386,0.79987714 0.79987712,0.79987714 H 3.6902509 V 3.35773 c 0,0.4432133 0.3566639,0.7998772 0.7998772,0.7998772 0.4432132,0 0.7998771,-0.3566639 0.7998771,-0.7998772 V 0.79987714 h 2.5578529 c 0.4432133,0 0.7998771,-0.35666386 0.7998771,-0.79987714 0,-0.44321328 -0.3566638,-0.79987714 -0.7998771,-0.79987714 H 5.2900052 V -3.35773 c 0,-0.4432133 -0.3566639,-0.7998772 -0.7998771,-0.7998772 -0.4432133,0 -0.7998772,0.3566639 -0.7998772,0.7998772 v 2.55785286 H 1.132398 c -0.22160662,0 -0.42141195,0.0888911 -0.56601629,0.23349543 z"
+              transform="rotate(45)"
+            />
+          </svg>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="compartments">
+    <div class="compartment">
+      <h2>Assigned Classes</h2>
+      {% if classes %}
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Subject</th>
+              <th>Subject Code</th>
+              <th>Teacher</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cls in classes %}
+            <tr>
+              <td>{{ cls['class_name'] }}</td>
+              <td>{{ cls['subject_code'] }}</td>
+              <td>{{ cls['subject'] }}</td>
+              <td>{{ cls['teacher'] }}</td>
+              <td>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 6.3499999 6.3499999"
+                  class="view-students"
+                  fill="none"
+                  onclick="viewClassStudents('{{ cls['id'] }}')"
+                >
+                  <path
+                    id="rect2"
+                    style="fill-opacity: 1; stroke-width: 0.278307"
+                    d="M 1.9905633,4.5649819e-4 C 1.8262455,-0.00615141 1.6524289,0.05902133 1.5182407,0.19320962 1.2796837,0.43176659 1.2595679,0.79546623 1.4727654,1.0086637 l 2.164209,2.164209 -2.164209,2.1642089 C 1.2595679,5.5502791 1.2796836,5.9139787 1.5182407,6.1525358 1.7567976,6.3910927 2.1204973,6.4117253 2.3336948,6.1985278 L 4.9738437,3.5583789 C 5.1401298,3.3920927 5.1640316,3.1341312 5.0534253,2.915524 5.0290986,2.859759 4.994519,2.8085586 4.9495557,2.7635953 L 2.3336947,0.1477344 C 2.2404209,0.05446051 2.1183659,0.00559597 1.9905633,4.5649819e-4 Z"
+                  />
+                </svg>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %} {% if not classes %}
+      <p>No classes assigned yet.</p>
+      {% endif %}
+    </div>
+    <div id="studentModal" class="modal">
+      <div class="modal-content" style="max-width: 100%">
+        <div style="width: 100%">
+          <h2 id="studentModalTitle"></h2>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Roll No</th>
+                  <th>Name</th>
+                  <th>Attended</th>
+                  <th>Total</th>
+                  <th>%</th>
+                </tr>
+              </thead>
+              <tbody id="studentList"></tbody>
+            </table>
+          </div>
+          <span onclick="closeModal()" class="close-btn"
+            ><svg
+              width="24"
+              height="24"
+              viewBox="0 0 6.3499999 6.3499999"
+              fill="none"
+            >
+              <path
+                id="rect1"
+                style="stroke-width: 0.454438"
+                d="M 0.56638171,-0.56638171 C 0.42177738,-0.42177738 0.33252088,-0.22160664 0.33252088,0 c 0,0.44321328 0.35666386,0.79987714 0.79987712,0.79987714 H 3.6902509 V 3.35773 c 0,0.4432133 0.3566639,0.7998772 0.7998772,0.7998772 0.4432132,0 0.7998771,-0.3566639 0.7998771,-0.7998772 V 0.79987714 h 2.5578529 c 0.4432133,0 0.7998771,-0.35666386 0.7998771,-0.79987714 0,-0.44321328 -0.3566638,-0.79987714 -0.7998771,-0.79987714 H 5.2900052 V -3.35773 c 0,-0.4432133 -0.3566639,-0.7998772 -0.7998771,-0.7998772 -0.4432133,0 -0.7998772,0.3566639 -0.7998772,0.7998772 v 2.55785286 H 1.132398 c -0.22160662,0 -0.42141195,0.0888911 -0.56601629,0.23349543 z"
+                transform="rotate(45)"
+              />
+            </svg>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="compartment">
+      <h2>Class Timetables</h2>
+      {% if timetables %}
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Day</th>
+              <th>Subject</th>
+              <th>Teacher</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for period in timetables %}
+            <tr>
+              <td>{{ period['class_name'] }}</td>
+              <td>{{ period['day'] }}</td>
+              <td>{{ period['teacher_name'] }}</td>
+              <td>{{ period['subject_name'] }}</td>
+              <td>{{ period['start_time'] }}</td>
+              <td>{{ period['end_time'] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %} {% if not timetables %}
+      <p>No timetables available.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="compartments">
+    <div class="compartment">
+      <h2>Pending Students</h2>
+      {% if pending_students %}
+      <div class="table-container" style="overflow: visible">
+        <table>
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Name</th>
+              <th>Roll No</th>
+              <th>Choose Class</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for student in pending_students %}
+            <tr>
+              <td id="studentId">{{ student['id'] }}</td>
+              <td>{{ student['name'] }}</td>
+              <td>{{ student['roll_no'] }}</td>
+              <td>
+                <select
+                  name="class-students"
+                  id="classStudents"
+                  class="js-custom-dropdown"
+                >
+                  <option value="">Select Class</option>
+                </select>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p>No pending students.</p>
+      {% endif %}
+      <h2>All Students</h2>
+      <div class="table-container">
+        {% if students %}
+        <table>
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Name</th>
+              <th>Roll No</th>
+              <th>Class Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for student in students %}
+            <tr>
+              <td>{{ student['id'] }}</td>
+              <td>{{ student['name'] }}</td>
+              <td>{{ student['roll_no'] }}</td>
+              <td>{{ student['class_name'] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p>No students available.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="compartment">
+      <h2>Assign Teachers to Subjects</h2>
+      {% if teachers %}
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Name</th>
+              <th>Choose Class</th>
+              <th>Choose Subject</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for teacher in teachers %}
+            <tr>
+              <td>{{ teacher['id'] }}</td>
+              <td>{{ teacher['name'] }}</td>
+              <td>
+                <select name="class" id="class" class="js-custom-dropdown">
+                  <option value="">Select Class</option>
+                  {% for cls in classes %}
+                  <option value="{{ cls['class_name'] | trim | lower }}">
+                    {{ cls['class_name'] }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td>
+                <select name="subject" id="subject" class="js-custom-dropdown">
+                  <option value="">Select Subject</option>
+                  {% for subject in subjects %}
+                  <option value="{{ subject['subject'] | trim | lower }}">
+                    {{ subject['subject'] }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p>No teachers available to assign.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="compartments">
+    <div class="compartment">
+      <h2>All Students Attendance</h2>
+      <div
+        class="filter-controls"
+        id="teacher-filter-controls"
+        data-table-id="attendance-table"
+      >
+        <div class="group" style="flex: 1">
+          <select name="subject" id="subject_filter" class="js-custom-dropdown">
+            <option value="">All Subjects</option>
+            {% for cls in classes %}
+            <option value="{{ cls['subject'] | trim | lower }}">
+              {{ cls['subject'] }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="calendar-wrapper" style="flex: 1">
+          <div class="input-wrapper group">
+            <input
+              type="text"
+              id="filterDateInput"
+              class="date-input input"
+              placeholder="Filter by date"
+              readonly
+            />
+          </div>
+          <div class="calendar-container">
+            <div class="calendar-header">
+              <button type="button" class="cal-nav-btn prev-month-btn">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <div class="month-year"></div>
+              <button type="button" class="cal-nav-btn next-month-btn">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+            <div class="calendar-grid"></div>
+          </div>
+        </div>
+        <div class="group" style="flex: 1">
+          <select name="status" id="status_filter" class="js-custom-dropdown">
+            <option value="">All Statuses</option>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+          </select>
+        </div>
+
+        <div class="group" style="flex: 1">
+          <select name="day" id="day_filter" class="js-custom-dropdown">
+            <option value="">All Days</option>
+            <option value="monday">Monday</option>
+            <option value="tuesday">Tuesday</option>
+            <option value="wednesday">Wednesday</option>
+            <option value="thursday">Thursday</option>
+            <option value="friday">Friday</option>
+            <option value="saturday">Saturday</option>
+            <option value="sunday">Sunday</option>
+          </select>
+        </div>
+        <button
+          type="button"
+          class="submit-btn"
+          onclick="resetFilters('teacher-filter-controls')"
+        >
+          Reset Filters
+        </button>
+      </div>
+      {% if attendance %}
+      <div class="table-container">
+        <table id="attendance-table">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Name</th>
+              <th>Roll No</th>
+              <th>Date</th>
+              <th>Subject</th>
+              <th>Day</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in attendance %}
+            <tr>
+              <td>{{ row['class_name'] }}</td>
+              <td>{{ row['name'] }}</td>
+              <td>{{ row['roll_no'] }}</td>
+              <td>{{ row['date'] }}</td>
+              <td>{{ row['subject'] }}</td>
+              <td>{{ row['day'] }}</td>
+              <td>{{ row['status'] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p>No attendance records found.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='custom-time.js')}}"></script>
+<script src="{{ url_for('static', filename='custom-dropdown.js') }}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Get the elements
+    const modal = document.getElementById("add-class-modal");
+    const openBtn = document.getElementById("open-add-class-modal");
+    const closeBtn = document.querySelector(".close-btn");
+    const form = document.getElementById("add-class-form");
+    const message = document.getElementById("modal-message");
+    const ALL_CLASSES = {{ classes | tojson }};
+
+    const classNames = [...new Set(ALL_CLASSES.map(row => row.class_name))];
+    const classNameIdMap = {};
+    ALL_CLASSES.forEach(row => {
+      if (!classNameIdMap[row.class_name]) {
+        classNameIdMap[row.class_name] = [];
+      }
+      classNameIdMap[row.class_name].push({
+        id: row.id,
+        name: row.class_name,
+      });
+    });
+
+    // Populate subject dropdown based on selected class
+    const classSelect = document.getElementById("className");
+    const subjectSelect = document.getElementById("subjectName");
+
+    const classStudentsSelect = document.getElementById("classStudents");
+
+    // --- MODAL DROPDOWN LOGIC ---
+
+    // 1. Define the function that updates the subject dropdown
+      function updateSubjectDropdown(selectedClass) {
+      // Find the wrapper that the custom dropdown created.
+      const subjectWrapper = document.getElementById("wrapper-subjectName");
+      if (!subjectWrapper) return;
+
+      // Create a new <select> element to replace the old one.
+      const newSubjectSelect = document.createElement("select");
+      newSubjectSelect.id = "subjectName";
+      newSubjectSelect.name = "ts_id";
+      newSubjectSelect.className = "js-custom-dropdown";
+      newSubjectSelect.required = true;
+
+      const subjects = ALL_CLASSES.filter(row => row.class_name === selectedClass);
+      newSubjectSelect.disabled = subjects.length === 0;
+
+      // Populate the new select element
+      newSubjectSelect.innerHTML = '<option value="">Select Subject</option>' +
+        subjects.map(sub => `<option value="${sub.id}">${sub.subject}</option>`).join('');
+
+      // Replace the old wrapper with our new, clean <select> element
+      subjectWrapper.parentNode.replaceChild(newSubjectSelect, subjectWrapper);
+
+      // Now, transform the new <select> into a custom dropdown
+      transformSelectToCustomDropdown(newSubjectSelect);
+    }
+    // 2. Populate and transform the class dropdown initially
+    classSelect.innerHTML = '<option value="">Select Class</option>' +
+      classNames.map(cls => `<option value="${cls}">${cls}</option>`).join('');
+
+    classStudentsSelect.innerHTML = '<option value="">Select Class</option>' +
+      Object.values(classNameIdMap).flat().map(cls => `<option value="${cls.id}">${cls.name}</option>`).join('');
+
+    transformSelectToCustomDropdown(classStudentsSelect, (value) => {
+      updateStudent(value, null, "classStudents");
+    });
+
+    transformSelectToCustomDropdown(classSelect, (value) => {
+      updateSubjectDropdown(value);
+    });
+
+    // 3. Perform an initial setup for the (disabled) subject dropdown
+    transformSelectToCustomDropdown(subjectSelect);
+
+
+    // --- END MODAL DROPDOWN LOGIC ---
+
+    // Function to open the modal
+    openBtn.onclick = function () {
+      modal.style.display = "flex";
+      form.reset(); // Clear the form fields
+
+      // Reset dropdowns to their initial state when opening
+      // This will now correctly rebuild and re-initialize the dropdowns
+    };
+
+    // Function to close the modal using the (x) button
+    closeBtn.onclick = function () {
+      modal.style.display = "none";
+    };
+
+    // Function to close the modal when clicking outside the content
+    window.onclick = function (event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
+
+    // 💡 Attach the form submission handler here
+    form.addEventListener("submit", handleAddClassSubmit);
+
+    // Listen for date selection on the filter calendar
+    const filterDateInput = document.getElementById("filterDateInput");
+    if (filterDateInput) {
+      filterDateInput.addEventListener("dateSelected", (e) => {
+        // Call your filter function when a date is selected
+        teacherApplyFilters(e.detail.date, null, "date_filter");
+      });
+    }
+  });
+
+  function viewClassStudents(tsId) {
+    const classes = {{ classes | tojson }};
+    fetch(`/api/classes/${tsId}/students`)
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById("studentList");
+        tbody.innerHTML = "";
+        data.forEach(s => {
+          const attended = s.attended || 0;
+          const totalClasses = s.total_classes || 0;
+          const percentage = (attended / totalClasses) * 100 || 0;
+          const color = s.percentage >= 75 ? 'green' : s.percentage >= 50 ? 'orange' : 'red';
+          tbody.innerHTML += `
+            <tr>
+              <td>${s.roll_no}</td>
+              <td>${s.name}</td>
+              <td>${attended}</td>
+              <td>${totalClasses}</td>
+              <td style="color:${color}">${percentage}%</td>
+            </tr>`;
+        });
+        document.getElementById("studentModal").style.display = "flex";
+        document.getElementById("studentModalTitle").textContent = classes.find(c => c.id == tsId).class_name;
+      });
+  }
+
+  setInterval(updatePeriods, 60000);
+  updatePeriods();
+</script>
+{% endblock %}

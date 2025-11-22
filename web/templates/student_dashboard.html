@@ -79,10 +79,6 @@ block content %}
           </tbody>
         </table>
       </div>
-
-      {% else %}
-      <p>No class assigned yet.</p>
-      {% endif %}
     </div>
   </div>
 
@@ -210,6 +206,9 @@ block content %}
       </div>
     </div>
   </div>
+  {% else %}
+  <p>No class assigned yet.</p>
+  {% endif %}
 </div>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -220,7 +219,7 @@ block content %}
       });
     }
   });
-  setInterval(studentUpdatePeriods, 60000);
-  studentUpdatePeriods();
+  setInterval(updatePeriods, 60000);
+  updatePeriods();
 </script>
 {% endblock %}

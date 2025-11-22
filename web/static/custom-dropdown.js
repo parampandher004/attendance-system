@@ -168,9 +168,9 @@ function transformSelectToCustomDropdown(selectElement, callback = null) {
   // --- 1. BUILD THE NEW HTML STRUCTURE ---
   const wrapper = document.createElement("div");
   // Add the z-index fix to the wrapper for proper stacking
+
   wrapper.className = "custom-select-wrapper relative z-10";
   wrapper.id = `wrapper-${selectId}`;
-
   const arrowSvg = `
                  <span class="select-arrow">
                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
@@ -205,6 +205,11 @@ function transformSelectToCustomDropdown(selectElement, callback = null) {
   const button = document.getElementById(`button-${selectId}`);
   const list = document.getElementById(`list-${selectId}`);
   const hiddenInput = document.getElementById(`value-${selectId}`);
+
+  if (selectElement.id === "roleSelect") {
+    const customSelectButton = document.getElementById("button-roleSelect");
+    customSelectButton.className += " input";
+  }
 
   // Call your existing setup logic using the new references
   setupCustomDropdownLogic(button, list, hiddenInput, callback, selectId);
@@ -309,11 +314,11 @@ function initializeAllCustomDropdowns() {
       select.id === "st_day_filter"
     ) {
       callback = studentApplyFilters;
+    } else if (select.id === "roleSelect") {
+      callback = toggleStudentFields;
+    } else if (select.id === "classStudents") {
+      return;
     }
-
-    // If you had another special dropdown, you'd add:
-    // else if (select.id === "class") { callback = handleClassChange; }
-
     transformSelectToCustomDropdown(select, callback);
   });
 }

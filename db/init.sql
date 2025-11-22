@@ -2,8 +2,9 @@
 -- PostgreSQL database dump
 --
 
+\restrict wPa1TGvA5irKl3qXzwE0ngXKIJsgm1Owp085A3joz0M0xd4feintbjnAGDiqq74
 
--- Dumped from database version 17.6
+-- Dumped from database version 17.6 (Debian 17.6-2.pgdg13+1)
 -- Dumped by pg_dump version 17.6 (Debian 17.6-2.pgdg13+1)
 
 SET statement_timeout = 0;
@@ -17,22 +18,6 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
-
---
--- Name: public; Type: SCHEMA; Schema: -; Owner: pg_database_owner
---
-
-CREATE SCHEMA IF NOT EXISTS public;
-
-
-ALTER SCHEMA public OWNER TO pg_database_owner;
-
---
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: pg_database_owner
---
-
-COMMENT ON SCHEMA public IS 'standard public schema';
-
 
 SET default_tablespace = '';
 
@@ -85,6 +70,10 @@ CREATE TABLE public.classes (
 
 ALTER TABLE public.classes OWNER TO postgres;
 
+--
+-- Name: classes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
 CREATE SEQUENCE public.classes_id_seq
     START WITH 1
     INCREMENT BY 1
@@ -92,8 +81,15 @@ CREATE SEQUENCE public.classes_id_seq
     NO MAXVALUE
     CACHE 1;
 
+
 ALTER SEQUENCE public.classes_id_seq OWNER TO postgres;
+
+--
+-- Name: classes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
 ALTER SEQUENCE public.classes_id_seq OWNED BY public.classes.id;
+
 
 --
 -- Name: face_encodings; Type: TABLE; Schema: public; Owner: postgres
@@ -108,6 +104,10 @@ CREATE TABLE public.face_encodings (
 
 ALTER TABLE public.face_encodings OWNER TO postgres;
 
+--
+-- Name: face_encodings_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
 CREATE SEQUENCE public.face_encodings_id_seq
     START WITH 1
     INCREMENT BY 1
@@ -115,8 +115,15 @@ CREATE SEQUENCE public.face_encodings_id_seq
     NO MAXVALUE
     CACHE 1;
 
+
 ALTER SEQUENCE public.face_encodings_id_seq OWNER TO postgres;
+
+--
+-- Name: face_encodings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
 ALTER SEQUENCE public.face_encodings_id_seq OWNED BY public.face_encodings.id;
+
 
 --
 -- Name: periods; Type: TABLE; Schema: public; Owner: postgres
@@ -136,6 +143,10 @@ CREATE TABLE public.periods (
 
 ALTER TABLE public.periods OWNER TO postgres;
 
+--
+-- Name: periods_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
 CREATE SEQUENCE public.periods_id_seq
     START WITH 1
     INCREMENT BY 1
@@ -143,7 +154,13 @@ CREATE SEQUENCE public.periods_id_seq
     NO MAXVALUE
     CACHE 1;
 
+
 ALTER SEQUENCE public.periods_id_seq OWNER TO postgres;
+
+--
+-- Name: periods_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
 ALTER SEQUENCE public.periods_id_seq OWNED BY public.periods.id;
 
 
@@ -265,6 +282,10 @@ CREATE TABLE public.teachersubjects (
 
 ALTER TABLE public.teachersubjects OWNER TO postgres;
 
+--
+-- Name: teachersubjects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
 CREATE SEQUENCE public.teachersubjects_id_seq
     START WITH 1
     INCREMENT BY 1
@@ -272,8 +293,15 @@ CREATE SEQUENCE public.teachersubjects_id_seq
     NO MAXVALUE
     CACHE 1;
 
+
 ALTER SEQUENCE public.teachersubjects_id_seq OWNER TO postgres;
+
+--
+-- Name: teachersubjects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
 ALTER SEQUENCE public.teachersubjects_id_seq OWNED BY public.teachersubjects.id;
+
 
 --
 -- Name: users; Type: TABLE; Schema: public; Owner: postgres
@@ -325,6 +353,10 @@ CREATE TABLE public.weekly_periods (
 
 ALTER TABLE public.weekly_periods OWNER TO postgres;
 
+--
+-- Name: weekly_periods_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
 CREATE SEQUENCE public.weekly_periods_id_seq
     START WITH 1
     INCREMENT BY 1
@@ -332,14 +364,42 @@ CREATE SEQUENCE public.weekly_periods_id_seq
     NO MAXVALUE
     CACHE 1;
 
+
 ALTER SEQUENCE public.weekly_periods_id_seq OWNER TO postgres;
+
+--
+-- Name: weekly_periods_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
 ALTER SEQUENCE public.weekly_periods_id_seq OWNED BY public.weekly_periods.id;
+
 
 --
 -- Name: attendance id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.attendance ALTER COLUMN id SET DEFAULT nextval('public.attendance_id_seq'::regclass);
+
+
+--
+-- Name: classes id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.classes ALTER COLUMN id SET DEFAULT nextval('public.classes_id_seq'::regclass);
+
+
+--
+-- Name: face_encodings id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.face_encodings ALTER COLUMN id SET DEFAULT nextval('public.face_encodings_id_seq'::regclass);
+
+
+--
+-- Name: periods id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.periods ALTER COLUMN id SET DEFAULT nextval('public.periods_id_seq'::regclass);
 
 
 --
@@ -364,15 +424,23 @@ ALTER TABLE ONLY public.teachers ALTER COLUMN id SET DEFAULT nextval('public.tea
 
 
 --
+-- Name: teachersubjects id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.teachersubjects ALTER COLUMN id SET DEFAULT nextval('public.teachersubjects_id_seq'::regclass);
+
+
+--
 -- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
-ALTER TABLE ONLY public.classes ALTER COLUMN id SET DEFAULT nextval('public.classes_id_seq'::regclass);
-ALTER TABLE ONLY public.face_encodings ALTER COLUMN id SET DEFAULT nextval('public.face_encodings_id_seq'::regclass);
-ALTER TABLE ONLY public.periods ALTER COLUMN id SET DEFAULT nextval('public.periods_id_seq'::regclass);
-ALTER TABLE ONLY public.teachersubjects ALTER COLUMN id SET DEFAULT nextval('public.teachersubjects_id_seq'::regclass);
+
+--
+-- Name: weekly_periods id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
 ALTER TABLE ONLY public.weekly_periods ALTER COLUMN id SET DEFAULT nextval('public.weekly_periods_id_seq'::regclass);
 
 
@@ -557,6 +625,10 @@ ALTER TABLE ONLY public.teachersubjects
 ALTER TABLE ONLY public.weekly_periods
     ADD CONSTRAINT weekly_periods_teacher_subject_id_fkey FOREIGN KEY (teacher_subject_id) REFERENCES public.teachersubjects(id);
 
+
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict wPa1TGvA5irKl3qXzwE0ngXKIJsgm1Owp085A3joz0M0xd4feintbjnAGDiqq74
+

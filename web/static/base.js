@@ -1,39 +1,3 @@
-function studentUpdatePeriods() {
-  const table = document.getElementById("periods-table");
-  const tbody = document.getElementById("periods-body");
-  const noPeriodsMessage = document.getElementById("no-periods-message");
-
-  tbody.innerHTML = "";
-  noPeriodsMessage.style.display = "none";
-
-  fetch("/api/periods/today")
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.length > 0) {
-        table.style.display = "table";
-        data.forEach((period) => {
-          let row = document.createElement("tr");
-          row.classList.add("status-" + period.status.toLowerCase());
-          row.innerHTML = `
-              <td>${period.subject_name}</td>
-              <td>${period.start_time}</td>
-              <td>${period.end_time}</td>
-              <td>${period.status.toUpperCase()}</td>
-            `;
-          tbody.appendChild(row);
-        });
-        setTableDataLabels("periods-table");
-      } else {
-        noPeriodsMessage.style.display = "block";
-      }
-    })
-    .catch((error) => {
-      noPeriodsMessage.textContent =
-        "Error fetching periods. Please try again later.";
-      noPeriodsMessage.style.display = "block";
-    });
-}
-
 function showToast(message, category = "info", duration = 4000) {
   const toast = document.getElementById("toast");
   toast.textContent = message;
@@ -53,6 +17,20 @@ function toggleDarkMode() {
     localStorage.setItem("theme", "dark");
     return;
   }
+}
+
+function toggleStudentFields(value, hiddenInput, selectId) {
+  const roleInput = hiddenInput;
+  if (!roleInput) {
+    console.error("Role hidden input not found.");
+    return;
+  }
+
+  const role = roleInput.value;
+  const fields = document.getElementById("studentFields");
+
+  // Set the display property
+  fields.style.display = role === "student" ? "flex" : "none";
 }
 
 // --- Custom Dropdown Setup Function ---
@@ -315,11 +293,13 @@ function updatePeriods() {
     .then((data) => {
       if (data.length > 0) {
         table.style.display = "table";
-        data.forEach((period) => {
-          let row = document.createElement("tr");
-          row.classList.add("status-" + period.status.toLowerCase());
-          row.innerHTML = `
-              <td>${period.class_name}</td>
+        if (SESSION.role === "teacher") {
+          data.forEach((period) => {
+            let row = document.createElement("tr");
+            row.classList.add("status-" + period.status.toLowerCase());
+
+            row.innerHTML = `
+            <td>${period.class_name}</td>
             <td>${period.subject_name}</td>
             <td>${period.start_time}</td>
             <td>${period.end_time}</td>
@@ -345,8 +325,11 @@ function updatePeriods() {
               </div>
             </td>
           `;
-          if (period.status === "Running" || period.status === "Completed") {
-            row.innerHTML += `
+            if (
+              period.status.toLowerCase() === "running" ||
+              period.status.toLowerCase() === "completed"
+            ) {
+              row.innerHTML += `
               <td>
                 <svg
                   width="24"
@@ -364,19 +347,93 @@ function updatePeriods() {
                 </svg>
               </td>
             `;
-          } else {
-            row.innerHTML += "<td></td>";
-          }
-          tbody.appendChild(row);
-        });
-        initializeStatusDropdowns();
-        setTableDataLabels("periods-table");
+            } else {
+              row.innerHTML += "<td></td>";
+            }
+            tbody.appendChild(row);
+          });
+          initializeStatusDropdowns();
+          setTableDataLabels("periods-table");
+        } else if (SESSION.role === "student") {
+          data.forEach((period) => {
+            let row = document.createElement("tr");
+            row.classList.add("status-" + period.status.toLowerCase());
+            row.innerHTML = `
+              <td>${period.subject_name}</td>
+              <td>${period.start_time}</td>
+              <td>${period.end_time}</td>
+              <td>${period.status.toUpperCase()}</td>
+            `;
+            tbody.appendChild(row);
+          });
+          setTableDataLabels("periods-table");
+        } else if (SESSION.role === "admin") {
+          data.forEach((period) => {
+            let row = document.createElement("tr");
+            row.classList.add("status-" + period.status.toLowerCase());
+            row.innerHTML = `
+            <td>${period.class_name}</td>
+            <td>${period.subject_name}</td>
+            <td>${period.teacher_name}</td>
+            <td>${period.start_time}</td>
+            <td>${period.end_time}</td>
+            <td style="overflow: visible;">
+              <div class="custom-select-wrapper" id="status-wrapper-${period.id}">
+                <input type="hidden" name="status-${period.id}" id="statusValue-${period.id}" value="${period.status}" />
+
+                <div class="custom-select" id="statusSelectButton-${period.id}">
+                  ${period.status}
+                  <span class="select-arrow">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+                    </svg>
+                  </span>
+                </div>
+
+                <ul class="options-list" id="statusOptionsList-${period.id}">
+                  <li class="option-item" data-value="scheduled">Scheduled</li>
+                  <li class="option-item" data-value="running">Running</li>
+                  <li class="option-item" data-value="completed">Completed</li>
+                  <li class="option-item" data-value="cancelled">Cancelled</li>
+                </ul>
+              </div>
+            </td>
+          `;
+            if (
+              period.status.toLowerCase() === "running" ||
+              period.status.toLowerCase() === "completed"
+            ) {
+              row.innerHTML += `
+              <td>
+                <svg
+                  width="24"
+                  height="24"
+                  class="view-students"
+                  viewBox="0 0 6.3499999 6.3499999"
+                  fill="none"
+                  onClick="viewPeriodStudents(${period.id})"
+                >
+                  <path
+                    id="rect2"
+                    style="fill-opacity: 1; stroke-width: 0.278307"
+                    d="M 1.9905633,4.5649819e-4 C 1.8262455,-0.00615141 1.6524289,0.05902133 1.5182407,0.19320962 1.2796837,0.43176659 1.2595679,0.79546623 1.4727654,1.0086637 l 2.164209,2.164209 -2.164209,2.1642089 C 1.2595679,5.5502791 1.2796836,5.9139787 1.5182407,6.1525358 1.7567976,6.3910927 2.1204973,6.4117253 2.3336948,6.1985278 L 4.9738437,3.5583789 C 5.1401298,3.3920927 5.1640316,3.1341312 5.0534253,2.915524 5.0290986,2.859759 4.994519,2.8085586 4.9495557,2.7635953 L 2.3336947,0.1477344 C 2.2404209,0.05446051 2.1183659,0.00559597 1.9905633,4.5649819e-4 Z"
+                    />
+                </svg>
+              </td>
+            `;
+            } else {
+              row.innerHTML += "<td></td>";
+            }
+            tbody.appendChild(row);
+          });
+          initializeStatusDropdowns();
+          setTableDataLabels("periods-table");
+        }
       } else {
         noPeriodsMessage.style.display = "block";
       }
     })
     .catch((error) => {
-      console.error("Error fetching periods:", error);
       noPeriodsMessage.textContent =
         "Error fetching periods. Please try again later.";
       noPeriodsMessage.style.display = "block";
@@ -395,4 +452,25 @@ function setTableDataLabels(tableId) {
       if (headers[i] !== "") td.setAttribute("data-label", headers[i] || "");
     });
   });
+}
+
+function updateStudent(value, hiddenInput, selectId) {
+  if (selectId === "classStudents") {
+    const class_id = value;
+    console.log("Selected class ID:", class_id);
+
+    const student_id = 
+    console.log("Student ID:", student_id);
+    fetch(`/api/students/${student_id}/class`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ class_id: class_id }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        hiddenInput.value = data;
+      });
+  }
 }

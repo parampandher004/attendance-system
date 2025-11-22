@@ -16,6 +16,7 @@ UPLOAD_FOLDER = "dataset/"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+# Day map to convert integer (as stored in db)  day to string day 
 DAY_MAP = {
     "0": "Sunday",
     "1": "Monday",
@@ -50,13 +51,13 @@ def serialize_rows(rows):
         row = dict(r)
         for k, v in row.items():
             if isinstance(v, datetime):
-                row[k] = v.strftime("%d/%m/%Y")
+                row[k] = v.strftime("%d/%m/%Y") # Convert from YYYY-MM-DD
                 continue
             if isinstance(v, date):
-                row[k] = v.strftime("%d/%m/%Y")
+                row[k] = v.strftime("%d/%m/%Y") # Convert from YYYY-MM-DD
                 continue
-            if isinstance(v, time):
-                row[k] = _format_time(v)
+            if isinstance(v, time): 
+                row[k] = _format_time(v) # Convert from HH:MM:SS
                 continue
             if hasattr(v, "isoformat") and not isinstance(v, str):
                 try:
@@ -64,7 +65,7 @@ def serialize_rows(rows):
                 except Exception:
                     row[k] = str(v)
             if k.lower() == "status" and isinstance(v, str):
-                row[k] = v.capitalize()
+                row[k] = v.capitalize() # Convert lowercase status
         out.append(row)
     return out
 
@@ -162,24 +163,30 @@ def login():
         db.execute("SELECT * FROM users WHERE username=%s AND password=%s", (username, hashed_password))
         user = db.fetchone()
         if user:
-            db.execute("SELECT name FROM students WHERE user_id=%s", (user["id"],))
-            user_name = db.fetchone()
             session["user_id"] = user["id"]
             session["username"] = user["username"]
             session["role"] = user["role"]
-            session["name"] = user_name["name"] if user_name else "Teacher"
-            if user["role"] == "student":
-                db.execute("SELECT id, class_id FROM students Where user_id=%s", (user["id"],))
+            if user["role"] == "student": # For students
+                db.execute("SELECT name, class_id FROM students Where user_id=%s", (user["id"],))
                 student = db.fetchone()
+                session["name"] = student["name"].capitalize()
                 session["class_id"] = student["class_id"]
                
                 flash(f"Welcome, {session['name']}! You are logged in as a {session['role']}.", "success")
                 db.connection.close()
                 return redirect("/student")
-            else:
+            elif user["role"] == "teacher": # For teachers
+                db.execute("SELECT name, id from teachers where user_id=%s", (user["id"],))
+                teacher = db.fetchone()
+                session["name"] = teacher["name"].capitalize()
                 flash(f"Welcome, {session['name']}! You are logged in as a {session['role']}.", "success")
                 db.connection.close()
                 return redirect("/teacher")
+            elif user["role"] == "admin": # For Admin
+                session["name"] = "Admin"
+                flash(f"Welcome, {session['name']}! You are successfuly logged in", "success")
+                db.connection.close()
+                return redirect("/admin")
         else:
             db.connection.close()
             flash("Invalid credentials!", "error")
@@ -308,11 +315,78 @@ def teacher_dashboard():
     db.connection.close()
     return render_template("teacher_dashboard.html", attendance=serialize_rows(attendance), classes=classes, timetables=timetables)
 
+# ---------------Admin Dashboard ----------------
+@app.route("/admin")
+def admin_dashboard():
+    db = get_db()
+    if session.get("role") != "admin":
+        return redirect("/")
+    db.execute("""
+               SELECT ts.id, c.name as class_name, sub.code as subject_code, sub.name as subject, t.name as teacher FROM classes c
+               JOIN teacherSubjects ts ON c.id = ts.class_id
+               JOIN subjects sub ON ts.subject_id = sub.id
+               JOIN teachers t ON ts.teacher_id = t.id
+               """)
+    rows = db.fetchall()
+    classes = []
+    for row in rows:
+        classes.append(dict(id=row["id"], class_name=row["class_name"], subject_code=row["subject_code"], subject=row["subject"], teacher=row["teacher"]))
+    
+    db.execute("""
+        SELECT c.name as class_name, sub.name as subject_name, t.name as teacher_name, p.day, p.start_time, p.end_time FROM weekly_periods p
+        JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id
+        JOIN teachers t ON ts.teacher_id = t.id
+        JOIN subjects sub ON ts.subject_id = sub.id
+        JOIN classes c ON ts.class_id = c.id
+    """)
+    rows = db.fetchall()
+    timetables = [
+        {"class_name": row["class_name"], "subject_name": row["subject_name"], "teacher_name": row["teacher_name"], "day": DAY_MAP[f"{row['day']}"], "start_time": _format_time(row["start_time"]), "end_time": _format_time(row["end_time"])} 
+        for row in rows
+    ]
+    
+    db.execute("""
+        SELECT s.id, s.name, s.roll_no, c.name as class_name FROM students s
+        LEFT JOIN classes c ON s.class_id = c.id
+        """)
+    rows = db.fetchall()
+    pending_students = []
+    students = []
+    for row in rows:
+        if row["class_name"] == None:
+            pending_students += [dict(id=row["id"], name=row["name"], roll_no=row["roll_no"])]
+        else :
+            students += [dict(id=row["id"], name=row["name"], roll_no=row["roll_no"], class_name=row["class_name"])]
+    
+    db.execute("""
+        SELECT t.id, t.name, c.name as class_name, sub.name as subject_name FROM teachers t
+        LEFT JOIN teacherSubjects ts ON t.id = ts.teacher_id
+        LEFT JOIN classes c ON ts.class_id = c.id
+        LEFT JOIN subjects sub ON ts.subject_id = sub.id
+        """)
+    rows = db.fetchall()
+    teachers = [dict(id=row["id"], name=row["name"], class_name=row["class_name"], subject_name=row["subject_name"]) for row in rows]
+    
+    db.execute("""
+        SELECT c.name as class_name, s.name as name, s.roll_no, p.date, p.day, sub.name as subject, COALESCE(a.status, 'absent') as status
+        FROM students s
+        JOIN teacherSubjects ts ON s.class_id = ts.class_id
+        JOIN periods p ON ts.id = p.teacher_subject_id
+        JOIN subjects sub ON ts.subject_id = sub.id
+        JOIN classes c ON s.class_id = c.id
+        LEFT JOIN attendance a ON p.id = a.period_id AND a.student_id = s.id
+        ORDER BY p.date DESC 
+        """)
+    rows = db.fetchall()
+    attendance = [{"class_name": row["class_name"], "name": row["name"], "roll_no": row["roll_no"], "date": row["date"], "day": DAY_MAP[f"{row['day']}"], "subject": row["subject"], "status": row["status"]} for row in rows]
+    db.connection.close()
+    return render_template("admin_dashboard.html", classes=classes, timetables=timetables, students=students, pending_students=pending_students, teachers=teachers, attendance=serialize_rows(attendance))
+
 # ---------- Student's List ------------------
 @app.route("/api/classes/<ts_id>/students", methods=["GET"])
 def get_students(ts_id):
     db = get_db()
-    if session.get("role") != "teacher":
+    if session.get("role") != "teacher" and session.get("role") != "admin":
         flash("Unauthorized", "error")
         return jsonify({"error": "Unauthorized"}), 403
     db.execute("""
@@ -367,11 +441,24 @@ def get_periods_today():
         today_periods = db.fetchall()
         db.connection.close()
         return jsonify(serialize_rows(today_periods))
+    elif session.get("role") == "admin":
+        db = get_db()
+        db.execute("""
+            SELECT p.id, c.name as class_name, sub.name as subject_name, t.name as teacher_name, p.start_time, p.end_time, p.status FROM periods p
+            JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id
+            JOIN subjects sub ON ts.subject_id = sub.id
+            JOIN classes c ON ts.class_id = c.id
+            JOIN teachers t ON ts.teacher_id = t.id
+            WHERE p.date = %s
+        """, (datetime.now().strftime("%Y-%m-%d"),))
+        today_periods = db.fetchall()
+        db.connection.close()
+        return jsonify(serialize_rows(today_periods))
     
 # ---------------- API to Add Class ----------------
 @app.route("/api/classes", methods=["POST"])
 def add_class():
-    if session.get("role") != "teacher":
+    if session.get("role") != "teacher" and session.get("role") != "admin":
         return jsonify({"error": "Unauthorized"}), 403
     if not request.json:
         return jsonify({"error": "No data provided"}), 400
@@ -400,7 +487,7 @@ def add_class():
 # ---------------- API to Update Period Status ----------------
 @app.route("/api/periods/<int:period_id>/status", methods=["POST"])
 def update_period_status_api(period_id):
-    if session.get("role") != "teacher":
+    if session.get("role") != "teacher" and session.get("role") != "admin":
         return jsonify({"error": "Unauthorized"}), 403
     if not request.json or "status" not in request.json:
         return jsonify({"error": "No status provided"}), 400
@@ -418,7 +505,7 @@ def update_period_status_api(period_id):
 # ----------------- API to Get Period Students ----------------
 @app.route("/api/periods/<int:period_id>/students", methods=["GET"])
 def get_period_students_api(period_id):
-    if session.get("role") != "teacher":
+    if session.get("role") != "teacher" and session.get("role") != "admin":
         return jsonify({"error": "Unauthorized"}), 403
     db = get_db()
     db.execute("SELECT s.id, s.roll_no, s.name, a.status FROM periods p JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id JOIN students s ON ts.class_id = s.class_id LEFT JOIN attendance a ON p.id = a.period_id WHERE p.id = %s", (period_id,))
@@ -429,7 +516,7 @@ def get_period_students_api(period_id):
 # ---------------- API to Add Attendance ----------------
 @app.route("/api/periods/<int:period_id>/students/<int:student_id>", methods=["POST"])
 def add_attendance_api(period_id, student_id):
-    if session.get("role") != "teacher":
+    if session.get("role") != "teacher" and session.get("role") != "admin":
         return jsonify({"error": "Unauthorized"}), 403
     db = get_db()
     db.execute("INSERT INTO attendance (period_id, student_id, status) VALUES (%s, %s, %s)", (period_id, student_id, "present"))
@@ -440,7 +527,7 @@ def add_attendance_api(period_id, student_id):
 # ---------------- API to Remove Attendance ----------------
 @app.route("/api/periods/<int:period_id>/students/<int:student_id>", methods=["DELETE"])
 def remove_attendance_api(period_id, student_id):
-    if session.get("role") != "teacher":
+    if session.get("role") != "teacher" and session.get("role") != "admin":
         return jsonify({"error": "Unauthorized"}), 403
     db = get_db()
     db.execute("DELETE FROM attendance WHERE period_id = %s AND student_id = %s", (period_id, student_id))
@@ -448,10 +535,24 @@ def remove_attendance_api(period_id, student_id):
     db.connection.close()
     return jsonify({"message": "Attendance removed successfully"}), 200
 
+# ------------------ API to update Student's Class -----------------
+@app.route("/api/students/<int:student_id>/class", methods=["POST"])
+def update_student_class_api(student_id):
+    if session.get("role") != "admin":
+        return jsonify({"error": "Unauthorized"}), 403
+    if not request.json or "class_id" not in request.json:
+        return jsonify({"error": "No class_id provided"}), 400
+    class_id = request.json["class_id"]
+    db = get_db()
+    db.execute("UPDATE students SET class_id = %s WHERE id = %s", (class_id, student_id))
+    db.connection.commit()
+    db.connection.close()
+    return jsonify({"message": "Class updated successfully"}), 200
+
 # ----------------- API to get currently running Class ------------------
 @app.route("/api/classes/<int:class_id>", methods=["GET"])
 def get_current_class_api(class_id):
-    if session.get("role") != "teacher":
+    if session.get("role") != "teacher" and session.get("role") != "admin":
         return jsonify({"error": "Unauthorized"}), 403
     db = get_db()
     db.execute("SELECT p.status, p.id FROM periods p JOIN teacherSubjects ts ON p.teacher_subject_id = ts.id WHERE ts.class_id = %s AND p.status = 'running'", (class_id,))
@@ -461,4 +562,4 @@ def get_current_class_api(class_id):
 
 if __name__ == "__main__":
     scheduler.start()
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)

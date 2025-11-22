@@ -50,6 +50,12 @@
     <script src="{{ url_for('static', filename='custom-calendar.js') }}"></script>
     <script src="{{ url_for('static', filename='custom-dropdown.js') }}"></script>
     <script>
+
+      window.SESSION = {
+        name: "{{ session.name }}",
+        role: "{{ session.role }}"
+      }
+
       document.addEventListener("DOMContentLoaded", function() {
 
         const theme = localStorage.getItem("theme");
