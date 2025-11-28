@@ -1,7 +1,10 @@
 from datetime import date, datetime, time
+
+import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 import os, pickle, hashlib
 from flask import Flask, jsonify, render_template, request, redirect, session, flash
+from drive_uploader import upload_to_drive
 from werkzeug.utils import secure_filename
 import psycopg2
 import psycopg2.extras
@@ -26,6 +29,9 @@ DAY_MAP = {
     "5": "Friday",
     "6": "Saturday",
 }
+
+UPLOAD_FOLDER = "temp_uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ---------------- DB Helper ----------------
 def get_db():
@@ -68,6 +74,20 @@ def serialize_rows(rows):
                 row[k] = v.capitalize() # Convert lowercase status
         out.append(row)
     return out
+
+def get_students_folder_id(student_id):
+    db = get_db()
+    db.execute("SELECT folder_id from students where id=%s", (student_id,))
+    folder_id = db.fetchone()["folder_id"]
+    db.connection.close()
+    return folder_id
+
+def save_drive_file(student_id, drive_file_id, file_name):
+    db = get_db()
+    db.execute("INSERT INTO students_images (student_id, drive_file_id, file_name) VALUES (%s, %s, %s)",
+               (student_id, drive_file_id, file_name))
+    db.connection.commit()
+    db.connection.close()
 
 # --------- Generate Today's periods ----------
 def generate_today_periods():
@@ -229,7 +249,7 @@ def student_dashboard():
         JOIN subjects sub ON ts.subject_id = sub.id
         JOIN teachers t ON ts.teacher_id = t.id
         LEFT JOIN periods p ON ts.id = p.teacher_subject_id
-        LEFT JOIN attendance a ON p.id = a.period_id
+        LEFT JOIN attendance a ON p.id = a.period_id AND a.student_id = s.id
         WHERE s.user_id=%s
         GROUP BY ts.id, sub.code, sub.name, t.name, c.name, c.id
         ORDER BY sub.name
@@ -257,8 +277,8 @@ def student_dashboard():
         JOIN subjects sub ON ts.subject_id = sub.id
         JOIN classes c ON ts.class_id = c.id
         JOIN students s ON c.id = s.class_id
-        LEFT JOIN attendance a ON p.id = a.period_id
-        WHERE s.user_id=(SELECT id FROM students WHERE user_id=%s)
+        LEFT JOIN attendance a ON p.id = a.period_id AND a.student_id = s.id
+        WHERE s.user_id=%s
     """, (session["user_id"],))
     rows = db.fetchall()
 
@@ -365,7 +385,13 @@ def admin_dashboard():
         LEFT JOIN subjects sub ON ts.subject_id = sub.id
         """)
     rows = db.fetchall()
-    teachers = [dict(id=row["id"], name=row["name"], class_name=row["class_name"], subject_name=row["subject_name"]) for row in rows]
+    pending_teachers = []
+    teachers = []
+    for row in rows:
+        if row["class_name"] == None:
+            pending_teachers += [dict(id=row["id"], name=row["name"])]
+        else :
+            teachers += [dict(id=row["id"], name=row["name"], class_name=row["class_name"], subject_name=row["subject_name"])]
     
     db.execute("""
         SELECT c.name as class_name, s.name as name, s.roll_no, p.date, p.day, sub.name as subject, COALESCE(a.status, 'absent') as status
@@ -379,8 +405,15 @@ def admin_dashboard():
         """)
     rows = db.fetchall()
     attendance = [{"class_name": row["class_name"], "name": row["name"], "roll_no": row["roll_no"], "date": row["date"], "day": DAY_MAP[f"{row['day']}"], "subject": row["subject"], "status": row["status"]} for row in rows]
+    
+    db.execute("SELECT c.id, c.name as class_name from classes c")
+    rows = db.fetchall()
+    class_list = []
+    for row in rows:
+        class_list.append(dict(id=row["id"], class_name=row["class_name"]))
+        
     db.connection.close()
-    return render_template("admin_dashboard.html", classes=classes, timetables=timetables, students=students, pending_students=pending_students, teachers=teachers, attendance=serialize_rows(attendance))
+    return render_template("admin_dashboard.html", classes=classes, timetables=timetables, students=students, pending_students=pending_students, teachers=teachers, attendance=serialize_rows(attendance), class_list=class_list, pending_teachers=pending_teachers)
 
 # ---------- Student's List ------------------
 @app.route("/api/classes/<ts_id>/students", methods=["GET"])
@@ -391,6 +424,7 @@ def get_students(ts_id):
         return jsonify({"error": "Unauthorized"}), 403
     db.execute("""
         SELECT 
+            s.id,
             s.roll_no,
             s.name,
             COUNT(DISTINCT p.id) AS total_classes,
@@ -405,7 +439,7 @@ def get_students(ts_id):
         FROM students s
         LEFT JOIN teacherSubjects ts ON ts.class_id = s.class_id
         LEFT JOIN periods p ON ts.id = p.teacher_subject_id
-        LEFT JOIN attendance a ON a.period_id = p.id
+        LEFT JOIN attendance a ON a.period_id = p.id AND a.student_id = s.id
         WHERE ts.id = %s
         GROUP BY s.id
         ORDER BY s.roll_no
@@ -560,6 +594,94 @@ def get_current_class_api(class_id):
     db.connection.close()
     return jsonify(dict(current_class) if current_class else {})
 
-if __name__ == "__main__":
+# ----------------- API to enroll Student -----------------
+@app.route("/api/students/<int:student_id>/enroll", methods=["POST"])
+def enroll_student_api(student_id):
+    if session.get("role") != "admin":
+        return jsonify({"error": "Unauthorized"}), 403
+    data = request.json
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+    class_id = data.get("class_id")
+    db = get_db()
+    db.execute("UPDATE students SET class_id = %s WHERE id = %s", (class_id, student_id))
+    db.connection.commit()
+    db.connection.close()
+    return jsonify({"message": "Student enrolled successfully"}), 200
+
+# --------------- API to reject Student ----------------
+@app.route("/api/students/<int:student_id>/reject", methods=["POST"])
+def reject_student_api(student_id):
+    if session.get("role") != "admin":
+        return jsonify({"error": "Unauthorized"}), 403
+    db = get_db()
+    db.execute("DELETE FROM students WHERE id = %s", (student_id,))
+    db.connection.commit()
+    db.connection.close()
+    return jsonify({"message": "Student rejected successfully"}), 200
+
+# ---------------- API to Upload File ----------------
+@app.route("/upload", methods=["GET", "POST"])
+def upload_file():
+    student_id = request.form.get("student_id")
+    files = request.files.getlist("images")
+
+    if not student_id:
+        print("student_id is required")
+        return jsonify({"error": "student_id is required"}), 400
+    if not files:
+        print("no images uploaded")
+        return jsonify({"error": "no images uploaded"}), 400
+
+    DRIVE_FOLDER_ID = get_students_folder_id(student_id)
+    
+    if not DRIVE_FOLDER_ID:
+        print("Student's Drive folder not found")
+        return jsonify({"error": "Student's Drive folder not found"}), 400
+    
+    uploaded = []
+
+    for file in files:
+        filename = file.filename
+        local_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(local_path)
+
+
+        # Upload to Google Drive
+        drive_file_id = upload_to_drive(local_path, filename, DRIVE_FOLDER_ID)
+
+        # Save DB reference
+        save_drive_file(student_id, drive_file_id, filename)
+
+        uploaded.append({
+            "filename": filename,
+            "drive_file_id": drive_file_id
+        })
+        os.remove(local_path)
+    return redirect("/admin")
+
+# ----------------- API to Generate Embeddings -----------------
+@app.route("/api/generate_embeddings", methods=["POST"])
+async def generate_embeddings_api():
+    if session.get("role") != "admin":
+        return jsonify({"error": "Unauthorized"}), 403
+    data = request.json
+    
+    student_id = data.get("student_id")
+    db = get_db()
+    db.execute("SELECT drive_file_id, file_name FROM students_images WHERE student_id = %s", (student_id,))
+    file_ids = [{"file_id": row["drive_file_id"]} for row in db.fetchall()]
+    
+    response = await requests.post(
+        os.getenv("FACE_SERVICE_URL") + "/generate_embeddings",
+        json={"file_ids": file_ids}
+    )
+    for embedding in response.json():
+        file_id = embedding["file_id"]
+        vector = embedding["embedding"]
+        db.execute("INSERT INTO embeddings (image_id, vector) VALUES (SELECT id from students_images WHERE drive_file_id = %s, %s)", ( file_id, vector))
+    return jsonify({"message": "Embeddings generated and saved successfully"}), 200
+
+if __name__ == "__main__":  
     scheduler.start()
     app.run(host="0.0.0.0", port=5000, debug=True)

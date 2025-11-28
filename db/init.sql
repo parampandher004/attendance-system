@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict wPa1TGvA5irKl3qXzwE0ngXKIJsgm1Owp085A3joz0M0xd4feintbjnAGDiqq74
+\restrict duiUhYSig9jzNQaSJEwbTgdrAhWmbT0bzfGtKzlZyMHOUG9AH25uEs9K9yuDhQX
 
 -- Dumped from database version 17.6 (Debian 17.6-2.pgdg13+1)
 -- Dumped by pg_dump version 17.6 (Debian 17.6-2.pgdg13+1)
@@ -92,40 +92,6 @@ ALTER SEQUENCE public.classes_id_seq OWNED BY public.classes.id;
 
 
 --
--- Name: face_encodings; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.face_encodings (
-    id bigint NOT NULL,
-    student_id bigint,
-    encoding bytea
-);
-
-
-ALTER TABLE public.face_encodings OWNER TO postgres;
-
---
--- Name: face_encodings_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.face_encodings_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.face_encodings_id_seq OWNER TO postgres;
-
---
--- Name: face_encodings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.face_encodings_id_seq OWNED BY public.face_encodings.id;
-
-
---
 -- Name: periods; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -173,11 +139,48 @@ CREATE TABLE public.students (
     name text,
     roll_no text,
     class_id bigint,
-    user_id bigint
+    user_id bigint,
+    folder_id character varying
 );
 
 
 ALTER TABLE public.students OWNER TO postgres;
+
+--
+-- Name: students_embeddings; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.students_embeddings (
+    id integer NOT NULL,
+    image_id integer NOT NULL,
+    vector double precision[] NOT NULL,
+    created_at timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.students_embeddings OWNER TO postgres;
+
+--
+-- Name: students_embeddings_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.students_embeddings_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.students_embeddings_id_seq OWNER TO postgres;
+
+--
+-- Name: students_embeddings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.students_embeddings_id_seq OWNED BY public.students_embeddings.id;
+
 
 --
 -- Name: students_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -198,6 +201,43 @@ ALTER SEQUENCE public.students_id_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.students_id_seq OWNED BY public.students.id;
+
+
+--
+-- Name: students_images; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.students_images (
+    id integer NOT NULL,
+    student_id integer NOT NULL,
+    drive_file_id text NOT NULL,
+    file_name text,
+    uploaded_at timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.students_images OWNER TO postgres;
+
+--
+-- Name: students_images_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.students_images_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.students_images_id_seq OWNER TO postgres;
+
+--
+-- Name: students_images_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.students_images_id_seq OWNED BY public.students_images.id;
 
 
 --
@@ -389,13 +429,6 @@ ALTER TABLE ONLY public.classes ALTER COLUMN id SET DEFAULT nextval('public.clas
 
 
 --
--- Name: face_encodings id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.face_encodings ALTER COLUMN id SET DEFAULT nextval('public.face_encodings_id_seq'::regclass);
-
-
---
 -- Name: periods id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -407,6 +440,20 @@ ALTER TABLE ONLY public.periods ALTER COLUMN id SET DEFAULT nextval('public.peri
 --
 
 ALTER TABLE ONLY public.students ALTER COLUMN id SET DEFAULT nextval('public.students_id_seq'::regclass);
+
+
+--
+-- Name: students_embeddings id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.students_embeddings ALTER COLUMN id SET DEFAULT nextval('public.students_embeddings_id_seq'::regclass);
+
+
+--
+-- Name: students_images id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.students_images ALTER COLUMN id SET DEFAULT nextval('public.students_images_id_seq'::regclass);
 
 
 --
@@ -450,14 +497,6 @@ ALTER TABLE ONLY public.weekly_periods ALTER COLUMN id SET DEFAULT nextval('publ
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT idx_17452_users_pkey PRIMARY KEY (id);
-
-
---
--- Name: face_encodings idx_17458_face_encodings_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.face_encodings
-    ADD CONSTRAINT idx_17458_face_encodings_pkey PRIMARY KEY (id);
 
 
 --
@@ -525,6 +564,22 @@ ALTER TABLE ONLY public.periods
 
 
 --
+-- Name: students_embeddings students_embeddings_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.students_embeddings
+    ADD CONSTRAINT students_embeddings_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: students_images students_images_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.students_images
+    ADD CONSTRAINT students_images_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: idx_17452_sqlite_autoindex_users_1; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -555,11 +610,19 @@ ALTER TABLE ONLY public.attendance
 
 
 --
--- Name: face_encodings face_encodings_student_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: students_embeddings fk_image; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.face_encodings
-    ADD CONSTRAINT face_encodings_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.students(id);
+ALTER TABLE ONLY public.students_embeddings
+    ADD CONSTRAINT fk_image FOREIGN KEY (image_id) REFERENCES public.students_images(id) ON DELETE CASCADE;
+
+
+--
+-- Name: students_images fk_student; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.students_images
+    ADD CONSTRAINT fk_student FOREIGN KEY (student_id) REFERENCES public.students(id) ON DELETE CASCADE;
 
 
 --
@@ -630,5 +693,5 @@ ALTER TABLE ONLY public.weekly_periods
 -- PostgreSQL database dump complete
 --
 
-\unrestrict wPa1TGvA5irKl3qXzwE0ngXKIJsgm1Owp085A3joz0M0xd4feintbjnAGDiqq74
+\unrestrict duiUhYSig9jzNQaSJEwbTgdrAhWmbT0bzfGtKzlZyMHOUG9AH25uEs9K9yuDhQX
 

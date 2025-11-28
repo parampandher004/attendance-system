@@ -459,8 +459,7 @@ function updateStudent(value, hiddenInput, selectId) {
     const class_id = value;
     console.log("Selected class ID:", class_id);
 
-    const student_id = 
-    console.log("Student ID:", student_id);
+    const student_id = console.log("Student ID:", student_id);
     fetch(`/api/students/${student_id}/class`, {
       method: "POST",
       headers: {
@@ -473,4 +472,53 @@ function updateStudent(value, hiddenInput, selectId) {
         hiddenInput.value = data;
       });
   }
+}
+function handleStudentEnroll(e) {
+  const studentId = e.target.getAttribute("data-id");
+  const classId = e.target.getAttribute("data-class-id");
+  fetch(`/api/students/${studentId}/enroll`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ class_id: classId }),
+  });
+}
+function handleStudentReject(e) {
+  const studentId = e.target.getAttribute("data-id");
+  fetch(`/api/students/${studentId}/reject`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+function viewStudentImages(studentId, studentName) {
+  const uploadModal = document.getElementById("uploadModal");
+  uploadModal.style.display = "flex";
+
+  uploadModal.querySelector("#studentIdInput").value = studentId;
+  uploadModal.querySelector("#uploadModalTitle").textContent = studentName;
+  const uploadModalClose = document.getElementById("closeUploadModal");
+  uploadModalClose.onclick = () => (uploadModal.style.display = "none");
+
+  window.onclick = (e) => {
+    if (e.target == uploadModal) uploadModal.style.display = "none";
+  };
+
+  // fetch(`/api/students/${studentId}/images`)
+  //   .then((res) => res.json())
+  //   .then((data) => {
+  //     const tbody = document.getElementById("studentImageList");
+  //     tbody.innerHTML = "";
+  //     data.forEach((image) => {
+  //       tbody.innerHTML += `
+  //         <tr>
+  //           <td><img src="${image}" alt="Student Image" /></td>
+  //         </tr>
+  //       `;
+  //     });
+  //     document.getElementById("studentImageModal").style.display = "flex";
+  //   });
 }

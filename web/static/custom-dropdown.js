@@ -257,6 +257,13 @@ function setupCustomDropdownLogic(
       const value = e.target.getAttribute("data-value");
       const text = e.target.textContent;
 
+      if (wrapper.id.startsWith("wrapper-classStudents")) {
+        wrapper
+          .closest(".student-card")
+          .querySelector("#enroll-btn")
+          .setAttribute("data-class-id", value);
+      }
+
       // Only update and execute if the value actually changed
       if (hiddenInput.value !== value) {
         // 1. Update the hidden input
@@ -316,8 +323,6 @@ function initializeAllCustomDropdowns() {
       callback = studentApplyFilters;
     } else if (select.id === "roleSelect") {
       callback = toggleStudentFields;
-    } else if (select.id === "classStudents") {
-      return;
     }
     transformSelectToCustomDropdown(select, callback);
   });

@@ -211,3 +211,7 @@ __marimo__/
 
 # Models
 models/
+
+# Google drive credentials
+credentials.json
+token.json

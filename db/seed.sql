@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 6YQogpFe0Eu1JBJanHVKczyl0T5IhikYTGTm5bNE3hxd5l3vRvbFZO7zR6dqkjI
+\restrict 4CgNSj6fu3FiLXb3NgheKgSgiMX0VmHtrg80KhtkprWHe3hFSmlnpgNzQh22Ahc
 
 -- Dumped from database version 17.6 (Debian 17.6-2.pgdg13+1)
 -- Dumped by pg_dump version 17.6 (Debian 17.6-2.pgdg13+1)
@@ -54,6 +54,9 @@ COPY public.users (id, username, password, role) FROM stdin;
 5	tanushree_m	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	teacher
 6	gourav_biswas	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	student
 7	admin	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	admin
+8	tushar_kanti	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	student
+9	diptendu_chatterjee	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	student
+10	souryadipta_paul	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	student
 \.
 
 
@@ -105,9 +108,12 @@ COPY public.periods (id, start_time, end_time, date, day, teacher_subject_id, is
 -- Data for Name: students; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.students (id, name, roll_no, class_id, user_id) FROM stdin;
-1	Paramveer Singh Pandher	3	1	1
-2	Gourav Biswas	2	\N	6
+COPY public.students (id, name, roll_no, class_id, user_id, folder_id) FROM stdin;
+1	Paramveer Singh Pandher	3	1	1	1qAY7qHiC6dZ0g4uAxkd8jF7tNNEXZTTH
+3	Tushar Kanti	5	1	8	1kmaGRKLMv-LHxZ9gxDnhWrq-xdgSpuQH
+2	Gourav Biswas	1	1	6	1Yhtt4-Kw64PxCfvpFz05LlAVLJatm3oW
+4	Diptendu Chatterjee	2	1	9	1E6gDw-GNY3DY74w-Q14EiIpNKBGiXbhr
+5	Souryadipta Paul	4	1	10	1eGViwnMqkb5elpy0DaTJJ75FAG2Y8RvV
 \.
 
 
@@ -122,10 +128,23 @@ COPY public.attendance (id, student_id, period_id, status) FROM stdin;
 
 
 --
--- Data for Name: face_encodings; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: students_images; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.face_encodings (id, student_id, encoding) FROM stdin;
+COPY public.students_images (id, student_id, drive_file_id, file_name, uploaded_at) FROM stdin;
+1	1	1S3qtXM9qKu90NrPJ5g4rk7P1SQVI4BYO	drawing.png	2025-11-26 14:07:56.373954
+2	1	1zHEA6g5oQoXxdpIY4_P2qtBh6w25HwTP	drawing.png	2025-11-26 14:08:49.528739
+3	1	1u5lsQrf2zsRv8CoFGBYiAdbxJ435D3Oc	face.jpg	2025-11-26 15:02:26.559708
+4	1	1OpEWkW4HY_P9UVOAsMfCq2OvB-oShHIH	g1.png	2025-11-26 15:04:26.733974
+5	2	1tX1A9OumAhjBAXooIXCjWMOaCbMp_tcu	face.jpg	2025-11-28 19:36:37.771892
+\.
+
+
+--
+-- Data for Name: students_embeddings; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.students_embeddings (id, image_id, vector, created_at) FROM stdin;
 \.
 
 
@@ -158,13 +177,6 @@ SELECT pg_catalog.setval('public.classes_id_seq', 1, false);
 
 
 --
--- Name: face_encodings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.face_encodings_id_seq', 1, false);
-
-
---
 -- Name: periods_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -172,10 +184,24 @@ SELECT pg_catalog.setval('public.periods_id_seq', 10, true);
 
 
 --
+-- Name: students_embeddings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.students_embeddings_id_seq', 1, false);
+
+
+--
 -- Name: students_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.students_id_seq', 2, true);
+SELECT pg_catalog.setval('public.students_id_seq', 5, true);
+
+
+--
+-- Name: students_images_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.students_images_id_seq', 5, true);
 
 
 --
@@ -203,7 +229,7 @@ SELECT pg_catalog.setval('public.teachersubjects_id_seq', 1, false);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 7, true);
+SELECT pg_catalog.setval('public.users_id_seq', 10, true);
 
 
 --
@@ -217,5 +243,5 @@ SELECT pg_catalog.setval('public.weekly_periods_id_seq', 1, false);
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 6YQogpFe0Eu1JBJanHVKczyl0T5IhikYTGTm5bNE3hxd5l3vRvbFZO7zR6dqkjI
+\unrestrict 4CgNSj6fu3FiLXb3NgheKgSgiMX0VmHtrg80KhtkprWHe3hFSmlnpgNzQh22Ahc
 

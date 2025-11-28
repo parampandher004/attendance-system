@@ -12,6 +12,7 @@ from pathlib import Path
 import sys
 import cv2
 import numpy as np
+from utilities.image_path import get_temp_image_path
 from ultralytics import YOLO
 import torch
 
@@ -184,8 +185,9 @@ def detect_faces(image):
         y1s, y2s = max(0, y1), min(orig_h, y2 + 1)
         x1s, x2s = max(0, x1), min(orig_w, x2 + 1)
         crop = img_bgr[y1s:y2s, x1s:x2s].copy()
-        faces.append(crop)
+        image_path = get_temp_image_path()
+        cv2.imwrite(image_path, crop)
+        faces.append({"image_path": image_path, "file_id": None})
 
-    return {"faces": faces, "boxes": final_boxes, "confs": final_confs}
-    # show (optional)
-    # cv2.imshow("YOLOv8 Face Detections", out); cv2.waitKey(0); cv2.destroyAllWindows()
+    return faces
+
