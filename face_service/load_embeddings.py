@@ -7,28 +7,38 @@ import time
 embeddings = []
 
 def load_embeddings():
-    """Load embeddings from web service with error handling"""
+    """Load embeddings from web service public API with error handling"""
     global embeddings
     
     try:
         web_service_url = os.getenv("WEB_SERVICE_URL")
+        api_key = os.getenv("PUBLIC_API_KEY", "default-insecure-key")
+        
         if not web_service_url:
             print("Warning: WEB_SERVICE_URL not set, skipping embeddings load")
             embeddings = []
             return
         
+        headers = {
+            "X-API-Key": api_key
+        }
+        
         resp = requests.get(
-            f"{web_service_url}/api/get_embeddings",
+            f"{web_service_url}/public/api/get-embeddings",
+            headers=headers,
             timeout=10
         )
         resp.raise_for_status()
         
         data = resp.json()
-        if data:
+        if data and "embeddings" in data:
+            embeddings_list = data["embeddings"]
             embeddings = [{
                 "student_id": item["student_id"],
+                "student_name": item["student_name"],
+                "roll_no": item["roll_no"],
                 "embedding": np.array(item["embedding"], dtype=np.float32)
-            } for item in data]
+            } for item in embeddings_list]
             print(f"Successfully loaded {len(embeddings)} embeddings from web service")
         else:
             print("No embeddings found from web service")
@@ -42,6 +52,8 @@ def load_embeddings():
         embeddings = []
     except requests.exceptions.HTTPError as e:
         print(f"HTTP error while loading embeddings: {e}")
+        if hasattr(e.response, 'text'):
+            print(f"Response: {e.response.text}")
         embeddings = []
     except ValueError as e:
         print(f"Invalid JSON response from web service: {e}")

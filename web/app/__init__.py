@@ -19,11 +19,13 @@ def create_app():
     from app.routes.student import student_bp
     from app.routes.teacher import teacher_bp
     from app.routes.admin import admin_bp
+    from app.routes.public import public_bp
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(student_bp, url_prefix='/student')
     app.register_blueprint(teacher_bp, url_prefix='/teacher')
     app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(public_bp, url_prefix='/public')
     
     # Redirect root to auth login for convenience
     @app.route('/')

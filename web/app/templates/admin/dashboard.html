@@ -1,13 +1,16 @@
-{% extends "base.html" %}
-{% block title %}Admin Dashboard{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% block title %}Admin Dashboard{% endblock %} {%
+block content %}
 
 <style>
   @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
-  
+
   .modal {
     position: fixed;
     z-index: 1000;
@@ -20,15 +23,15 @@
     align-items: center;
     justify-content: center;
   }
-  
+
   #uploadModal {
     z-index: 1100 !important;
   }
-  
+
   #imageViewerModal {
     z-index: 1100 !important;
   }
-  
+
   .modal.show {
     display: flex !important;
   }
@@ -40,13 +43,8 @@
     <div class="compartment">
       <div class="overview-wrapper" style="margin-bottom: 1rem">
         <div class="grid-container">
-          <div
-            class="overview-card avatar"
-          >
-            <div
-              class="img-container"
-  
-            >
+          <div class="overview-card avatar">
+            <div class="img-container">
               <img
                 src="{{ url_for('static', filename='images/teacher-avatar-male.jpg') }}"
                 alt="Admin"
@@ -121,11 +119,7 @@
                 <label for="value-className" class="input-label"
                   >Class Name:</label
                 >
-                <select
-                  id="className"
-                  class="js-custom-dropdown"
-                  required
-                >
+                <select id="className" class="js-custom-dropdown" required>
                   <option value="">Select Class</option>
                 </select>
                 <br />
@@ -353,7 +347,7 @@
       {% endif %}
     </div>
   </div>
-<div class="compartments">
+  <div class="compartments">
     <!-- Admin Management Tables -->
     <div class="compartment">
       <h2>Teachers</h2>
@@ -448,7 +442,28 @@
           </div>
 
           <!-- Submit -->
-          <button type="submit" class="submit-btn">Upload</button>
+          <button type="submit" class="submit-btn" id="uploadSubmitBtn">
+            Upload
+          </button>
+
+          <!-- Loading Spinner -->
+          <div
+            id="uploadLoadingSpinner"
+            style="display: none; text-align: center; margin-top: 1rem"
+          >
+            <div
+              style="
+                display: inline-block;
+                width: 30px;
+                height: 30px;
+                border: 3px solid #f3f3f3;
+                border-top: 3px solid #3498db;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+              "
+            ></div>
+            <p style="margin-top: 0.5rem; color: #666">Uploading images...</p>
+          </div>
         </form>
       </div>
     </div>
@@ -458,34 +473,81 @@
       <div class="modal-content" style="max-width: 600px">
         <div style="width: 100%">
           <h2 id="imagesModalTitle">Student Images</h2>
-          
+
           <!-- Image Stats -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: var(--bg-light); border-radius: 8px">
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 1rem;
+              margin-bottom: 1rem;
+              padding: 1rem;
+              background: var(--bg-light);
+              border-radius: 8px;
+            "
+          >
             <div style="text-align: center">
-              <div style="font-size: 0.9rem; color: var(--text-muted)">Total Images</div>
-              <div id="totalImagesCount" style="font-size: 1.8rem; font-weight: bold; color: var(--primary)">0</div>
+              <div style="font-size: 0.9rem; color: var(--text-muted)">
+                Total Images
+              </div>
+              <div
+                id="totalImagesCount"
+                style="
+                  font-size: 1.8rem;
+                  font-weight: bold;
+                  color: var(--primary);
+                "
+              >
+                0
+              </div>
             </div>
             <div style="text-align: center">
-              <div style="font-size: 0.9rem; color: var(--text-muted)">With Encodings</div>
-              <div id="encodedImagesCount" style="font-size: 1.8rem; font-weight: bold; color: var(--success)">0</div>
+              <div style="font-size: 0.9rem; color: var(--text-muted)">
+                With Encodings
+              </div>
+              <div
+                id="encodedImagesCount"
+                style="
+                  font-size: 1.8rem;
+                  font-weight: bold;
+                  color: var(--success);
+                "
+              >
+                0
+              </div>
             </div>
           </div>
 
           <!-- Action Buttons -->
           <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem">
-            <button onclick="handleAddImages()" class="submit-btn" style="flex: 1; background: var(--primary)">
+            <button
+              onclick="handleAddImages()"
+              class="submit-btn"
+              style="flex: 1; background: var(--primary)"
+            >
               + Add Images
             </button>
-            <button onclick="handleGenerateEncodings()" class="submit-btn" style="flex: 1; background: var(--success)">
+            <button
+              onclick="handleGenerateEncodings()"
+              class="submit-btn"
+              style="flex: 1; background: var(--success)"
+            >
               🔧 Generate Encodings
             </button>
-            <button onclick="handleShowImages()" class="submit-btn" style="flex: 1; background: var(--info)">
+            <button
+              onclick="handleShowImages()"
+              class="submit-btn"
+              style="flex: 1; background: var(--info)"
+            >
               👁️ Show Images
             </button>
           </div>
 
           <!-- Images List -->
-          <div class="table-container" style="max-height: 400px; overflow-y: auto">
+          <div
+            class="table-container"
+            style="max-height: 400px; overflow-y: auto"
+          >
             <table>
               <thead>
                 <tr>
@@ -499,7 +561,15 @@
           </div>
 
           <!-- Loading Indicator -->
-          <div id="imagesLoadingIndicator" style="display: none; text-align: center; padding: 1rem; color: var(--text-muted)">
+          <div
+            id="imagesLoadingIndicator"
+            style="
+              display: none;
+              text-align: center;
+              padding: 1rem;
+              color: var(--text-muted);
+            "
+          >
             <div style="animation: spin 1s linear infinite">⏳</div>
             Processing...
           </div>
@@ -525,18 +595,90 @@
 
     <!-- Image Viewer Modal -->
     <div id="imageViewerModal" class="modal" style="display: none">
-      <div class="modal-content" style="max-width: 90vw; max-height: 90vh; display: flex; flex-direction: column; position: relative">
-        <span onclick="closeImageViewerModal()" class="close-btn" style="position: absolute; right: 1rem; top: 1rem; z-index: 10">
-          <svg width="24" height="24" viewBox="0 0 6.3499999 6.3499999" fill="none">
-            <path style="stroke-width: 0.454438" d="M 0.56638171,-0.56638171 C 0.42177738,-0.42177738 0.33252088,-0.22160664 0.33252088,0 c 0,0.44321328 0.35666386,0.79987714 0.79987712,0.79987714 H 3.6902509 V 3.35773 c 0,0.4432133 0.3566639,0.7998772 0.7998772,0.7998772 0.4432132,0 0.7998771,-0.3566639 0.7998771,-0.7998772 V 0.79987714 h 2.5578529 c 0.4432133,0 0.7998771,-0.35666386 0.7998771,-0.79987714 0,-0.44321328 -0.3566638,-0.79987714 -0.7998771,-0.79987714 H 5.2900052 V -3.35773 c 0,-0.4432133 -0.3566639,-0.7998772 -0.7998771,-0.7998772 -0.4432133,0 -0.7998772,0.3566639 -0.7998772,0.7998772 v 2.55785286 H 1.132398 c -0.22160662,0 -0.42141195,0.0888911 -0.56601629,0.23349543 z" transform="rotate(45)" />
+      <div
+        class="modal-content"
+        style="
+          max-width: 90vw;
+          max-height: 90vh;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+        "
+      >
+        <span
+          onclick="closeImageViewerModal()"
+          class="close-btn"
+          style="position: absolute; right: 1rem; top: 1rem; z-index: 10"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 6.3499999 6.3499999"
+            fill="none"
+          >
+            <path
+              style="stroke-width: 0.454438"
+              d="M 0.56638171,-0.56638171 C 0.42177738,-0.42177738 0.33252088,-0.22160664 0.33252088,0 c 0,0.44321328 0.35666386,0.79987714 0.79987712,0.79987714 H 3.6902509 V 3.35773 c 0,0.4432133 0.3566639,0.7998772 0.7998772,0.7998772 0.4432132,0 0.7998771,-0.3566639 0.7998771,-0.7998772 V 0.79987714 h 2.5578529 c 0.4432133,0 0.7998771,-0.35666386 0.7998771,-0.79987714 0,-0.44321328 -0.3566638,-0.79987714 -0.7998771,-0.79987714 H 5.2900052 V -3.35773 c 0,-0.4432133 -0.3566639,-0.7998772 -0.7998771,-0.7998772 -0.4432133,0 -0.7998772,0.3566639 -0.7998772,0.7998772 v 2.55785286 H 1.132398 c -0.22160662,0 -0.42141195,0.0888911 -0.56601629,0.23349543 z"
+              transform="rotate(45)"
+            />
           </svg>
         </span>
-        <div style="flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; position: relative">
-          <button id="imageNavPrev" onclick="prevImage()" style="position: absolute; left: 1rem; background: rgba(0,0,0,0.5); color: white; border: none; padding: 1rem; border-radius: 50%; cursor: pointer; display: none; z-index: 5">←</button>
-          <img id="imageViewerImg" src="" alt="Student Image" style="max-width: 100%; max-height: 100%; object-fit: contain" />
-          <button id="imageNavNext" onclick="nextImage()" style="position: absolute; right: 1rem; background: rgba(0,0,0,0.5); color: white; border: none; padding: 1rem; border-radius: 50%; cursor: pointer; display: none; z-index: 5">→</button>
+        <div
+          style="
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            position: relative;
+          "
+        >
+          <button
+            id="imageNavPrev"
+            onclick="prevImage()"
+            style="
+              position: absolute;
+              left: 1rem;
+              background: rgba(0, 0, 0, 0.5);
+              color: white;
+              border: none;
+              padding: 1rem;
+              border-radius: 50%;
+              cursor: pointer;
+              display: none;
+              z-index: 5;
+            "
+          >
+            ←
+          </button>
+          <img
+            id="imageViewerImg"
+            src=""
+            alt="Student Image"
+            style="max-width: 100%; max-height: 100%; object-fit: contain"
+          />
+          <button
+            id="imageNavNext"
+            onclick="nextImage()"
+            style="
+              position: absolute;
+              right: 1rem;
+              background: rgba(0, 0, 0, 0.5);
+              color: white;
+              border: none;
+              padding: 1rem;
+              border-radius: 50%;
+              cursor: pointer;
+              display: none;
+              z-index: 5;
+            "
+          >
+            →
+          </button>
         </div>
-        <div style="text-align: center; padding: 1rem; background: var(--bg-light)">
+        <div
+          style="text-align: center; padding: 1rem; background: var(--bg-light)"
+        >
           <span id="imageViewerName" style="font-weight: bold"></span>
         </div>
       </div>
@@ -793,240 +935,260 @@
     </div>
   </div>
 </div>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // Populate overview statistics cards
-      const classesCountEl = document.getElementById("admin-classes-count");
-      const teachersCountEl = document.getElementById("admin-teachers-count");
-      const studentsCountEl = document.getElementById("admin-students-count");
-      const pendingCountEl = document.getElementById("admin-pending-count");
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Populate overview statistics cards
+    const classesCountEl = document.getElementById("admin-classes-count");
+    const teachersCountEl = document.getElementById("admin-teachers-count");
+    const studentsCountEl = document.getElementById("admin-students-count");
+    const pendingCountEl = document.getElementById("admin-pending-count");
 
-      if (classesCountEl) classesCountEl.textContent = "{{ total_classes }}";
-      if (teachersCountEl) teachersCountEl.textContent = "{{ total_teachers }}";
-      if (studentsCountEl) studentsCountEl.textContent = "{{ total_students }}";
-      if (pendingCountEl) pendingCountEl.textContent = "{{ pending_count }}";
+    if (classesCountEl) classesCountEl.textContent = "{{ total_classes }}";
+    if (teachersCountEl) teachersCountEl.textContent = "{{ total_teachers }}";
+    if (studentsCountEl) studentsCountEl.textContent = "{{ total_students }}";
+    if (pendingCountEl) pendingCountEl.textContent = "{{ pending_count }}";
 
-      // Get the elements
-      const modal = document.getElementById("add-class-modal");
-      const openBtn = document.getElementById("open-add-class-modal");
-      const closeBtn = document.querySelector(".close-btn");
-      const form = document.getElementById("add-class-form");
-      const message = document.getElementById("modal-message");
-      window.allClasses = {{ classes | tojson }};
-      const ALL_CLASSES = {{ classes | tojson }};
+    // Get the elements
+    const modal = document.getElementById("add-class-modal");
+    const openBtn = document.getElementById("open-add-class-modal");
+    const closeBtn = document.querySelector(".close-btn");
+    const form = document.getElementById("add-class-form");
+    const message = document.getElementById("modal-message");
+    window.allClasses = {{ classes | tojson }};
+    const ALL_CLASSES = {{ classes | tojson }};
 
-      // Expose admin data for Tabulator tables
-      window.pendingStudents = {{ pending_students | tojson }};
-      window.adminTeachers = {{ teachers | tojson }};
-      window.adminClasses = {{ classes | tojson }};
-      window.adminSubjects = {{ subjects | tojson }};
+    // Expose admin data for Tabulator tables
+    window.pendingStudents = {{ pending_students | tojson }};
+    window.adminTeachers = {{ teachers | tojson }};
+    window.adminClasses = {{ classes | tojson }};
+    window.adminSubjects = {{ subjects | tojson }};
 
-      const classNames = [...new Set(ALL_CLASSES.map(row => row.class_name))];
-      const classNamesWithIds = Object.values(
-        ALL_CLASSES.reduce((accumulator, row) => {
-          accumulator[row.id] = { class_name: row.class_name, id: row.id };
-          return accumulator;
-        }, {})
-      );
-      // Populate subject dropdown based on selected class
-      const classSelect = document.getElementById("className");
-      const subjectSelect = document.getElementById("subjectName");
+    const classNames = [...new Set(ALL_CLASSES.map(row => row.class_name))];
+    const classNamesWithIds = Object.values(
+      ALL_CLASSES.reduce((accumulator, row) => {
+        accumulator[row.id] = { class_name: row.class_name, id: row.id };
+        return accumulator;
+      }, {})
+    );
+    // Populate subject dropdown based on selected class
+    const classSelect = document.getElementById("className");
+    const subjectSelect = document.getElementById("subjectName");
 
-      const teacherSelect = document.getElementById("teacherSelect");
-      const teacherClassSelect = document.getElementById("teacherClass");
-      const teacherSubjectSelect = document.getElementById("teacherSubject");
+    const teacherSelect = document.getElementById("teacherSelect");
+    const teacherClassSelect = document.getElementById("teacherClass");
+    const teacherSubjectSelect = document.getElementById("teacherSubject");
 
-      // Initialize Tabulator tables if available
-      if (typeof Tabulator !== 'undefined') {
-          // pending-enrollments removed (assign students UI replaces it)
+    // Initialize Tabulator tables if available
+    if (typeof Tabulator !== 'undefined') {
+        // pending-enrollments removed (assign students UI replaces it)
 
-        // Teachers table
-        new Tabulator("#teachers-table", {
-          data: window.adminTeachers || [],
-          layout: "fitColumns",
-          resizableColumns: true,
-          columns: [
-            { title: "ID", field: "id", width: 70 },
-            { title: "Name", field: "name" }
-          ]
-        });
+      // Teachers table
+      new Tabulator("#teachers-table", {
+        data: window.adminTeachers || [],
+        layout: "fitColumns",
+        resizableColumns: true,
+        columns: [
+          { title: "ID", field: "id", width: 70 },
+          { title: "Name", field: "name" }
+        ]
+      });
 
-        // Classes table
-        new Tabulator("#classes-table", {
-          data: window.adminClasses || [],
-          layout: "fitColumns",
-          resizableColumns: true,
-          columns: [
-            { title: "ID", field: "id", width: 70 },
-            { title: "Class Name", field: "name" }
-          ]
-        });
-      }
+      // Classes table
+      new Tabulator("#classes-table", {
+        data: window.adminClasses || [],
+        layout: "fitColumns",
+        resizableColumns: true,
+        columns: [
+          { title: "ID", field: "id", width: 70 },
+          { title: "Class Name", field: "name" }
+        ]
+      });
+    }
 
-      // --- MODAL DROPDOWN LOGIC ---
+    // --- MODAL DROPDOWN LOGIC ---
 
-      // 1. Define the function that updates the subject dropdown
-      function updateSubjectDropdown(selectedClass, subjectWrapper) {
-        // Find the wrapper that the custom dropdown created.
-        if (!subjectWrapper) return;
+    // 1. Define the function that updates the subject dropdown
+    function updateSubjectDropdown(selectedClass, subjectWrapper) {
+      // Find the wrapper that the custom dropdown created.
+      if (!subjectWrapper) return;
 
-        // Create a new <select> element to replace the old one.
-        const newSubjectSelect = document.createElement("select");
-        newSubjectSelect.id = subjectWrapper.id.replace("wrapper-", "");
-        newSubjectSelect.name = "ts_id";  // Keep this name for form submission
-        newSubjectSelect.className = "js-custom-dropdown";
-        newSubjectSelect.required = true;
+      // Create a new <select> element to replace the old one.
+      const newSubjectSelect = document.createElement("select");
+      newSubjectSelect.id = subjectWrapper.id.replace("wrapper-", "");
+      newSubjectSelect.name = "ts_id";  // Keep this name for form submission
+      newSubjectSelect.className = "js-custom-dropdown";
+      newSubjectSelect.required = true;
 
-        const subjects = ALL_CLASSES.filter(row => row.class_name === selectedClass);
-        newSubjectSelect.disabled = subjects.length === 0;
+      const subjects = ALL_CLASSES.filter(row => row.class_name === selectedClass);
+      newSubjectSelect.disabled = subjects.length === 0;
 
-        // Populate the new select element with ts_id (TeacherSubject.id) as value
-        newSubjectSelect.innerHTML = '<option value="">Select Subject</option>' +
-          subjects.map(sub => `<option value="${sub.id}">${sub.subject}</option>`).join('');
+      // Populate the new select element with ts_id (TeacherSubject.id) as value
+      newSubjectSelect.innerHTML = '<option value="">Select Subject</option>' +
+        subjects.map(sub => `<option value="${sub.id}">${sub.subject}</option>`).join('');
 
-        // Replace the old wrapper with our new, clean <select> element
-        subjectWrapper.parentNode.replaceChild(newSubjectSelect, subjectWrapper);
+      // Replace the old wrapper with our new, clean <select> element
+      subjectWrapper.parentNode.replaceChild(newSubjectSelect, subjectWrapper);
 
-        // Now, transform the new <select> into a custom dropdown
-        transformSelectToCustomDropdown(newSubjectSelect);
-      }
-      // 2. Populate and transform the class dropdown initially
-      classSelect.innerHTML = '<option value="">Select Class</option>' +
-        classNames.map(cls => `<option value="${cls}">${cls}</option>`).join('');
+      // Now, transform the new <select> into a custom dropdown
+      transformSelectToCustomDropdown(newSubjectSelect);
+    }
+    // 2. Populate and transform the class dropdown initially
+    classSelect.innerHTML = '<option value="">Select Class</option>' +
+      classNames.map(cls => `<option value="${cls}">${cls}</option>`).join('');
 
-      // 3. Perform an initial setup for the subject dropdowns FIRST
-      transformSelectToCustomDropdown(subjectSelect);
-      
-      if (teacherSubjectSelect) transformSelectToCustomDropdown(teacherSubjectSelect);
+    // 3. Perform an initial setup for the subject dropdowns FIRST
+    transformSelectToCustomDropdown(subjectSelect);
 
-      // Now set up the class dropdowns with callbacks that reference the already-transformed subject wrappers
-      transformSelectToCustomDropdown(classSelect, (value) => {
-        const subjectWrapper = document.getElementById("wrapper-subjectName");
+    if (teacherSubjectSelect) transformSelectToCustomDropdown(teacherSubjectSelect);
+
+    // Now set up the class dropdowns with callbacks that reference the already-transformed subject wrappers
+    transformSelectToCustomDropdown(classSelect, (value) => {
+      const subjectWrapper = document.getElementById("wrapper-subjectName");
+      if (!subjectWrapper) return;
+      updateSubjectDropdown(value, subjectWrapper);
+    });
+
+    if (teacherClassSelect) {
+      teacherClassSelect.innerHTML = '<option value="">Select Class</option>' +
+        classNamesWithIds.map(cls => `<option value="${cls.id}">${cls.class_name}</option>`).join('');
+
+      transformSelectToCustomDropdown(teacherClassSelect, (value) => {
+        const subjectWrapper = document.getElementById("wrapper-teacherSubject");
         if (!subjectWrapper) return;
         updateSubjectDropdown(value, subjectWrapper);
       });
+    }
 
-      if (teacherClassSelect) {
-        teacherClassSelect.innerHTML = '<option value="">Select Class</option>' +
-          classNamesWithIds.map(cls => `<option value="${cls.id}">${cls.class_name}</option>`).join('');
-
-        transformSelectToCustomDropdown(teacherClassSelect, (value) => {
-          const subjectWrapper = document.getElementById("wrapper-teacherSubject");
-          if (!subjectWrapper) return;
-          updateSubjectDropdown(value, subjectWrapper);
-        });
-      }
-
-      if (teacherSelect) transformSelectToCustomDropdown(teacherSelect);
+    if (teacherSelect) transformSelectToCustomDropdown(teacherSelect);
 
 
-      // --- END MODAL DROPDOWN LOGIC ---
+    // --- END MODAL DROPDOWN LOGIC ---
 
-      // Function to open the modal
-      openBtn.onclick = function () {
-        modal.style.display = "flex";
-        form.reset(); // Clear the form fields
+    // Function to open the modal
+    openBtn.onclick = function () {
+      modal.style.display = "flex";
+      form.reset(); // Clear the form fields
 
-        // Reset dropdowns to their initial state when opening
-        // This will now correctly rebuild and re-initialize the dropdowns
-      };
+      // Reset dropdowns to their initial state when opening
+      // This will now correctly rebuild and re-initialize the dropdowns
+    };
 
-      // Function to close the modal using the (x) button
-      closeBtn.onclick = function () {
+    // Function to close the modal using the (x) button
+    closeBtn.onclick = function () {
+      modal.style.display = "none";
+    };
+
+    // Function to close the modal when clicking outside the content
+    window.onclick = function (event) {
+      if (event.target == modal) {
         modal.style.display = "none";
-      };
+      }
+    };
 
-      // Function to close the modal when clicking outside the content
-      window.onclick = function (event) {
-        if (event.target == modal) {
-          modal.style.display = "none";
-        }
-      };
+    // 💡 Attach the form submission handler here
+    form.addEventListener("submit", handleAddClassSubmit);
 
-      // 💡 Attach the form submission handler here
-      form.addEventListener("submit", handleAddClassSubmit);
+    // Listen for date selection on the filter calendar
 
-      // Listen for date selection on the filter calendar
-
-      document.querySelectorAll('.enroll-btn').forEach(btn => {
-        btn.addEventListener('click', handleStudentEnroll);
-      });
-      document.querySelectorAll('.reject-btn').forEach(btn => {
-        btn.addEventListener('click', handleStudentReject);
-      });
-
+    document.querySelectorAll('.enroll-btn').forEach(btn => {
+      btn.addEventListener('click', handleStudentEnroll);
+    });
+    document.querySelectorAll('.reject-btn').forEach(btn => {
+      btn.addEventListener('click', handleStudentReject);
     });
 
-    function viewClassStudents(tsId) {
-      const classes = {{ classes | tojson }};
-      fetch(`/admin/api/classes/${tsId}/students`)
-        .then(res => res.json())
-        .then(data => {
-          const tbody = document.getElementById("studentList");
-          tbody.innerHTML = "";
-          data.forEach(s => {
-            const attended = s.attended || 0;
-            const totalClasses = s.total_classes || 0;
-            const percentage = (attended / totalClasses) * 100 || 0;
-            const color = s.percentage >= 75 ? 'green' : s.percentage >= 50 ? 'orange' : 'red';
-            tbody.innerHTML += `
-              <tr>
-                <td>${s.roll_no}</td>
-                <td>${s.name}</td>
-                <td>${attended}</td>
-                <td>${totalClasses}</td>
-                <td style="color:${color}">${percentage}%</td>
-                <td>
-                  <button onclick="viewStudentImages('${s.id}', '${s.name}')">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 6.3499999 6.3499999"
-                      class="view-students"
-                      fill="none"
-                    >
-                      <path
-                        id="rect2"
-                        style="fill-opacity: 1; stroke-width: 0.278307"
-                        d="M 1.9905633,4.5649819e-4 C 1.8262455,-0.00615141 1.6524289,0.05902133 1.5182407,0.19320962 1.2796837,0.43176659 1.2595679,0.79546623 1.4727654,1.0086637 l 2.164209,2.164209 -2.164209,2.1642089 C 1.2595679,5.5502791 1.2796836,5.9139787 1.5182407,6.1525358 1.7567976,6.3910927 2.1204973,6.4117253 2.3336948,6.1985278 L 4.9738437,3.5583789 C 5.1401298,3.3920927 5.1640316,3.1341312 5.0534253,2.915524 5.0290986,2.859759 4.994519,2.8085586 4.9495557,2.7635953 L 2.3336947,0.1477344 C 2.2404209,0.05446051 2.1183659,0.00559597 1.9905633,4.5649819e-4 Z"
-                      />
-                    </svg>
-                  </button>
-                </td>
-              </tr>`;
-          });
-          document.getElementById("studentModal").style.display = "flex";
-          document.getElementById("studentModalTitle").textContent = classes.find(c => c.id == tsId).class_name;
+  });
+
+  function viewClassStudents(tsId) {
+    const classes = {{ classes | tojson }};
+    fetch(`/admin/api/classes/${tsId}/students`)
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById("studentList");
+        tbody.innerHTML = "";
+        data.forEach(s => {
+          const attended = s.attended || 0;
+          const totalClasses = s.total_classes || 0;
+          const percentage = (attended / totalClasses) * 100 || 0;
+          const color = s.percentage >= 75 ? 'green' : s.percentage >= 50 ? 'orange' : 'red';
+          tbody.innerHTML += `
+            <tr>
+              <td>${s.roll_no}</td>
+              <td>${s.name}</td>
+              <td>${attended}</td>
+              <td>${totalClasses}</td>
+              <td style="color:${color}">${percentage}%</td>
+              <td>
+                <button onclick="viewStudentImages('${s.id}', '${s.name}')">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 6.3499999 6.3499999"
+                    class="view-students"
+                    fill="none"
+                  >
+                    <path
+                      id="rect2"
+                      style="fill-opacity: 1; stroke-width: 0.278307"
+                      d="M 1.9905633,4.5649819e-4 C 1.8262455,-0.00615141 1.6524289,0.05902133 1.5182407,0.19320962 1.2796837,0.43176659 1.2595679,0.79546623 1.4727654,1.0086637 l 2.164209,2.164209 -2.164209,2.1642089 C 1.2595679,5.5502791 1.2796836,5.9139787 1.5182407,6.1525358 1.7567976,6.3910927 2.1204973,6.4117253 2.3336948,6.1985278 L 4.9738437,3.5583789 C 5.1401298,3.3920927 5.1640316,3.1341312 5.0534253,2.915524 5.0290986,2.859759 4.994519,2.8085586 4.9495557,2.7635953 L 2.3336947,0.1477344 C 2.2404209,0.05446051 2.1183659,0.00559597 1.9905633,4.5649819e-4 Z"
+                    />
+                  </svg>
+                </button>
+              </td>
+            </tr>`;
         });
-    }
-    document
-      .getElementById("uploadStudentImageForm")
-      .addEventListener("submit", async (e) => {
-        e.preventDefault();
+        document.getElementById("studentModal").style.display = "flex";
+        document.getElementById("studentModalTitle").textContent = classes.find(c => c.id == tsId).class_name;
+      });
+  }
+  document
+    .getElementById("uploadStudentImageForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById("uploadSubmitBtn");
+      const spinner = document.getElementById("uploadLoadingSpinner");
+      const fileInput = document.getElementById("studentImage");
 
       let formData = new FormData(e.target);
       const studentId = formData.get("student_id");
 
-      let res = await fetch("/admin/upload", {
-        method: "POST",
-        body: formData,
-      });
+      // Show loading spinner and disable submit button
+      submitBtn.disabled = true;
+      fileInput.disabled = true;
+      spinner.style.display = "block";
 
-      if (res.ok) {
-        showToast("Image uploaded successfully!", "success");
-        document.getElementById("uploadModal").style.display = "none";
-        // Refresh the images modal if it's open
-        if (window.currentStudentId) {
-          loadStudentImages(window.currentStudentId);
+      try {
+        let res = await fetch("/admin/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (res.ok) {
+          showToast("Image uploaded successfully!", "success");
+          document.getElementById("uploadModal").style.display = "none";
+          // Reset form
+          e.target.reset();
+          // Refresh the images modal if it's open
+          if (window.currentStudentId) {
+            loadStudentImages(window.currentStudentId);
+          }
+        } else {
+          showToast("Image upload failed", "error");
         }
-      } else {
-        showToast("Image upload failed", "error");
+      } catch (error) {
+        showToast("Upload error: " + error.message, "error");
+      } finally {
+        // Hide loading spinner and re-enable submit button
+        submitBtn.disabled = false;
+        fileInput.disabled = false;
+        spinner.style.display = "none";
       }
     });
 
 
-    setInterval(updatePeriods, 60000);
-    updatePeriods();
-  </script>
-</div>
+  setInterval(updatePeriods, 60000);
+  updatePeriods();
+</script>
+
 {% endblock %}
