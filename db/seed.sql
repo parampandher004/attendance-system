@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 4CgNSj6fu3FiLXb3NgheKgSgiMX0VmHtrg80KhtkprWHe3hFSmlnpgNzQh22Ahc
+\restrict 3FvVUZcP6DwqKaLb8ZQrnBZ10NFCH3zWkK9pqibrzgOHA3Io9v1vLCry5AdpdhT
 
 -- Dumped from database version 17.6 (Debian 17.6-2.pgdg13+1)
 -- Dumped by pg_dump version 17.6 (Debian 17.6-2.pgdg13+1)
@@ -57,6 +57,9 @@ COPY public.users (id, username, password, role) FROM stdin;
 8	tushar_kanti	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	student
 9	diptendu_chatterjee	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	student
 10	souryadipta_paul	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	student
+11	test	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	student
+12	test_2	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	teacher
+13	test_1	5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8	student
 \.
 
 
@@ -64,11 +67,12 @@ COPY public.users (id, username, password, role) FROM stdin;
 -- Data for Name: teachers; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.teachers (id, name, user_id) FROM stdin;
-1	Anirban Ghosh	2
-2	Arindam Sen	3
-3	Priyanka Roy	4
-5	Tanushree Mukherjee	5
+COPY public.teachers (id, name, user_id, gender) FROM stdin;
+1	Anirban Ghosh	2	male
+2	Arindam Sen	3	male
+3	Priyanka Roy	4	female
+5	Tanushree Mukherjee	5	female
+7	test_2	12	male
 \.
 
 
@@ -101,6 +105,18 @@ COPY public.periods (id, start_time, end_time, date, day, teacher_subject_id, is
 6	22:00:00	23:00:00	2025-11-18	2	6	0	running
 7	13:00:00	16:00:00	2025-11-19	3	3	0	completed
 8	12:00:00	14:00:00	2025-11-19	3	1	0	completed
+11	10:30:00	12:00:00	2025-02-12	2	2	0	scheduled
+12	13:00:00	14:30:00	2025-02-12	2	3	0	scheduled
+13	10:30:00	12:00:00	2025-02-12	2	2	0	scheduled
+14	13:00:00	14:30:00	2025-02-12	2	3	0	scheduled
+15	10:30:00	12:00:00	2025-12-02	2	2	0	completed
+16	13:00:00	14:30:00	2025-12-02	2	3	0	completed
+17	09:00:00	17:00:00	2025-12-07	6	3	0	running
+18	09:00:00	17:00:00	2025-12-07	6	6	0	running
+19	09:00:00	17:00:00	2025-12-07	6	6	0	running
+20	09:00:00	17:00:00	2025-12-07	6	6	0	running
+22	19:00:00	22:00:00	2025-12-24	2	6	0	completed
+21	14:00:00	18:00:00	2025-12-24	2	6	0	completed
 \.
 
 
@@ -108,12 +124,13 @@ COPY public.periods (id, start_time, end_time, date, day, teacher_subject_id, is
 -- Data for Name: students; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.students (id, name, roll_no, class_id, user_id, folder_id) FROM stdin;
-1	Paramveer Singh Pandher	3	1	1	1qAY7qHiC6dZ0g4uAxkd8jF7tNNEXZTTH
-3	Tushar Kanti	5	1	8	1kmaGRKLMv-LHxZ9gxDnhWrq-xdgSpuQH
-2	Gourav Biswas	1	1	6	1Yhtt4-Kw64PxCfvpFz05LlAVLJatm3oW
-4	Diptendu Chatterjee	2	1	9	1E6gDw-GNY3DY74w-Q14EiIpNKBGiXbhr
-5	Souryadipta Paul	4	1	10	1eGViwnMqkb5elpy0DaTJJ75FAG2Y8RvV
+COPY public.students (id, name, roll_no, class_id, user_id, folder_id, gender) FROM stdin;
+1	Paramveer Singh Pandher	3	1	1	1qAY7qHiC6dZ0g4uAxkd8jF7tNNEXZTTH	male
+3	Tushar Kanti	5	1	8	1kmaGRKLMv-LHxZ9gxDnhWrq-xdgSpuQH	male
+2	Gourav Biswas	1	1	6	1Yhtt4-Kw64PxCfvpFz05LlAVLJatm3oW	male
+4	Diptendu Chatterjee	2	1	9	1E6gDw-GNY3DY74w-Q14EiIpNKBGiXbhr	male
+5	Souryadipta Paul	4	1	10	1eGViwnMqkb5elpy0DaTJJ75FAG2Y8RvV	male
+7	test_1	200	1	13	\N	male
 \.
 
 
@@ -124,6 +141,7 @@ COPY public.students (id, name, roll_no, class_id, user_id, folder_id) FROM stdi
 COPY public.attendance (id, student_id, period_id, status) FROM stdin;
 13	1	2	present
 41	1	7	present
+42	1	21	present
 \.
 
 
@@ -132,11 +150,6 @@ COPY public.attendance (id, student_id, period_id, status) FROM stdin;
 --
 
 COPY public.students_images (id, student_id, drive_file_id, file_name, uploaded_at) FROM stdin;
-1	1	1S3qtXM9qKu90NrPJ5g4rk7P1SQVI4BYO	drawing.png	2025-11-26 14:07:56.373954
-2	1	1zHEA6g5oQoXxdpIY4_P2qtBh6w25HwTP	drawing.png	2025-11-26 14:08:49.528739
-3	1	1u5lsQrf2zsRv8CoFGBYiAdbxJ435D3Oc	face.jpg	2025-11-26 15:02:26.559708
-4	1	1OpEWkW4HY_P9UVOAsMfCq2OvB-oShHIH	g1.png	2025-11-26 15:04:26.733974
-5	2	1tX1A9OumAhjBAXooIXCjWMOaCbMp_tcu	face.jpg	2025-11-28 19:36:37.771892
 \.
 
 
@@ -166,7 +179,7 @@ COPY public.weekly_periods (id, teacher_subject_id, day, start_time, end_time) F
 -- Name: attendance_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.attendance_id_seq', 41, true);
+SELECT pg_catalog.setval('public.attendance_id_seq', 42, true);
 
 
 --
@@ -180,28 +193,28 @@ SELECT pg_catalog.setval('public.classes_id_seq', 1, false);
 -- Name: periods_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.periods_id_seq', 10, true);
+SELECT pg_catalog.setval('public.periods_id_seq', 22, true);
 
 
 --
 -- Name: students_embeddings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.students_embeddings_id_seq', 1, false);
+SELECT pg_catalog.setval('public.students_embeddings_id_seq', 2, true);
 
 
 --
 -- Name: students_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.students_id_seq', 5, true);
+SELECT pg_catalog.setval('public.students_id_seq', 7, true);
 
 
 --
 -- Name: students_images_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.students_images_id_seq', 5, true);
+SELECT pg_catalog.setval('public.students_images_id_seq', 6, true);
 
 
 --
@@ -215,7 +228,7 @@ SELECT pg_catalog.setval('public.subjects_id_seq', 6, true);
 -- Name: teachers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.teachers_id_seq', 6, true);
+SELECT pg_catalog.setval('public.teachers_id_seq', 7, true);
 
 
 --
@@ -229,7 +242,7 @@ SELECT pg_catalog.setval('public.teachersubjects_id_seq', 1, false);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 10, true);
+SELECT pg_catalog.setval('public.users_id_seq', 13, true);
 
 
 --
@@ -243,5 +256,5 @@ SELECT pg_catalog.setval('public.weekly_periods_id_seq', 1, false);
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 4CgNSj6fu3FiLXb3NgheKgSgiMX0VmHtrg80KhtkprWHe3hFSmlnpgNzQh22Ahc
+\unrestrict 3FvVUZcP6DwqKaLb8ZQrnBZ10NFCH3zWkK9pqibrzgOHA3Io9v1vLCry5AdpdhT
 

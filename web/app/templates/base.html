@@ -10,23 +10,45 @@
     <link
       rel="icon"
       type="image/svg+xml"
-      href="{{ url_for('static', filename='favicon.svg') }}"
+      href="{{ url_for('static', filename='vector/favicon.svg') }}"
     />
     <link
+      href="{{ url_for('static', filename='css/components/tabulator.css') }}"
       rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/luxon@2.3.1/build/global/luxon.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"
+    ></script>
+    <script src="{{ url_for('static', filename='js/components/custom-calendar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/custom-time.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/components/custom-dropdown.js') }}"></script>
+    <script>
+      // Ensure page-level datasets are available as globals for any inline/page scripts
+      window.classesData = window.classesData || {% if classes is defined %}{{ classes | tojson }}{% else %}[]{% endif %};
+      window.timetablesData = window.timetablesData || {% if timetables is defined %}{{ timetables | tojson }}{% else %}[]{% endif %};
+      window.attendanceData = window.attendanceData || {% if attendance is defined %}{{ attendance | tojson }}{% else %}[]{% endif %};
+    </script>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
     />
     <style>
       {% block style %} {% endblock%}
     </style>
-    <script src="{{ url_for('static', filename='base.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/base.js')}}"></script>
   </head>
   <body>
     <div class="dashboard-container">
       <div class="header">
         <h2>Welcome, {{ session.name }}</h2>
         <h3>{{ session.class_name }}</h3>
-        <a class="logout-btn" href="/logout">Logout</a>
+        <a class="logout-btn" href="/auth/logout">Logout</a>
         <div
           class="toggle-switch"
           style="position: relative; top: auto; right: auto"
@@ -47,8 +69,6 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
     <div class="toast" id="toast"></div>
 
-    <script src="{{ url_for('static', filename='custom-calendar.js') }}"></script>
-    <script src="{{ url_for('static', filename='custom-dropdown.js') }}"></script>
     <script>
 
       window.SESSION = {
@@ -70,6 +90,15 @@
           {% endfor %}
         {% endif %}
       });
+       const filterDateInput = document.getElementById("filterDateInput");
+      if (filterDateInput) {
+        filterDateInput.addEventListener("dateSelected", (e) => {
+          // Call your filter function when a date is selected
+          applyFilters(e.detail.date, null, "date_filter");
+        });
+      }
+      setInterval(updatePeriods, 60000);
+      updatePeriods();
     </script>
     {% endwith %}
   </body>

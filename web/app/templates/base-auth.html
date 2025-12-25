@@ -10,17 +10,17 @@
     <link
       rel="icon"
       type="image/svg+xml"
-      href="{{ url_for('static', filename='favicon.svg') }}"
+      href="{{ url_for('static', filename='vector/favicon.svg') }}"
     />
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}"
+      href="{{ url_for('static', filename='css/style.css') }}"
     />
     <style>
       {% block style %} {% endblock%}
     </style>
-    <script src="{{ url_for('static', filename='base.js') }}"></script>
-    <script src="{{ url_for('static', filename='custom-dropdown.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/base.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/custom-dropdown.js') }}"></script>
   </head>
   <body>
     {% with messages = get_flashed_messages(with_categories=true) %}

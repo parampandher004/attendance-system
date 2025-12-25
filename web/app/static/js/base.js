@@ -244,8 +244,27 @@ function handleAddClassSubmit(event) {
 
   showToast("Saving...", "info", 4000);
 
+  // Debug: Log what's being sent
+  console.log("Form data before send:", periodData);
+
+  // Ensure ts_id is present and not empty/undefined
+  if (
+    !periodData.ts_id ||
+    periodData.ts_id === "" ||
+    periodData.ts_id === "undefined"
+  ) {
+    showToast("Please select a subject", "error");
+    return;
+  }
+
+  // Rename ts_id to teacher_subject_id for backend compatibility
+  if (periodData.ts_id) {
+    periodData.teacher_subject_id = periodData.ts_id;
+    delete periodData.ts_id;
+  }
+
   // 1. Send data to Flask backend
-  fetch("/api/classes", {
+  fetch("/admin/api/periods", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -281,14 +300,59 @@ function closePeriodModal() {
 }
 // The form submission function will be defined in the next step
 function updatePeriods() {
+  // Guard access to SESSION (may be defined on window later)
+  const session =
+    typeof window !== "undefined" && window.SESSION ? window.SESSION : {};
+
+  // Skip for admin role - admins don't manage periods
+  if (session.role === "admin") {
+    return;
+  }
+
+  // Determine API URL based on user role
+  const apiUrl =
+    session.role === "teacher"
+      ? "/teacher/api/periods/today"
+      : "/student/api/periods/today";
+
+  // If a Tabulator periods table exists, populate it and exit early
+  if (
+    window.periodsTable &&
+    typeof window.periodsTable.setData === "function"
+  ) {
+    fetch(apiUrl)
+      .then((response) => response.json())
+      .then((data) => {
+        try {
+          window.periodsTable.setData(data);
+        } catch (err) {
+          console.error("Error setting periods Tabulator data:", err);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch periods for Tabulator:", err);
+        try {
+          window.periodsTable.clearData();
+        } catch (err) {
+          console.error("Error clearing periods Tabulator data:", err);
+        }
+      });
+    return;
+  }
+
+  // --- Fallback: original DOM-table update (teacher/student without Tabulator) ---
   const table = document.getElementById("periods-table");
   const tbody = document.getElementById("periods-body");
   const noPeriodsMessage = document.getElementById("no-periods-message");
 
+  if (!tbody || !noPeriodsMessage || !table) {
+    return;
+  }
+
   tbody.innerHTML = "";
   noPeriodsMessage.style.display = "none";
 
-  fetch("/api/periods/today")
+  fetch(apiUrl)
     .then((response) => response.json())
     .then((data) => {
       if (data.length > 0) {
@@ -296,19 +360,25 @@ function updatePeriods() {
         if (SESSION.role === "teacher") {
           data.forEach((period) => {
             let row = document.createElement("tr");
-            row.classList.add("status-" + period.status.toLowerCase());
+            row.classList.add("status-" + (period.status || "").toLowerCase());
 
             row.innerHTML = `
-            <td>${period.class_name}</td>
-            <td>${period.subject_name}</td>
-            <td>${period.start_time}</td>
-            <td>${period.end_time}</td>
+            <td>${period.class_name || ""}</td>
+            <td>${period.subject_name || ""}</td>
+            <td>${period.start_time || ""}</td>
+            <td>${period.end_time || ""}</td>
             <td style="overflow: visible;">
-              <div class="custom-select-wrapper" id="status-wrapper-${period.id}">
-                <input type="hidden" name="status-${period.id}" id="statusValue-${period.id}" value="${period.status}" />
+              <div class="custom-select-wrapper" id="status-wrapper-${
+                period.id
+              }">
+                <input type="hidden" name="status-${
+                  period.id
+                }" id="statusValue-${period.id}" value="${
+              period.status || ""
+            }" />
 
                 <div class="custom-select" id="statusSelectButton-${period.id}">
-                  ${period.status}
+                  ${period.status || ""}
                   <span class="select-arrow">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
@@ -326,8 +396,9 @@ function updatePeriods() {
             </td>
           `;
             if (
-              period.status.toLowerCase() === "running" ||
-              period.status.toLowerCase() === "completed"
+              period.status &&
+              (period.status.toLowerCase() === "running" ||
+                period.status.toLowerCase() === "completed")
             ) {
               row.innerHTML += `
               <td>
@@ -357,12 +428,12 @@ function updatePeriods() {
         } else if (SESSION.role === "student") {
           data.forEach((period) => {
             let row = document.createElement("tr");
-            row.classList.add("status-" + period.status.toLowerCase());
+            row.classList.add("status-" + (period.status || "").toLowerCase());
             row.innerHTML = `
-              <td>${period.subject_name}</td>
-              <td>${period.start_time}</td>
-              <td>${period.end_time}</td>
-              <td>${period.status.toUpperCase()}</td>
+              <td>${period.subject_name || ""}</td>
+              <td>${period.start_time || ""}</td>
+              <td>${period.end_time || ""}</td>
+              <td>${(period.status || "").toUpperCase()}</td>
             `;
             tbody.appendChild(row);
           });
@@ -370,19 +441,25 @@ function updatePeriods() {
         } else if (SESSION.role === "admin") {
           data.forEach((period) => {
             let row = document.createElement("tr");
-            row.classList.add("status-" + period.status.toLowerCase());
+            row.classList.add("status-" + (period.status || "").toLowerCase());
             row.innerHTML = `
-            <td>${period.class_name}</td>
-            <td>${period.subject_name}</td>
-            <td>${period.teacher_name}</td>
-            <td>${period.start_time}</td>
-            <td>${period.end_time}</td>
+            <td>${period.class_name || ""}</td>
+            <td>${period.subject_name || ""}</td>
+            <td>${period.teacher_name || ""}</td>
+            <td>${period.start_time || ""}</td>
+            <td>${period.end_time || ""}</td>
             <td style="overflow: visible;">
-              <div class="custom-select-wrapper" id="status-wrapper-${period.id}">
-                <input type="hidden" name="status-${period.id}" id="statusValue-${period.id}" value="${period.status}" />
+              <div class="custom-select-wrapper" id="status-wrapper-${
+                period.id
+              }">
+                <input type="hidden" name="status-${
+                  period.id
+                }" id="statusValue-${period.id}" value="${
+              period.status || ""
+            }" />
 
                 <div class="custom-select" id="statusSelectButton-${period.id}">
-                  ${period.status}
+                  ${period.status || ""}
                   <span class="select-arrow">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
@@ -400,8 +477,9 @@ function updatePeriods() {
             </td>
           `;
             if (
-              period.status.toLowerCase() === "running" ||
-              period.status.toLowerCase() === "completed"
+              period.status &&
+              (period.status.toLowerCase() === "running" ||
+                period.status.toLowerCase() === "completed")
             ) {
               row.innerHTML += `
               <td>
@@ -474,51 +552,377 @@ function updateStudent(value, hiddenInput, selectId) {
   }
 }
 function handleStudentEnroll(e) {
-  const studentId = e.target.getAttribute("data-id");
-  const classId = e.target.getAttribute("data-class-id");
-  fetch(`/api/students/${studentId}/enroll`, {
+  const btn = e.target.closest(".enroll-btn");
+  if (!btn) return;
+  const studentId = btn.getAttribute("data-id") || btn.dataset.id;
+  const classId = btn.getAttribute("data-class-id") || btn.dataset.classId;
+
+  // Ensure we have a student id
+  if (!studentId) return console.error("No student id found for enroll");
+
+  fetch("/admin/api/student/enroll", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ class_id: classId }),
-  });
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ student_id: studentId, class_id: classId }),
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Enroll failed");
+      return res.json();
+    })
+    .then((data) => {
+      showToast(data.message || "Enrolled", "success");
+      // remove the student card from pending list if present
+      const card = btn.closest(".student-card");
+      if (card) card.remove();
+    })
+    .catch((err) => {
+      console.error(err);
+      showToast("Enroll failed", "error");
+    });
 }
 function handleStudentReject(e) {
-  const studentId = e.target.getAttribute("data-id");
-  fetch(`/api/students/${studentId}/reject`, {
+  const btn = e.target.closest(".reject-btn");
+  if (!btn) return;
+  const studentId = btn.getAttribute("data-id") || btn.dataset.id;
+  if (!studentId) return console.error("No student id found for reject");
+
+  fetch("/admin/api/student/reject", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ student_id: studentId }),
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Reject failed");
+      return res.json();
+    })
+    .then((data) => {
+      showToast(data.message || "Rejected", "success");
+      const card = btn.closest(".student-card");
+      if (card) card.remove();
+    })
+    .catch((err) => {
+      console.error(err);
+      showToast("Reject failed", "error");
+    });
 }
 
 function viewStudentImages(studentId, studentName) {
-  const uploadModal = document.getElementById("uploadModal");
-  uploadModal.style.display = "flex";
+  // Store current student ID for later use
+  window.currentStudentId = studentId;
+  window.currentStudentName = studentName;
 
-  uploadModal.querySelector("#studentIdInput").value = studentId;
-  uploadModal.querySelector("#uploadModalTitle").textContent = studentName;
-  const uploadModalClose = document.getElementById("closeUploadModal");
-  uploadModalClose.onclick = () => (uploadModal.style.display = "none");
+  // Open the images modal
+  const imagesModal = document.getElementById("imagesModal");
+  imagesModal.style.display = "flex";
+  document.getElementById(
+    "imagesModalTitle"
+  ).textContent = `${studentName}'s Images`;
 
-  window.onclick = (e) => {
-    if (e.target == uploadModal) uploadModal.style.display = "none";
+  // Load student images data
+  loadStudentImages(studentId);
+}
+
+function loadStudentImages(studentId) {
+  const loadingIndicator = document.getElementById("imagesLoadingIndicator");
+  const imagesList = document.getElementById("imagesList");
+
+  loadingIndicator.style.display = "block";
+  imagesList.innerHTML = "";
+
+  fetch(`/admin/api/students/${studentId}/images`)
+    .then((res) => res.json())
+    .then((data) => {
+      loadingIndicator.style.display = "none";
+
+      // Update stats
+      document.getElementById("totalImagesCount").textContent =
+        data.total_images;
+      document.getElementById("encodedImagesCount").textContent =
+        data.encoded_images;
+
+      // Populate images list
+      if (data.images.length === 0) {
+        imagesList.innerHTML =
+          '<tr><td colspan="3" style="text-align: center; padding: 1rem; color: var(--text-muted)">No images yet</td></tr>';
+        return;
+      }
+
+      imagesList.innerHTML = data.images
+        .map(
+          (img) => `
+        <tr>
+          <td>${img.file_name}</td>
+          <td>
+            <span style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; ${
+              img.has_encoding
+                ? "background: var(--success); color: white"
+                : "background: var(--warning); color: white"
+            }">
+              ${img.has_encoding ? "✓ Yes" : "✗ No"}
+            </span>
+          </td>
+          <td>
+            <button onclick="deleteStudentImage(${studentId}, ${
+            img.id
+          })" style="background: var(--danger); color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer">Delete</button>
+          </td>
+        </tr>
+      `
+        )
+        .join("");
+    })
+    .catch((err) => {
+      loadingIndicator.style.display = "none";
+      imagesList.innerHTML =
+        '<tr><td colspan="3" style="text-align: center; color: var(--danger)">Failed to load images</td></tr>';
+      console.error("Error loading student images:", err);
+    });
+}
+
+function closeImagesModal() {
+  const imagesModal = document.getElementById("imagesModal");
+  imagesModal.style.display = "none";
+}
+
+function closeImageViewerModal() {
+  const imageViewerModal = document.getElementById("imageViewerModal");
+  imageViewerModal.style.display = "none";
+}
+
+function handleAddImages() {
+  // Open upload modal for adding images
+  if (window.currentStudentId) {
+    const uploadModal = document.getElementById("uploadModal");
+    uploadModal.style.display = "flex";
+    document.getElementById("studentIdInput").value = window.currentStudentId;
+    document.getElementById("uploadModalTitle").textContent =
+      window.currentStudentName;
+
+    const uploadModalClose = document.getElementById("closeUploadModal");
+    uploadModalClose.onclick = () => {
+      uploadModal.style.display = "none";
+      // Refresh images list after upload
+      loadStudentImages(window.currentStudentId);
+    };
+  }
+}
+
+function handleGenerateEncodings() {
+  if (!window.currentStudentId) {
+    showToast("No student selected", "error");
+    return;
+  }
+
+  const loadingIndicator = document.getElementById("imagesLoadingIndicator");
+  loadingIndicator.style.display = "block";
+
+  fetch(`/admin/api/students/${window.currentStudentId}/generate-encodings`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        return res.json().then((err) => {
+          throw new Error(err.error || "Failed to generate encodings");
+        });
+      }
+      return res.json();
+    })
+    .then((data) => {
+      loadingIndicator.style.display = "none";
+
+      if (data.error) {
+        showToast(`Error: ${data.error}`, "error");
+        console.error("Encoding error details:", data);
+      } else {
+        showToast(data.message, "success");
+        // Reload images to update encoding status
+        loadStudentImages(window.currentStudentId);
+      }
+
+      if (data.errors && data.errors.length > 0) {
+        console.warn("Encoding warnings:", data.errors);
+      }
+    })
+    .catch((err) => {
+      loadingIndicator.style.display = "none";
+      showToast(`Error: ${err.message}`, "error");
+      console.error("Error generating encodings:", err);
+    });
+}
+
+function handleShowImages() {
+  if (!window.currentStudentId) {
+    showToast("No student selected", "error");
+    return;
+  }
+
+  fetch(`/admin/api/students/${window.currentStudentId}/images`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.images.length === 0) {
+        showToast("No images to display", "info");
+        return;
+      }
+
+      // Create a simple gallery viewer
+      const imageViewerModal = document.getElementById("imageViewerModal");
+      const imageViewerImg = document.getElementById("imageViewerImg");
+      const imageViewerName = document.getElementById("imageViewerName");
+
+      // Store all images for gallery navigation
+      window.currentImageGallery = data.images;
+      window.currentImageIndex = 0;
+
+      // Display first image
+      displayImageInGallery(0);
+      imageViewerModal.style.display = "flex";
+    })
+    .catch((err) => {
+      showToast("Failed to load images", "error");
+      console.error("Error loading images:", err);
+    });
+}
+
+function displayImageInGallery(index) {
+  if (!window.currentImageGallery || window.currentImageGallery.length === 0)
+    return;
+
+  const image = window.currentImageGallery[index];
+  // Use the server endpoint to get the image with proper authentication
+  const imageUrl = `/admin/api/students/${window.currentStudentId}/images/${image.id}/view`;
+
+  const imgElement = document.getElementById("imageViewerImg");
+
+  // Clear previous image
+  imgElement.src = "";
+  imgElement.alt = "Loading...";
+
+  // Set up error handler
+  imgElement.onerror = () => {
+    imgElement.alt = "Failed to load image";
+    imgElement.style.backgroundColor = "#f0f0f0";
+    showToast(`Failed to load image: ${image.file_name}`, "warning");
   };
 
-  // fetch(`/api/students/${studentId}/images`)
-  //   .then((res) => res.json())
-  //   .then((data) => {
-  //     const tbody = document.getElementById("studentImageList");
-  //     tbody.innerHTML = "";
-  //     data.forEach((image) => {
-  //       tbody.innerHTML += `
-  //         <tr>
-  //           <td><img src="${image}" alt="Student Image" /></td>
-  //         </tr>
-  //       `;
-  //     });
-  //     document.getElementById("studentImageModal").style.display = "flex";
-  //   });
+  imgElement.onload = () => {
+    imgElement.style.backgroundColor = "transparent";
+  };
+
+  // Set source
+  imgElement.src = imageUrl;
+
+  document.getElementById("imageViewerName").textContent = `${
+    image.file_name
+  } (${index + 1}/${window.currentImageGallery.length})`;
+
+  // Show navigation buttons if multiple images
+  const prevBtn = document.getElementById("imageNavPrev");
+  const nextBtn = document.getElementById("imageNavNext");
+
+  if (prevBtn && nextBtn) {
+    prevBtn.style.display =
+      window.currentImageGallery.length > 1 ? "block" : "none";
+    nextBtn.style.display =
+      window.currentImageGallery.length > 1 ? "block" : "none";
+  }
+}
+
+function prevImage() {
+  if (!window.currentImageGallery) return;
+  window.currentImageIndex =
+    (window.currentImageIndex - 1 + window.currentImageGallery.length) %
+    window.currentImageGallery.length;
+  displayImageInGallery(window.currentImageIndex);
+}
+
+function nextImage() {
+  if (!window.currentImageGallery) return;
+  window.currentImageIndex =
+    (window.currentImageIndex + 1) % window.currentImageGallery.length;
+  displayImageInGallery(window.currentImageIndex);
+}
+
+function deleteStudentImage(studentId, imageId) {
+  if (!confirm("Are you sure you want to delete this image?")) {
+    return;
+  }
+
+  fetch(`/admin/api/students/${studentId}/images/${imageId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.error) {
+        showToast(`Error: ${data.error}`, "error");
+      } else {
+        showToast(data.message, "success");
+        loadStudentImages(studentId);
+      }
+    })
+    .catch((err) => {
+      showToast("Failed to delete image", "error");
+      console.error("Error deleting image:", err);
+    });
+}
+
+function toggleTeacherPanel(button) {
+  const panel = document.getElementById("teacher-panel");
+  const expandBtn = button;
+
+  if (panel.style.display === "none") {
+    panel.style.display = "block";
+    setTimeout(() => {
+      panel.classList.add("active");
+    }, 10);
+    expandBtn.classList.add("active");
+  } else {
+    panel.classList.remove("active");
+    expandBtn.classList.remove("active");
+    setTimeout(() => {
+      panel.style.display = "none";
+    }, 300);
+  }
+}
+
+function assignTeacherToSubject() {
+  const teacherId = document.getElementById("value-teacherSelect").value;
+  if (!teacherId) {
+    showToast("Please select a teacher", "error");
+    return;
+  }
+
+  const classId = document.getElementById("value-teacherClass").value;
+  const subjectId = document.getElementById("value-teacherSubject").value;
+
+  if (!classId || !subjectId) {
+    showToast("Please select both class and subject", "error");
+    return;
+  }
+
+  fetch(`/api/teachers/${teacherId}/assign`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      class_id: classId,
+      subject_id: subjectId,
+    }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      showToast(data.message, "success");
+      // Optionally refresh the page or remove the assigned teacher
+      setTimeout(() => location.reload(), 1500);
+    })
+    .catch((error) => {
+      console.error("Error assigning teacher:", error);
+      showToast("Failed to assign teacher", "error");
+    });
 }

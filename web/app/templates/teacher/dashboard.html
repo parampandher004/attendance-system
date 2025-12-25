@@ -1,0 +1,969 @@
+{% extends "base.html" %} {% block title %}Teacher Dashboard{% endblock %} {%
+block content %}
+
+<div class="main" id="main">
+  <!-- NEW: Teacher overview grid -->
+  <div class="compartments">
+    <div class="compartment">
+      <div class="overview-wrapper" style="margin-bottom: 1rem">
+        <div class="grid-container">
+          <div class="overview-card avatar">
+            <div class="img-container">
+              <img
+                src="{{ url_for('static', filename='images/teacher-avatar-' + session.gender + '.jpg') }}"
+                alt="Teacher"
+                style="width: 100%; height: 100%; object-fit: cover"
+              />
+            </div>
+            <div class="avatar-meta">
+              <div class="welcome-label">Instructor</div>
+              <div id="teacher-name" class="student-name">
+                {{ session.name }}
+              </div>
+              <div
+                id="teacher-subjects-text"
+                class="recognition-time"
+                style="
+                  margin-top: 0.25rem;
+                  color: var(--text-muted);
+                  font-size: 0.9rem;
+                "
+              ></div>
+            </div>
+          </div>
+
+          <div class="overview-card info-1">
+            <div class="card-label">Classes Assigned</div>
+            <div id="teacher-classes-count" class="card-value">—</div>
+          </div>
+
+          <div class="overview-card info-2">
+            <div class="card-label">Subjects Handled</div>
+            <div id="teacher-subjects-count-card" class="card-value">—</div>
+          </div>
+
+          <div class="overview-card info-3" id="total-students">
+            <div class="card-label">Total Students</div>
+            <div class="card-value">{{ total_students }}</div>
+          </div>
+
+          <div class="overview-card schedule" id="today-schedule">
+            <div class="card-label">Todayʼs Lectures</div>
+            <div id="today-lectures" class="card-value">—</div>
+            <div class="card-meta">Updated live</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="compartments">
+    <div class="compartment">
+      <div id="add-class-modal" class="modal">
+        <div class="modal-content">
+          <div style="width: 100%">
+            <span class="close-btn" id="close-add-class-modal"
+              ><svg
+                width="24"
+                height="24"
+                viewBox="0 0 6.3499999 6.3499999"
+                fill="none"
+              >
+                <path
+                  id="rect1"
+                  style="stroke-width: 0.454438"
+                  d="M 0.56638171,-0.56638171 C 0.42177738,-0.42177738 0.33252088,-0.22160664 0.33252088,0 c 0,0.44321328 0.35666386,0.79987714 0.79987712,0.79987714 H 3.6902509 V 3.35773 c 0,0.4432133 0.3566639,0.7998772 0.7998772,0.7998772 0.4432132,0 0.7998771,-0.3566639 0.7998771,-0.7998772 V 0.79987714 h 2.5578529 c 0.4432133,0 0.7998771,-0.35666386 0.7998771,-0.79987714 0,-0.44321328 -0.3566638,-0.79987714 -0.7998771,-0.79987714 H 5.2900052 V -3.35773 c 0,-0.4432133 -0.3566639,-0.7998772 -0.7998771,-0.7998772 -0.4432133,0 -0.7998772,0.3566639 -0.7998772,0.7998772 v 2.55785286 H 1.132398 c -0.22160662,0 -0.42141195,0.0888911 -0.56601629,0.23349543 z"
+                  transform="rotate(45)"
+                />
+              </svg>
+            </span>
+            <h2>Add New Class Schedule</h2>
+
+            <form id="add-class-form">
+              <div class="group bt-margin" style="max-width: 1000px">
+                <label for="value-className" class="input-label"
+                  >Class Name:</label
+                >
+                <select
+                  id="className"
+                  name="class_name"
+                  class="js-custom-dropdown"
+                  required
+                >
+                  <option value="">Select Class</option>
+                </select>
+                <br />
+              </div>
+              <div class="group bt-margin" style="max-width: 1000px">
+                <label for="subjectName" class="input-label"
+                  >Subject Name:</label
+                >
+                <select
+                  id="subjectName"
+                  name="teacher_subject_id"
+                  class="js-custom-dropdown"
+                  required
+                  disabled
+                >
+                  <option value="">Select Subject</option>
+                </select>
+                <br />
+              </div>
+
+              <div
+                class="js-time-picker group bt-margin"
+                style="max-width: 1000px"
+                data-hour-id="startHour"
+                data-minute-id="startMinute"
+                data-hidden-id="start_time_hidden"
+              >
+                <label for="startHour" class="input-label">Start Time:</label>
+
+                <div class="time-selector-group">
+                  <!-- Hour Dropdown -->
+                  <select id="startHour" class="time-select-field"></select>
+
+                  <span class="time-separator">:</span>
+
+                  <!-- Minute Dropdown -->
+                  <select id="startMinute" class="time-select-field"></select>
+                </div>
+
+                <!-- Hidden input for form submission -->
+                <input
+                  type="hidden"
+                  name="start_time"
+                  id="start_time_hidden"
+                  value="09:00"
+                />
+              </div>
+
+              <div
+                class="js-time-picker group bt-margin"
+                style="max-width: 1000px"
+                data-hour-id="endHour"
+                data-minute-id="endMinute"
+                data-hidden-id="end_time_hidden"
+              >
+                <label for="endHour" class="input-label">End Time:</label>
+
+                <div class="time-selector-group">
+                  <!-- Hour Dropdown -->
+                  <select id="endHour" class="time-select-field"></select>
+
+                  <span class="time-separator">:</span>
+
+                  <!-- Minute Dropdown -->
+                  <select id="endMinute" class="time-select-field"></select>
+                </div>
+
+                <!-- Hidden input for form submission -->
+                <input
+                  type="hidden"
+                  name="end_time"
+                  id="end_time_hidden"
+                  value="17:00"
+                />
+              </div>
+
+              <div class="calendar-wrapper">
+                <div
+                  class="input-wrapper group bt-margin"
+                  style="max-width: 1000px"
+                >
+                  <label for="modalDateInput" class="input-label"
+                    >Class Date:</label
+                  >
+                  <input
+                    type="text"
+                    id="modalDateInput"
+                    name="date"
+                    class="date-input input"
+                    placeholder="Click to select date"
+                    readonly
+                  />
+                </div>
+                <div class="calendar-container">
+                  <div class="calendar-header">
+                    <button type="button" class="cal-nav-btn prev-month-btn">
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M15 18l-6-6 6-6" />
+                      </svg>
+                    </button>
+                    <div class="month-year"></div>
+                    <button type="button" class="cal-nav-btn next-month-btn">
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M9 18l6-6-6-6" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="calendar-grid"></div>
+                </div>
+              </div>
+
+              <input type="hidden" name="day" id="day" />
+              <input type="hidden" name="status" value="scheduled" />
+
+              <button class="submit-btn" id="schedule-class">Save Class</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <button class="add-class-btn" id="open-add-class-modal">
+        Schedule Class
+      </button>
+    </div>
+  </div>
+  <div id="periodModal" class="modal">
+    <div class="modal-content" style="max-width: 100%">
+      <div style="width: 100%">
+        <h2 id="periodModalTitle"></h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Roll No</th>
+                <th>Name</th>
+                <th>Present</th>
+                <th>Absent</th>
+              </tr>
+            </thead>
+            <tbody id="studentAttendanceList"></tbody>
+          </table>
+        </div>
+        <span onclick="closePeriodModal()" class="close-btn"
+          ><svg
+            width="24"
+            height="24"
+            viewBox="0 0 6.3499999 6.3499999"
+            fill="none"
+          >
+            <path
+              id="rect1"
+              style="stroke-width: 0.454438"
+              d="M 0.56638171,-0.56638171 C 0.42177738,-0.42177738 0.33252088,-0.22160664 0.33252088,0 c 0,0.44321328 0.35666386,0.79987714 0.79987712,0.79987714 H 3.6902509 V 3.35773 c 0,0.4432133 0.3566639,0.7998772 0.7998772,0.7998772 0.4432132,0 0.7998771,-0.3566639 0.7998771,-0.7998772 V 0.79987714 h 2.5578529 c 0.4432133,0 0.7998771,-0.35666386 0.7998771,-0.79987714 0,-0.44321328 -0.3566638,-0.79987714 -0.7998771,-0.79987714 H 5.2900052 V -3.35773 c 0,-0.4432133 -0.3566639,-0.7998772 -0.7998771,-0.7998772 -0.4432133,0 -0.7998772,0.3566639 -0.7998772,0.7998772 v 2.55785286 H 1.132398 c -0.22160662,0 -0.42141195,0.0888911 -0.56601629,0.23349543 z"
+              transform="rotate(45)"
+            />
+          </svg>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="compartments">
+    <div class="compartment">
+      <h2>Today's Periods</h2>
+      <div class="table-container">
+        <!-- Tabulator will render today's periods -->
+        <div id="periods-tabulator"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="compartments">
+    <div class="compartment">
+      <h2>Assigned Classes</h2>
+      {% if classes %}
+      <div class="table-container">
+        <!-- Tabulator will render assigned classes -->
+        <div id="classes-tabulator"></div>
+      </div>
+      {% endif %} {% if not classes %}
+      <p>No classes assigned yet.</p>
+      {% endif %}
+    </div>
+    <div id="studentModal" class="modal">
+      <div class="modal-content" style="max-width: 100%">
+        <div style="width: 100%">
+          <h2 id="studentModalTitle"></h2>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Roll No</th>
+                  <th>Name</th>
+                  <th>Attended</th>
+                  <th>Total</th>
+                  <th>%</th>
+                </tr>
+              </thead>
+              <tbody id="studentList"></tbody>
+            </table>
+          </div>
+          <span onclick="closeModal()" class="close-btn"
+            ><svg
+              width="24"
+              height="24"
+              viewBox="0 0 6.3499999 6.3499999"
+              fill="none"
+            >
+              <path
+                id="rect1"
+                style="stroke-width: 0.454438"
+                d="M 0.56638171,-0.56638171 C 0.42177738,-0.42177738 0.33252088,-0.22160664 0.33252088,0 c 0,0.44321328 0.35666386,0.79987714 0.79987712,0.79987714 H 3.6902509 V 3.35773 c 0,0.4432133 0.3566639,0.7998772 0.7998772,0.7998772 0.4432132,0 0.7998771,-0.3566639 0.7998771,-0.7998772 V 0.79987714 h 2.5578529 c 0.4432133,0 0.7998771,-0.35666386 0.7998771,-0.79987714 0,-0.44321328 -0.3566638,-0.79987714 -0.7998771,-0.79987714 H 5.2900052 V -3.35773 c 0,-0.4432133 -0.3566639,-0.7998772 -0.7998771,-0.7998772 -0.4432133,0 -0.7998772,0.3566639 -0.7998772,0.7998772 v 2.55785286 H 1.132398 c -0.22160662,0 -0.42141195,0.0888911 -0.56601629,0.23349543 z"
+                transform="rotate(45)"
+              />
+            </svg>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="compartment">
+      <h2>Class Timetables</h2>
+      {% if timetables %}
+      <div class="table-container">
+        <!-- Tabulator will render timetables -->
+        <div id="timetables-tabulator"></div>
+      </div>
+      {% endif %} {% if not timetables %}
+      <p>No timetables available.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="compartments">
+    <div class="compartment">
+      <h2>All Students Attendance</h2>
+      {% if attendance %}
+      <div
+        class="filter-controls"
+        id="teacher-filter-controls"
+        data-table-id="attendance-table"
+      >
+        <div class="group" style="flex: 1">
+          <select name="subject" id="subject_filter" class="js-custom-dropdown">
+            <option value="">All Subjects</option>
+            {% for cls in classes %}
+            <option value="{{ cls['subject'] | trim | lower }}">
+              {{ cls['subject'] }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="calendar-wrapper" style="flex: 1">
+          <div class="input-wrapper group">
+            <input
+              type="text"
+              id="filterDateInput"
+              class="date-input input"
+              placeholder="Filter by date"
+              readonly
+            />
+          </div>
+          <div class="calendar-container">
+            <div class="calendar-header">
+              <button type="button" class="cal-nav-btn prev-month-btn">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <div class="month-year"></div>
+              <button type="button" class="cal-nav-btn next-month-btn">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+            <div class="calendar-grid"></div>
+          </div>
+        </div>
+        <div class="group" style="flex: 1">
+          <select name="status" id="status_filter" class="js-custom-dropdown">
+            <option value="">All Statuses</option>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+          </select>
+        </div>
+
+        <div class="group" style="flex: 1">
+          <select name="day" id="day_filter" class="js-custom-dropdown">
+            <option value="">All Days</option>
+            <option value="monday">Monday</option>
+            <option value="tuesday">Tuesday</option>
+            <option value="wednesday">Wednesday</option>
+            <option value="thursday">Thursday</option>
+            <option value="friday">Friday</option>
+            <option value="saturday">Saturday</option>
+            <option value="sunday">Sunday</option>
+          </select>
+        </div>
+        <button
+          type="button"
+          class="submit-btn"
+          onclick="resetFilters('teacher-filter-controls')"
+        >
+          Reset Filters
+        </button>
+      </div>
+      <div class="table-container">
+        <!-- Tabulator will render attendance -->
+        <div id="attendance-tabulator"></div>
+      </div>
+      {% else %}
+      <p>No Attendance record available</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+    (function () {
+
+      const openAddClassModalBtn = document.getElementById("open-add-class-modal");
+      const addClassModal = document.getElementById("add-class-modal");
+      const closeAddClassModalBtn = document.getElementById("close-add-class-modal");
+      const classNameSelect = document.getElementById("className");
+      const subjectNameSelect = document.getElementById("subjectName");
+      const scheduleClassBtn = document.getElementById("schedule-class");
+      const form = document.getElementById("add-class-form");
+
+      openAddClassModalBtn.addEventListener("click", () => {
+        addClassModal.style.display = "flex";
+      });
+
+      closeAddClassModalBtn.addEventListener("click", () => {
+        addClassModal.style.display = "none";
+        form.reset();
+        const classNameWrapper = document.getElementById("wrapper-className");
+        const subjectNameWrapper = document.getElementById("wrapper-subjectName");
+        resetDropdown(classNameWrapper);
+        resetDropdown(subjectNameWrapper);
+      });
+
+    	// Stabilize references to server-injected data
+    	window.classesData = window.classesData || {{ classes | tojson }};
+    	window.timetablesData = window.timetablesData || {{ timetables | tojson }};
+    	window.attendanceData = window.attendanceData || {{ attendance | tojson }};
+
+    	const classesData = window.classesData;
+    	const timetablesData = window.timetablesData;
+    	const attendanceData = window.attendanceData;
+
+      const classNames = [...new Set(classesData.map(row => row.class_name))];
+
+      function updateSubjectDropdown(selectedClass) {
+        // Find the wrapper that the custom dropdown created.
+        const subjectWrapper = document.getElementById("wrapper-subjectName");
+        if (!subjectWrapper) return;
+
+        // Create a new <select> element to replace the old one.
+        const newSubjectSelect = document.createElement("select");
+        newSubjectSelect.id = "subjectName";
+        newSubjectSelect.name = "teacher_subject_id";
+        newSubjectSelect.className = "js-custom-dropdown";
+        newSubjectSelect.required = true;
+
+        const subjects = classesData.filter(row => row.class_name === selectedClass);
+        newSubjectSelect.disabled = subjects.length === 0;
+
+        // Populate the new select element
+        newSubjectSelect.innerHTML = '<option value="">Select Subject</option>' +
+          subjects.map(sub => `<option value="${sub.id}">${sub.subject}</option>`).join('');
+
+        // Replace the old wrapper with our new, clean <select> element
+        subjectWrapper.parentNode.replaceChild(newSubjectSelect, subjectWrapper);
+
+        // Now, transform the new <select> into a custom dropdown
+        transformSelectToCustomDropdown(newSubjectSelect);
+      }
+
+      // 2. Populate and transform the class dropdown initially
+      classNameSelect.innerHTML = '<option value="">Select Class</option>' +
+        classNames.map(cls => `<option value="${cls}">${cls}</option>`).join('');
+
+      transformSelectToCustomDropdown(classNameSelect, (value) => {
+        updateSubjectDropdown(value);
+      });
+
+      // 3. Perform an initial setup for the (disabled) subject dropdown
+      transformSelectToCustomDropdown(subjectNameSelect);
+
+      scheduleClassBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        fetch("api/periods", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              addClassModal.style.display = "none";
+              const classNameWrapper = document.getElementById("wrapper-className");
+              const subjectNameWrapper = document.getElementById("wrapper-subjectName");
+              resetDropdown(classNameWrapper);
+              resetDropdown(subjectNameWrapper);
+              form.reset();
+              refreshTodayPeriods();
+            } else {
+              alert("Error: " + (data.message || "Failed to schedule class."));
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An unexpected error occurred.");
+          });
+      });
+    	// ---- DOM ready: overview, modal dropdowns, quick-links, form hookup ----
+    	document.addEventListener("DOMContentLoaded", () => {
+    		try {
+    			// Overview counts
+    			const teacherNameEl = document.getElementById("teacher-name");
+    			if (teacherNameEl) teacherNameEl.textContent = "{{ session.name }}";
+
+    			const cls = classesData || [];
+    			const subjectSet = new Set(cls.map(c => (c.subject || "").toLowerCase()).filter(Boolean));
+    			const classSet = new Set(cls.map(c => (c.class_name || "").toLowerCase()).filter(Boolean));
+
+    			const subjectsCount = subjectSet.size || 0;
+    			const classesCount = classSet.size || 0;
+
+    			const elSubjectsCard = document.getElementById("teacher-subjects-count-card");
+    			const elSubjectsInline = document.getElementById("teacher-subjects-count");
+    			const elClasses = document.getElementById("teacher-classes-count");
+
+    			if (elSubjectsCard) elSubjectsCard.textContent = subjectsCount;
+    			if (elSubjectsInline) elSubjectsInline.textContent = subjectsCount;
+    			if (elClasses) elClasses.textContent = classesCount;
+
+    			// Quick links
+    			const qTimetable = document.getElementById("quick-link-timetable");
+    			if (qTimetable) qTimetable.addEventListener("click", () => {
+    				const node = document.getElementById("timetables-tabulator");
+    				if (node) node.scrollIntoView({ behavior: "smooth", block: "center" });
+    			});
+    			const qManual = document.getElementById("quick-link-manual");
+    			if (qManual) qManual.addEventListener("click", () => {
+    				const node = document.getElementById("periods-tabulator");
+    				if (node) node.scrollIntoView({ behavior: "smooth", block: "center" });
+    			});
+
+    			// Modal and dropdown initialization: keep existing behaviors
+    			// ...existing modal / dropdown initialization code...
+    			// (the page already contains code that relies on transformSelectToCustomDropdown, so it will still work)
+    		} catch (err) {
+    			console.error("DOMContentLoaded init error:", err);
+    		}
+    	});
+
+    	// ---- Live refresh for today's lectures ----
+    	function refreshTodayPeriods() {
+    		fetch("api/periods/today")
+    			.then(r => r.json())
+    			.then(data => {
+    				const container = document.getElementById("today-lectures");
+
+          if (container) {
+              container.innerHTML = ''; // Clear loading/old data
+
+              // Filter to show only scheduled and running periods
+              const filteredData = data.filter(period => {
+                  const status = (period.status || 'scheduled').toLowerCase();
+                  return status === 'scheduled' || status === 'running';
+              });
+
+              if (filteredData.length === 0) {
+                  container.innerHTML = '<div style="padding: 10px; font-size: 0.85rem; color: #9ca3af; text-align: center;">No scheduled classes today</div>';
+              } else {
+                  filteredData.forEach(period => {
+                      const row = document.createElement('div');
+                      row.className = 'mini-period-row';
+
+                      // Helper to get correct class based on API status
+                      const statusClass = `mini-status-${(period.status || 'scheduled').toLowerCase()}`;
+                      const selectId = `mini-status-select-${period.id}`;
+
+                      row.innerHTML = `
+                          <div class="mini-period-info">
+                              <span class="mini-subject">${period.subject}</span>
+                              <span class="mini-time">
+                                 ${period.start_time} - ${period.end_time} • ${period.room || 'N/A'}
+                              </span>
+                          </div>
+                          <div class="status-pill-wrapper" style="position: relative; z-index: 10;">
+                              <select id="${selectId}" class="mini-status-select ${statusClass}">
+                                  <option value="scheduled" ${(period.status || 'scheduled') === 'scheduled' ? 'selected' : ''}>Scheduled</option>
+                                  <option value="running" ${(period.status || 'scheduled') === 'running' ? 'selected' : ''}>Running</option>
+                                  <option value="completed" ${(period.status || 'scheduled') === 'completed' ? 'selected' : ''}>Done</option>
+                                  <option value="cancelled" ${(period.status || 'scheduled') === 'cancelled' ? 'selected' : ''}>Cancel</option>
+                              </select>
+                          </div>
+                      `;
+                      container.appendChild(row);
+
+                      // Transform the select into a custom dropdown with callback
+                      const selectElement = document.getElementById(selectId);
+                      if (selectElement && typeof transformSelectToCustomDropdown === 'function') {
+                          transformSelectToCustomDropdown(selectElement, (selectedValue) => {
+                              updateMiniStatus(selectedValue, `${period.id}`);
+                          });
+                      }
+                  });
+              }
+    			}
+
+    			// Also refresh the Tabulator table if it exists
+    			if (periodsTable) {
+    				periodsTable.setData(data);
+    			}
+    			})
+    			.catch(err => console.error("Failed to fetch today's periods for overview:", err));
+    	}
+
+    	// Declare periodsTable at function scope, not inside window.load
+    	let periodsTable = null;
+
+    	window.addEventListener("load", () => {
+    		// initial refresh and periodic
+    		refreshTodayPeriods();
+    		setInterval(refreshTodayPeriods, 60000);
+
+    		// ---- Tabulator initialization ----
+    		try {
+
+
+  // Today's Periods Tabulator
+    			async function initPeriodsTable(data) {
+    				periodsTable = new Tabulator("#periods-tabulator", {
+    					data: data || [],
+    					layout: "fitColumns",
+    					autoResize: false,
+    					responsiveLayout: false,
+    					resizableColumns: true,
+    					virtualDom: false,
+    					placeholder: "No periods scheduled for today",
+    					columns: [
+    						{ title: "Subject", field: "subject", sorter: "string", hozAlign: "center" },
+    						{ title: "Class", field: "class_name", sorter: "string", hozAlign: "center" },
+    						{ title: "Start Time", field: "start_time", sorter: "string", hozAlign: "center", formatter: (cell) => {
+    							const val = cell.getValue();
+    							return val || "—";
+    						}},
+    						{ title: "End Time", field: "end_time", sorter: "string", hozAlign: "center", formatter: (cell) => {
+    							const val = cell.getValue();
+    							return val || "—";
+    						}},
+    						{ title: "Status", field: "status", sorter: "string", hozAlign: "center", formatter: (cell) => {
+    							const val = (cell.getValue() || "").toLowerCase();
+    							const colors = {
+    								"scheduled": "#3b82f6",
+    								"running": "#10b981",
+    								"completed": "#6b7280",
+    								"cancelled": "#ef4444"
+    							};
+    							return `<span style="color: ${colors[val] || '#6b7280'};text-transform:capitalize">${val}</span>`;
+    						}},
+    						{ title: "Actions", field: "id", hozAlign: "center", formatter: (cell) => {
+    							const id = cell.getValue();
+    							return `<svg width="24" height="24" viewBox="0 0 6.3499999 6.3499999" fill="currentColor" onclick="markAttendance(${id})" style="cursor:pointer">
+    								<path style="fill: currentColor; stroke-width: 0.278307" d="M 1.9905633,4.5649819e-4 C 1.8262455,-0.00615141 1.6524289,0.05902133 1.5182407,0.19320962 1.2796837,0.43176659 1.2595679,0.79546623 1.4727654,1.0086637 l 2.164209,2.164209 -2.164209,2.1642089 C 1.2595679,5.5502791 1.2796836,5.9139787 1.5182407,6.1525358 1.7567976,6.3910927 2.1204973,6.4117253 2.3336948,6.1985278 L 4.9738437,3.5583789 C 5.1401298,3.3920927 5.1640316,3.1341312 5.0534253,2.915524 5.0290986,2.859759 4.994519,2.8085586 4.9495557,2.7635953 L 2.3336947,0.1477344 C 2.2404209,0.05446051 2.1183659,0.00559597 1.9905633,4.5649819e-4 Z"/>
+    							</svg>`;
+    						}},
+    					],
+    				});
+    			}
+
+    			// Load today's periods on startup
+    			fetch("/teacher/api/periods/today")
+    				.then(r => r.json())
+    				.then(data => initPeriodsTable(data))
+    				.catch(err => console.error("Failed to load periods:", err));
+
+    		// Classes Tabulator
+    			const classesTable = new Tabulator("#classes-tabulator", {
+    				data: classesData || [],
+    				layout: "fitColumns",
+    				autoResize: false,
+    				responsiveLayout: false,
+    				resizableColumns: true,
+    				virtualDom: false,
+    				placeholder: "No classes assigned",
+    				columns: [
+    					{ title: "Class Name", field: "class_name", sorter: "string", hozAlign: "center" },
+    					{ title: "Subject Code", field: "subject_code", sorter: "string", hozAlign: "center" },
+    					{ title: "Subject Name", field: "subject", sorter: "string", hozAlign: "center" },
+    					{ title: "Actions", field: "id", hozAlign: "center", formatter: (cell) => {
+    						const id = cell.getValue();
+    						return `<svg width="24" height="24" viewBox="0 0 6.3499999 6.3499999" fill="none" onclick="viewClassStudents(${id})" style="cursor:pointer">
+    							<path style="fill: currentColor; fill-opacity: 1; stroke-width: 0.278307" d="M 1.9905633,4.5649819e-4 C 1.8262455,-0.00615141 1.6524289,0.05902133 1.5182407,0.19320962 1.2796837,0.43176659 1.2595679,0.79546623 1.4727654,1.0086637 l 2.164209,2.164209 -2.164209,2.1642089 C 1.2595679,5.5502791 1.2796836,5.9139787 1.5182407,6.1525358 1.7567976,6.3910927 2.1204973,6.4117253 2.3336948,6.1985278 L 4.9738437,3.5583789 C 5.1401298,3.3920927 5.1640316,3.1341312 5.0534253,2.915524 5.0290986,2.859759 4.994519,2.8085586 4.9495557,2.7635953 L 2.3336947,0.1477344 C 2.2404209,0.05446051 2.1183659,0.00559597 1.9905633,4.5649819e-4 Z"/>
+    						</svg>`;
+    					} },
+    				],
+    			});
+
+    			// Timetables Tabulator
+    			const timetablesTable = new Tabulator("#timetables-tabulator", {
+    				data: timetablesData || [],
+    				layout: "fitColumns",
+    				autoResize: false,
+    				responsiveLayout: false,
+    				resizableColumns: true,
+    				virtualDom: false,
+    				placeholder: "No timetable entries",
+    				columns: [
+    					{ title: "Class Name", field: "class_name", sorter: "string", hozAlign: "center" },
+    					{ title: "Day", field: "day", sorter: "string", hozAlign: "center" },
+    					{ title: "Subject Name", field: "subject_name", sorter: "string", hozAlign: "center" },
+    					{ title: "Start Time", field: "start_time", sorter: "string", hozAlign: "center" },
+    					{ title: "End Time", field: "end_time", sorter: "string", hozAlign: "center" },
+    				],
+    			});
+
+    			// Attendance Tabulator
+    			const attendanceTable = new Tabulator("#attendance-tabulator", {
+    				data: attendanceData || [],
+    				layout: "fitColumns",
+    				autoResize: false,
+    				responsiveLayout: false,
+    				resizableColumns: true,
+    				virtualDom: false,
+    				pagination: "local",
+    				paginationSize: 10,
+    				placeholder: "No Data Available",
+    				columns: [
+    					{ title: "Name", field: "name", sorter: "string", hozAlign: "center" },
+    					{ title: "Roll No", field: "roll_no", sorter: "string", hozAlign: "center" },
+    					{ title: "Date", field: "date", sorter: "date", hozAlign: "center" },
+    					{ title: "Subject", field: "subject", sorter: "string", hozAlign: "center" },
+    					{ title: "Day", field: "day", sorter: "string", hozAlign: "center" },
+    					{ title: "Status", field: "status", sorter: "string", hozAlign: "center", formatter: (cell) => {
+    						const value = cell.getValue() || "";
+    						const color = value.toLowerCase() === "present" ? "green" : "red";
+    						return `<span style="color:${color};text-transform:capitalize">${value}</span>`;
+    					} },
+    				],
+    				initialSort: [{ column: "date", dir: "desc" }],
+    			});
+    			window.studentAttendanceTable = attendanceTable;
+
+    		} catch (err) {
+    			console.error("Tabulator init error:", err);
+    		}
+    	});
+
+    	// ---- global helper exposure (keep these global if other code calls them) ----
+    	window.refreshTodayPeriods = refreshTodayPeriods;
+
+  	// Mark attendance button click handler
+  	window.markAttendance = function(periodId) {
+  		const period = periodsTable ? periodsTable.getRows().find(r => r.getData().id === periodId) : null;
+  		if (!period) {
+  			console.error("Period not found:", periodId);
+  			return;
+  		}
+
+  		const periodData = period.getData();
+  		// Fetch students for this period
+  		fetch(`/teacher/api/periods/${periodId}/students`)
+  			.then(r => r.json())
+  			.then(students => {
+  				// Populate period modal
+  				const modal = document.getElementById("periodModal");
+  				const title = document.getElementById("periodModalTitle");
+  				const tbody = document.getElementById("studentAttendanceList");
+
+  				if (title) title.textContent = `Mark Attendance - ${periodData.subject} (${periodData.class_name})`;
+  				if (tbody) {
+  					tbody.innerHTML = "";
+  					students.forEach(s => {
+  						const row = document.createElement('tr');
+  						row.innerHTML = `
+  							<td>${s.roll_no}</td>
+  							<td>${s.name}</td>
+  							<td><input type="checkbox" class="attendance-cb" data-student="${s.id}" data-period="${periodId}" data-status="present" onclick="updateAttendanceStatus(this)"></td>
+  							<td><input type="checkbox" class="attendance-cb" data-student="${s.id}" data-period="${periodId}" data-status="absent" onclick="updateAttendanceStatus(this)"></td>
+  						`;
+  						// Check existing status
+  						if (s.status === 'present') {
+  							row.querySelector('[data-status="present"]').checked = true;
+  						} else if (s.status === 'absent') {
+  							row.querySelector('[data-status="absent"]').checked = true;
+  						}
+  						tbody.appendChild(row);
+  					});
+  				}
+
+  				if (modal) modal.style.display = "flex";
+  			})
+  			.catch(err => console.error("Failed to load students for period:", err));
+  	};
+
+  	// Update attendance status (present/absent toggle)
+  	window.updateAttendanceStatus = function(checkbox) {
+  		const studentId = checkbox.dataset.student;
+  		const periodId = checkbox.dataset.period;
+  		const status = checkbox.dataset.status;
+
+  		// Uncheck opposite status
+  		const tbody = document.getElementById("studentAttendanceList");
+  		const oppositeStatus = status === 'present' ? 'absent' : 'present';
+  		const oppositeCheckbox = tbody.querySelector(`input[data-student="${studentId}"][data-status="${oppositeStatus}"]`);
+  		if (oppositeCheckbox) {
+  			oppositeCheckbox.checked = false;
+  		}
+
+  		if (checkbox.checked) {
+  			// Mark as present
+  			fetch("/teacher/api/attendance", {
+  				method: "POST",
+  				headers: { "Content-Type": "application/json" },
+  				body: JSON.stringify({
+  					period_id: periodId,
+  					student_id: studentId,
+  					action: 'present'
+  				})
+  			})
+  			.then(r => r.json())
+  			.catch(err => console.error("Error marking attendance:", err));
+  		} else if (status === 'present') {
+  			// Remove present status
+  			fetch("/teacher/api/attendance", {
+  				method: "POST",
+  				headers: { "Content-Type": "application/json" },
+  				body: JSON.stringify({
+  					period_id: periodId,
+  					student_id: studentId,
+  					action: 'remove'
+  				})
+  			})
+  			.then(r => r.json())
+  			.catch(err => console.error("Error removing attendance:", err));
+  		}
+  	};
+
+  	// Update period status (mini status select)
+  	window.updateMiniStatus = function(selectVl, periodId) {
+  		const newStatus = selectVl;
+      console.log("Updating period", periodId, "to status", newStatus);
+  		fetch(`/teacher/api/periods/${periodId}/status`, {
+  			method: "POST",
+  			headers: { "Content-Type": "application/json" },
+  			body: JSON.stringify({ status: newStatus })
+  		})
+  		.then(r => r.json())
+  		.then(data => {
+  			console.log("Period status updated:", data);
+  			// Refresh the table
+  			refreshTodayPeriods();
+  		})
+  		.catch(err => console.error("Error updating period status:", err));
+  	};
+
+  	// Close period modal
+  	window.closePeriodModal = function() {
+  		const modal = document.getElementById("periodModal");
+  		if (modal) modal.style.display = "none";
+  	};
+
+  	// Close student modal
+  	window.closeModal = function() {
+  		const modal = document.getElementById("studentModal");
+  		if (modal) modal.style.display = "none";
+  	};
+
+  	// Minimal global function used by table formatters or other inline handlers
+  	window.viewClassStudents = function (tsId) {
+  		// ...existing viewClassStudents implementation can remain unchanged...
+  		const classes = classesData || [];
+  		fetch(`/teacher/api/classes/${tsId}/students`)
+  			.then(res => res.json())
+  			.then(data => {
+  				const tbody = document.getElementById("studentList");
+  				if (!tbody) return;
+  				tbody.innerHTML = "";
+  				data.forEach(s => {
+  					const attended = s.attended || 0;
+  					const totalClasses = s.total_classes || 0;
+  					const percentage = totalClasses ? Math.round((attended / totalClasses) * 100) : 0;
+  					const color = percentage >= 75 ? 'green' : percentage >= 50 ? 'orange' : 'red';
+  					tbody.innerHTML += `<tr>
+  						<td>${s.roll_no}</td>
+  						<td>${s.name}</td>
+  						<td>${attended}</td>
+  						<td>${totalClasses}</td>
+  						<td style="color:${color}">${percentage}%</td>
+  					</tr>`;
+  				});
+  				const modal = document.getElementById("studentModal");
+  				if (modal) modal.style.display = "flex";
+  				const title = document.getElementById("studentModalTitle");
+  				if (title) {
+  					const found = classes.find(c => c.id == tsId);
+  					title.textContent = found ? found.class_name : "";
+  				}
+  			})
+  			.catch(err => console.error("viewClassStudents error:", err));
+  	};
+
+  	// Reset/clear helper for Tabulator-filter integration (keeps previous behavior)
+  	window.resetAndClearTabulator = function (containerID) {
+  		if (typeof resetFilters === "function") resetFilters(containerID);
+  		try {
+  			if (window.studentAttendanceTable) {
+  				if (typeof window.studentAttendanceTable.clearHeaderFilter === "function") {
+  					window.studentAttendanceTable.clearHeaderFilter();
+  				} else if (typeof window.studentAttendanceTable.clearFilter === "function") {
+  					window.studentAttendanceTable.clearFilter(true);
+  				}
+  			}
+  		} catch (e) {
+  			console.error("Error clearing Tabulator filters:", e);
+  		}
+  	};
+
+  	// Apply global metrics if available (non-blocking)
+  	document.addEventListener("DOMContentLoaded", () => {
+  		try {
+  			if (window.metricsData && Object.keys(window.metricsData).length) {
+  				const totalStudentsEl = document.getElementById("total-students");
+  				if (totalStudentsEl && window.metricsData.total_students !== undefined) {
+  					totalStudentsEl.querySelector(".card-value").textContent = window.metricsData.total_students;
+  				}
+  			}
+  		} catch(e) { console.error("Applying global metrics to teacher page failed:", e); }
+  	});
+
+    	// End IIFE
+    })();
+</script>
+{% endblock %}

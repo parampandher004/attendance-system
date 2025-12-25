@@ -1,7 +1,7 @@
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from googleapiclient.http import MediaFileUpload
-from drive_service import get_drive_service
+from app.services.drive_service import get_drive_service
 
 import io
 

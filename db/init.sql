@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict duiUhYSig9jzNQaSJEwbTgdrAhWmbT0bzfGtKzlZyMHOUG9AH25uEs9K9yuDhQX
+\restrict ZsjGKnxa7MoBHf1brG3qvNTQvcfpSgztif6CROeSJgfGcNRpeqj1BfqlB9BHFL2
 
 -- Dumped from database version 17.6 (Debian 17.6-2.pgdg13+1)
 -- Dumped by pg_dump version 17.6 (Debian 17.6-2.pgdg13+1)
@@ -140,7 +140,8 @@ CREATE TABLE public.students (
     roll_no text,
     class_id bigint,
     user_id bigint,
-    folder_id character varying
+    folder_id character varying,
+    gender character varying
 );
 
 
@@ -281,7 +282,8 @@ ALTER SEQUENCE public.subjects_id_seq OWNED BY public.subjects.id;
 CREATE TABLE public.teachers (
     id bigint NOT NULL,
     name text,
-    user_id bigint
+    user_id bigint,
+    gender character varying
 );
 
 
@@ -693,5 +695,5 @@ ALTER TABLE ONLY public.weekly_periods
 -- PostgreSQL database dump complete
 --
 
-\unrestrict duiUhYSig9jzNQaSJEwbTgdrAhWmbT0bzfGtKzlZyMHOUG9AH25uEs9K9yuDhQX
+\unrestrict ZsjGKnxa7MoBHf1brG3qvNTQvcfpSgztif6CROeSJgfGcNRpeqj1BfqlB9BHFL2
 

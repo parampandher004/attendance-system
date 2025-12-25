@@ -1,0 +1,410 @@
+{% extends "base.html" %} {% block title %}Student Dashboard{% endblock %} {%
+block content %}
+<div class="main" id="main">
+  <!-- Student overview grid (NEW) -->
+  <div class="compartments">
+    <div class="compartment">
+      <h2 class="dashbaord-header">Student Overview</h2>
+      <div class="overview-wrapper">
+        <div class="grid-container">
+          <div class="overview-card avatar">
+            <div class="img-container">
+              {% if profile_picture %}
+              <img
+                src="data:image/jpeg;base64,{{ profile_picture }}"
+                alt="Profile Picture"
+              />
+              {% else %}
+              <img
+                src="{{ url_for('static', filename='default_profile.jpg') }}"
+                alt="Default Profile Picture"
+              />
+              {% endif %}
+            </div>
+            <div class="avatar-meta">
+              <div class="card-value">{{ session.name }}</div>
+              <div class="recognition-meta"></div>
+            </div>
+          </div>
+
+          <div class="overview-card info-1">
+            <div class="card-label">Roll No / Student ID</div>
+            <div class="card-value">
+              {{ session.roll_no or session.student_id or "—" }}
+            </div>
+          </div>
+
+          <div class="overview-card info-2">
+            <div class="card-label">Class &amp; Division</div>
+            <div class="card-value">{{ session.class_name or "—" }}</div>
+          </div>
+
+          <div class="overview-card info-3">
+            <div class="card-label">Attendance</div>
+            <span class="card-value">
+              <div class="attendance-percentage">
+                {% if overall_attendance is defined %} {{ overall_attendance }}%
+                {% elif subjects %} {% set valid_percentages = subjects |
+                map(attribute='percentage') | select('ne', None) | list %} {% if
+                valid_percentages %} {% set avg = (valid_percentages | sum) /
+                (valid_percentages | length) %} {{ avg | round(0) }}{% else %} —
+                {% endif %} {% else %} — {% endif %}
+              </div>
+              <div class="percent-sign">%</div>
+            </span>
+            <span class="card-meta">
+              Attendance across {% if subjects %} {{ subjects | length }}
+              subjects {% else %} — {% endif %}
+            </span>
+          </div>
+
+          <div class="overview-card schedule">
+            <div class="card-label">Today's schedule</div>
+            <div class="card-value" id="todayScheduleSummary">Loading…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="compartments">
+    <div class="compartment">
+      <h2>Today's Periods</h2>
+
+      <div class="table-container">
+        <!-- Tabulator will render today's periods -->
+        <div id="periods-tabulator"></div>
+      </div>
+
+      <p id="no-periods-message" style="display: none">
+        No periods scheduled for today.
+      </p>
+    </div>
+  </div>
+
+  <div class="compartments">
+    <div class="compartment">
+      <h2>Assigned Subjects</h2>
+      <div class="table-container">
+        <!-- Tabulator will render assigned subjects -->
+        <div id="subjects-tabulator"></div>
+      </div>
+    </div>
+    <div class="compartment">
+      <h2>Class Timetable</h2>
+      <div class="table-container">
+        <!-- Tabulator will render class timetable -->
+        <div id="timetables-tabulator"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="compartments">
+    <div class="compartment">
+      <h2>Attendance History</h2>
+      {% if attendance %}
+      <div class="filter-section">
+        <div
+          class="filter-controls"
+          id="student-filter-controls"
+          data-table-id="attendance-table"
+        >
+          <div class="calendar-wrapper">
+            <div class="input-wrapper group">
+              <input
+                type="text"
+                id="filterDateInput"
+                class="date-input input"
+                placeholder="Filter by date"
+                readonly
+              />
+            </div>
+            <div class="calendar-container">
+              <div class="calendar-header">
+                <button type="button" class="cal-nav-btn prev-month-btn">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                </button>
+                <div class="month-year"></div>
+                <button type="button" class="cal-nav-btn next-month-btn">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+              </div>
+              <div class="calendar-grid"></div>
+            </div>
+          </div>
+          <div class="group">
+            <select
+              name="subject"
+              id="subject_filter"
+              class="js-custom-dropdown"
+            >
+              <option value="">All Subjects</option>
+              {% for subject in subjects %}
+              <option value="{{ subject['subject'] | trim | lower }}">
+                {{ subject['subject'] }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="group">
+            <select name="day" id="day_filter" class="js-custom-dropdown">
+              <option value="">All Days</option>
+              <option value="monday">Monday</option>
+              <option value="tuesday">Tuesday</option>
+              <option value="wednesday">Wednesday</option>
+              <option value="thursday">Thursday</option>
+              <option value="friday">Friday</option>
+              <option value="saturday">Saturday</option>
+              <option value="sunday">Sunday</option>
+            </select>
+          </div>
+          <div class="group">
+            <select name="status" id="status_filter" class="js-custom-dropdown">
+              <option value="">All Statuses</option>
+              <option value="present">Present</option>
+              <option value="absent">Absent</option>
+            </select>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="submit-btn"
+          onclick="resetAndClearTabulator('student-filter-controls')"
+        >
+          Reset Filters
+        </button>
+      </div>
+      <div class="table-container">
+        <!-- Tabulator will render here -->
+        <div id="attendance-tabulator"></div>
+      </div>
+
+      {% else %}
+      <p>No attendance record avaiable</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+      (function () {
+        // Server-side data for tables
+        const attendanceData = {{ attendance | tojson }};
+        const subjectsData = {{ subjects | tojson }};
+        const timetablesData = {{ timetables | tojson }};
+
+        // Initialize Tabulator tables when layout is stable
+        window.addEventListener("load", () => {
+          // Check if Tabulator is loaded
+          if (typeof Tabulator === 'undefined') {
+            console.error('Tabulator library not loaded');
+            document.getElementById('main').innerHTML = '<p style="color: red; padding: 20px;">Error: Tabulator library failed to load. Please refresh the page.</p>';
+            return;
+          }
+          try {
+            // Periods Tabulator - data fetched from API and refreshed periodically
+            const periodsTable = new Tabulator("#periods-tabulator", {
+              data: [], // initial empty
+              layout: "fitColumns",
+              autoResize: false,
+              responsiveLayout: false,
+              resizableColumns: true,
+              virtualDom: false,
+              placeholder: "No periods",
+              columns: [
+                { title: "Subject Name", field: "subject_name", sorter: "string", hozAlign: "center" },
+                { title: "Start Time", field: "start_time", sorter: "string", hozAlign: "center" },
+                { title: "End Time", field: "end_time", sorter: "string", hozAlign: "center" },
+                { title: "Status", field: "status", sorter: "string", hozAlign: "center" },
+              ],
+            });
+
+            const fetchAndSetPeriods = () => {
+              fetch("api/periods/today")
+                .then((r) => r.json())
+                .then((data) => periodsTable.setData(data).then(()=> updateTodaySummaryFromPeriods(periodsTable)) )
+                .catch(() => periodsTable.clearData());
+            };
+            fetchAndSetPeriods();
+            setInterval(fetchAndSetPeriods, 60000);
+
+            // Subjects Tabulator (server-provided)
+            const subjectsTable = new Tabulator("#subjects-tabulator", {
+              data: subjectsData || [],
+              layout: "fitColumns",
+              autoResize: false,
+              responsiveLayout: false,
+              resizableColumns: true,
+              virtualDom: false,
+              placeholder: "No subjects",
+              columns: [
+                { title: "Subject Code", field: "subject_code", sorter: "string", hozAlign: "center" },
+                { title: "Subject Name", field: "subject", sorter: "string", hozAlign: "center" },
+                { title: "Teacher Name", field: "teacher", sorter: "string", hozAlign: "center" },
+                { title: "Attended", field: "attended", sorter: "number", hozAlign: "center" },
+                { title: "Total", field: "total_classes", sorter: "number", hozAlign: "center" },
+                { title: "%", field: "percentage", sorter: "number", hozAlign: "center", formatter: (cell) => `${Math.round(cell.getValue()||0)}%` },
+              ],
+            });
+
+            // Timetables Tabulator (server-provided)
+            const timetablesTable = new Tabulator("#timetables-tabulator", {
+              data: timetablesData || [],
+              layout: "fitColumns",
+              autoResize: false,
+              responsiveLayout: false,
+              resizableColumns: true,
+              virtualDom: false,
+              placeholder: "No timetable entries",
+              columns: [
+                { title: "Day", field: "day", sorter: "string", hozAlign: "center" },
+                { title: "Subject Name", field: "subject_name", sorter: "string", hozAlign: "center" },
+                { title: "Start Time", field: "start_time", sorter: "string", hozAlign: "center" },
+                { title: "End Time", field: "end_time", sorter: "string", hozAlign: "center" },
+              ],
+            });
+
+            // Attendance Tabulator (student view) - reuse existing variable for filters
+            const attendanceTable = new Tabulator("#attendance-tabulator", {
+              data: attendanceData || [],
+              layout: "fitColumns",
+              autoResize: false,
+              responsiveLayout: false,
+              resizableColumns: true,
+              virtualDom: false,
+              pagination: "local",
+              paginationSize: 10,
+              placeholder: "No Data Available",
+              columns: [
+                { title: "Date", field: "date", sorter: "date", hozAlign: "center" },
+                { title: "Day", field: "day", sorter: "string", hozAlign: "center" },
+                { title: "Subject Code", field: "subject_code", sorter: "string", hozAlign: "center" },
+                { title: "Subject", field: "subject", sorter: "string", hozAlign: "center" },
+                { title: "Status", field: "status", sorter: "string", hozAlign: "center" },
+              ],
+              initialSort: [{ column: "date", dir: "desc" }],
+            });
+
+            // expose the attendance Tabulator instance globally so applyFilters/reset work
+            window.studentAttendanceTable = attendanceTable;
+          } catch (err) {
+            console.error("Tabulator init error:", err);
+            document.getElementById('main').innerHTML += '<p style="color: red; padding: 20px;">Error initializing dashboard: ' + err.message + '</p>';
+          }
+        });
+
+         // Helper to reset both existing filters and Tabulator header filters
+         window.resetAndClearTabulator = function (containerID) {
+           // reset existing dropdowns / calendars
+           if (typeof resetFilters === "function") resetFilters(containerID);
+
+           // clear Tabulator header filters safely
+           try {
+             if (window.studentAttendanceTable) {
+               if (typeof window.studentAttendanceTable.clearHeaderFilter === "function") {
+                 window.studentAttendanceTable.clearHeaderFilter();
+               } else if (typeof window.studentAttendanceTable.clearFilter === "function") {
+                 window.studentAttendanceTable.clearFilter(true);
+               }
+             }
+           } catch (e) {
+             console.error("Error clearing Tabulator filters:", e);
+           }
+         };
+
+         // after periodsTable is created (inside window.load where periodsTable is defined),
+         // we update the today schedule summary once periods data is set.
+    window.updateTodaySummaryFromPeriods = function (tableInstance) {
+      try {
+          const rows = tableInstance.getData ? tableInstance.getData() : [];
+          const summaryEl = document.getElementById("todayScheduleSummary");
+
+          if (!rows || rows.length === 0) {
+              summaryEl.textContent = "No classes scheduled today";
+              return;
+          }
+
+          const now = new Date();
+
+          // Helper function to parse "9:30 AM" or "12:45 PM" into a Date object for today
+          const parseTimeStr = (timeStr) => {
+              if (!timeStr) return null;
+              // Regex matches "9:30 AM", "12:00PM", "02:30 pm" etc.
+              const match = timeStr.match(/(\d{1,2}):(\d{2})\s?([AaPp][Mm])/);
+              if (!match) return null;
+
+              let [_, hours, minutes, period] = match;
+              hours = parseInt(hours);
+              minutes = parseInt(minutes);
+              period = period.toUpperCase();
+
+              // Convert to 24-hour format for comparison
+              if (period === 'PM' && hours < 12) hours += 12;
+              if (period === 'AM' && hours === 12) hours = 0;
+
+              const date = new Date();
+              date.setHours(hours, minutes, 0, 0);
+              return date;
+          };
+
+          // Filter: Find classes that are NOT cancelled AND are in the future
+          const upcomingClasses = rows.filter(row => {
+              // 1. Check Status
+              const status = row.status ? row.status.toLowerCase() : 'scheduled';
+              if (status === 'cancelled') return false;
+
+              // 2. Check Time
+              const classDate = parseTimeStr(row.start_time);
+              if (!classDate) return false; // Skip invalid times
+
+              // Keep only if classTime is later than now
+              // We store the parsed date on the row object to avoid re-parsing during sort
+              row._parsedDate = classDate;
+              return classDate > now;
+          });
+
+          // Determine Output
+          if (upcomingClasses.length > 0) {
+              // Sort by the parsed date
+              upcomingClasses.sort((a, b) => a._parsedDate - b._parsedDate);
+
+              const next = upcomingClasses[0];
+
+              summaryEl.innerHTML = `Next: <strong>${next.subject_name || next.subject || "Unknown Subject"}</strong> at ${next.start_time}`;
+          } else {
+              // If rows exist but none are upcoming
+              summaryEl.textContent = "All classes completed for today";
+          }
+
+      } catch (e) {
+          console.error("Schedule Summary Error:", e);
+          if (typeof showToast === "function") {
+              showToast("Error updating today's schedule summary", "error", 5000);
+          }
+          document.getElementById("todayScheduleSummary").textContent = "—";
+      }
+    };
+  })();
+</script>
+{% endblock %}
