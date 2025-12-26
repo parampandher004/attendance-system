@@ -93,6 +93,7 @@ def process_with_attendance():
         npimg = np.frombuffer(file.read(), np.uint8)
         img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
         
+        
         if img is None:
             return jsonify({"error": "Failed to decode image"}), 400
         
@@ -105,6 +106,8 @@ def process_with_attendance():
                 "predicted_students": [],
                 "marked_attendance": []
             }), 200
+
+            
         
         embeddings = generate_bulk_embeddings(faces)
         
@@ -118,7 +121,7 @@ def process_with_attendance():
             }), 200
         
         predicted_students, similar_students_all = match_students(
-            list(embeddings.values()),
+            embeddings,
             student_embeddings
         )
         

@@ -1,11 +1,11 @@
 import cv2
 
-image = cv2.imread('goru.png')
+image = cv2.imread('collage.jpg')
 height, width, _ = image.shape
 
 # Define your grid (e.g., 30x30)
-rows = 6
-cols = 5
+rows = 5
+cols = 6
 
 step_h = height // rows
 step_w = width // cols

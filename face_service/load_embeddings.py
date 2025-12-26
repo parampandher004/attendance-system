@@ -3,11 +3,15 @@ import requests
 import numpy as np
 import threading
 import time
+from collections import defaultdict
 
 embeddings = []
 
 def load_embeddings():
-    """Load embeddings from web service public API with error handling"""
+
+
+# ... inside load_embeddings() function ...
+
     global embeddings
     
     try:
@@ -33,13 +37,19 @@ def load_embeddings():
         data = resp.json()
         if data and "embeddings" in data:
             embeddings_list = data["embeddings"]
-            embeddings = [{
-                "student_id": item["student_id"],
-                "student_name": item["student_name"],
-                "roll_no": item["roll_no"],
-                "embedding": np.array(item["embedding"], dtype=np.float32)
-            } for item in embeddings_list]
-            print(f"Successfully loaded {len(embeddings)} embeddings from web service")
+            
+            # Use a dictionary to group multiple embeddings per student
+            grouped_embeddings = defaultdict(list)
+            
+            for item in embeddings_list:
+                s_id = item["student_id"]
+                vector = np.array(item["embedding"], dtype=np.float32)
+                grouped_embeddings[s_id].append(vector)
+            
+            # Set the global variable to this dictionary
+            embeddings = dict(grouped_embeddings) 
+            print(f"Successfully loaded embeddings for {len(embeddings)} unique students")
+            """Load embeddings from web service public API with error handling"""
         else:
             print("No embeddings found from web service")
             embeddings = []

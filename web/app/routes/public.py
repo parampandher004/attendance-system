@@ -282,29 +282,11 @@ def get_attendance_status():
 @public_bp.route('/api/get-running-period', methods=['GET'])
 @require_api_key
 def get_running_period():
-    """
-    Get the currently running period for a class.
-    Used by Raspberry Pi to know when to start capturing images.
-    
-    Query parameters:
-    - class_id: ID of the class (optional, returns all running periods if not provided)
-    """
     try:
         class_id = request.args.get('class_id')
         
-        query = Period.query.filter_by(status='running')
-        
-        if class_id:
-            query = query.join(
-                TeacherSubject, Period.teacher_subject_id == TeacherSubject.id
-            ).filter(
-                TeacherSubject.class_id == class_id
-            )
-        
-        # Get periods with subject details
-        periods = query.join(
-            TeacherSubject, Period.teacher_subject_id == TeacherSubject.id
-        ).with_entities(
+        # Start a single query with all necessary joins
+        query = db.session.query(
             Period.id,
             Period.date,
             Period.day,
@@ -315,8 +297,16 @@ def get_running_period():
             Subject.code.label('subject_code'),
             TeacherSubject.class_id
         ).join(
+            TeacherSubject, Period.teacher_subject_id == TeacherSubject.id
+        ).join(
             Subject, TeacherSubject.subject_id == Subject.id
-        ).all()
+        ).filter(Period.status == 'running') # Only fetch running periods
+
+        # Apply class filter if provided
+        if class_id:
+            query = query.filter(TeacherSubject.class_id == class_id)
+        
+        periods = query.all()
         
         if not periods:
             return jsonify({
@@ -347,7 +337,7 @@ def get_running_period():
         }), 200
     
     except Exception as e:
-        traceback.print_exc()
+        traceback.print_exc() # Check your console for the specific error details
         return jsonify({"error": str(e)}), 500
 
 

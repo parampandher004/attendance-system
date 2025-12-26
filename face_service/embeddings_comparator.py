@@ -21,10 +21,11 @@ def find_top5_matches(test_embedding, db_embeddings):
     return all_scores[:5]
 
 
-def match_students(test_embeddings, db_embeddings, threshold=0.55):
+def match_students(test_embeddings, db_embeddings, threshold=0.4):
 
     predicted_students = []
     similar_students_all = []
+    print(test_embeddings)
 
     for idx, test_emb in enumerate(test_embeddings):
         top5 = find_top5_matches(test_emb, db_embeddings)
